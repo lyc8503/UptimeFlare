@@ -28,7 +28,7 @@ const config = {
       method: 'GET',
       target: 'https://cloudflare.com',
       expectedCode: [200],
-      timeout: 10,
+      timeout: 5,
       headers: {
         "User-Agent": "Uptimeflare"
       },
@@ -39,7 +39,7 @@ const config = {
       name: 'Ping 1.1.1.1',
       method: 'TCP_PING',
       target: '1.1.1.1:1234'
-    }
+    },
   ]
 } 
 

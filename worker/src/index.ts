@@ -19,6 +19,7 @@ async function getStatus(monitor: MonitorTarget): Promise<{ ping: number; up: bo
 
 	if (monitor.method === "TCP_PING") {
 		// TCP port endpoint monitor
+		// TODO: TCP timeout
 		try {
 			const [hostname, port] = monitor.target.split(":")
 			
@@ -90,6 +91,9 @@ export default {
 		state.overallUp = 0
 
 		// Check each monitor
+		// TODO: callback exception handler
+		// TODO: advanced status check
+		// TODO: concurrent status check
 		for (const monitor of config.monitors) {
 			console.log(`[${workerLocation}] Checking ${monitor.name}...`)
 
