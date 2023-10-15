@@ -1,3 +1,5 @@
+'use client'
+
 import Head from 'next/head'
 
 import { Inter } from 'next/font/google'
@@ -6,6 +8,7 @@ import { KVNamespace } from '@cloudflare/workers-types'
 import config from '@/uptime.config'
 import OverallStatus from '@/components/OverallStatus'
 import Header from '@/components/Header'
+import MonitorList from '@/components/MonitorList'
 
 export const runtime = 'experimental-edge'
 const inter = Inter({ subsets: ['latin'] })
@@ -19,18 +22,10 @@ export default function Home({ state }: { state: MonitorState }) {
       </Head>
 
       <main className={inter.className}>
-        
         <Header />
         <OverallStatus state={state} />
-
-        {
-          config.monitors.map(monitor => (
-            <div key={monitor.id}>
-              <h2>{monitor.name}</h2>
-            </div>
-          ))
-        }
-        <p>{JSON.stringify(state)}</p>
+        <MonitorList config={config} state={state} />
+        {/* <p>{JSON.stringify(state)}</p> */}
       </main>
     </>
   )

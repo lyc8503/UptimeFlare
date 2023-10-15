@@ -14,8 +14,10 @@
     "@mantine/ds": "^7.1.3",
     "@mantine/hooks": "^7.1.3",
     "@tabler/icons-react": "^2.39.0",
+    "chart.js": "^4.4.0",
     "next": "13.5.4",
     "react": "^18",
+    "react-chartjs-2": "^5.2.0",
     "react-dom": "^18"
   },
   "devDependencies": {
