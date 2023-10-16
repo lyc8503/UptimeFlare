@@ -50,7 +50,12 @@ async function getStatus(monitor: MonitorTarget): Promise<{ ping: number; up: bo
 			const response = await fetchTimeout(monitor.target, monitor.timeout || 10000, {
 				method: monitor.method,
 				headers: monitor.headers,
-				body: monitor.body
+				body: monitor.body,
+				cf: {
+					cacheTtlByStatus: {
+						'100-599': -1  // Don't cache any status code, from https://developers.cloudflare.com/workers/runtime-apis/request/#requestinitcfproperties
+					}
+				}
 			})
 			
 			console.log(`${monitor.name} responded with ${response.status}`)

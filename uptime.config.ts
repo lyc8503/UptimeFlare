@@ -56,6 +56,16 @@ const config = {
       timeout: 10000
     },
     {
+      id: 'homelab',
+      name: 'HomeLab',
+      method: 'GET',
+      target: 'https://lyc8503.cn4.quickconnect.cn/webstation/hello.txt',
+      timeout: 10000,
+      headers: {
+        "Cookie": "type=tunnel;"
+      }
+    },
+    {
       id: 'broken-test',
       name: 'Ping 1.1.1.1',
       method: 'TCP_PING',

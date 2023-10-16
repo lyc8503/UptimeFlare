@@ -82,9 +82,17 @@ export default function MonitorDetail({ monitor, state }: { monitor: MonitorTarg
     }
   }
 
+  const uptimePercentBars = []
+  for (let i = 0; i < 90; i++) {
+    uptimePercentBars.push(<div key={i} style={{ height: '50px', background: 'red' }}/>)
+  }
+
   return (
     <>
       <Text mt='sm' style={{ display: 'flex', alignItems: 'center' }}>{statusIcon} {monitor.name}</Text>
+      {/* <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, 1fr)' }}>
+        {uptimePercentBars}
+      </div> */}
       <div style={{ height: '150px' }}>
         <Line options={options} data={data} />
       </div>
