@@ -28,11 +28,32 @@ const config = {
       method: 'GET',
       target: 'https://cloudflare.com',
       expectedCode: [200],
-      timeout: 5,
+      timeout: 10000,
       headers: {
         "User-Agent": "Uptimeflare"
       },
       body: undefined
+    },
+    {
+      id: 'blog',
+      name: 'My Blog',
+      method: 'GET',
+      target: 'https://blog.lyc8503.site',
+      timeout: 10000
+    },
+    {
+      id: 'pan',
+      name: 'My Fileshare',
+      method: 'GET',
+      target: 'https://pan.lyc8503.site',
+      timeout: 10000
+    },
+    {
+      id: 'server',
+      name: 'My Aliyun Server',
+      method: 'GET',
+      target: 'https://server.lyc8503.site',
+      timeout: 10000
     },
     {
       id: 'broken-test',

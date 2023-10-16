@@ -35,6 +35,6 @@ export default function Home({ state }: { state: MonitorState }) {
 export async function getServerSideProps() {
   const { UPTIMEFLARE_STATE } = process.env as unknown as { UPTIMEFLARE_STATE: KVNamespace }
   const state = await UPTIMEFLARE_STATE.get('state', 'json') as unknown as MonitorState
-
+  
   return { props: { state } }
 }
