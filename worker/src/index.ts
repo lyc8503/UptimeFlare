@@ -118,7 +118,7 @@ export default {
 				}
 			]
 			// Then lastIncident here must not be undefined
-			const lastIncident = incidentList.slice(-1)[0]
+			const lastIncident = state.incident[monitor.id].slice(-1)[0]
 			const timeString = new Date().toLocaleString(config.dateLocale, { timeZone: config.timezone })
 
 			if (status.up) {
@@ -132,7 +132,7 @@ export default {
 				// Current status is down
 				// open new incident if not already open
 				if (lastIncident.end !== undefined) {
-					incidentList.push({
+					state.incident[monitor.id].push({
 						start: [currentTimeSecond],
 						end: undefined,
 						error: [status.err]
