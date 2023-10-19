@@ -4,7 +4,7 @@ Another **serverless (and free!)** uptime monitoring & status page on Cloudflare
 ## ⭐Features
 
 - **Opensource** & Easy to deploy (in 10 minutes without local tools) & Free
-- Up to **2-minute** interval check on free plan (Up to 1-min on paid Workers plan)
+- Up to 50 **2-minute** interval check on free plan (Up to unlimited 1-min on paid Workers plan)
 - Monitoring for **HTTP/HTTPS/TCP port**
 - Show 90-day uptime history and uptime percentage
 - Show all incident history & detailed timeline

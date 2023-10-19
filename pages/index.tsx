@@ -9,6 +9,7 @@ import config from '@/uptime.config'
 import OverallStatus from '@/components/OverallStatus'
 import Header from '@/components/Header'
 import MonitorList from '@/components/MonitorList'
+import { Center, Text } from '@mantine/core'
 
 export const runtime = 'experimental-edge'
 const inter = Inter({ subsets: ['latin'] })
@@ -23,9 +24,23 @@ export default function Home({ state }: { state: MonitorState }) {
 
       <main className={inter.className}>
         <Header />
-        <OverallStatus state={state} />
-        <MonitorList config={config} state={state} />
-        {/* <p>{JSON.stringify(state)}</p> */}
+
+        {
+          state === undefined ? 
+          (
+            <Center>
+              <Text fw={700}>
+                Monitor State is not defined now, please check your worker&apos;s status and KV binding!
+              </Text>
+            </Center>
+          ) : 
+          (
+            <div>
+              <OverallStatus state={state} />
+              <MonitorList config={config} state={state} />
+            </div>
+          )
+        }
       </main>
     </>
   )
@@ -34,7 +49,7 @@ export default function Home({ state }: { state: MonitorState }) {
 
 export async function getServerSideProps() {
   const { UPTIMEFLARE_STATE } = process.env as unknown as { UPTIMEFLARE_STATE: KVNamespace }
-  const state = await UPTIMEFLARE_STATE.get('state', 'json') as unknown as MonitorState
+  const state = await UPTIMEFLARE_STATE?.get('state', 'json') as unknown as MonitorState
   
   return { props: { state } }
 }

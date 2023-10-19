@@ -3,7 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2023-05-15"
 
 kv_namespaces = [
-  { binding = "UPTIMEFLARE_STATE", id = "30a3733511a246e395ab99ee6a8dceb7" }
+  { binding = "UPTIMEFLARE_STATE", id = "ff7ab44866d746aaa19f2225e464ad3e" }
 ]
 
 [triggers]

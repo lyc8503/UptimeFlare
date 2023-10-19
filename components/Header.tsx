@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { Container, Group, Burger } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { MantineLogo } from '@mantine/ds';
+import { Container, Group, Text } from '@mantine/core';
 import classes from '@/styles/Header.module.css';
 
 const links = [
@@ -12,7 +10,6 @@ const links = [
 ];
 
 export default function Header() {
-  const [opened, { toggle }] = useDisclosure(false);
   const [active, setActive] = useState(links[0].link);
 
   const items = links.map((link) => (
@@ -33,7 +30,12 @@ export default function Header() {
   return (
     <header className={classes.header}>
       <Container size="md" className={classes.inner}>
-        <MantineLogo size={28} />
+        <div>
+          <a href='https://github.com/lyc8503/UptimeFlare' target='_blank'>
+            <Text size='xl' span>🕒</Text>
+            <Text size='xl' span fw={700} variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: 90 }}>UptimeFlare</Text>
+          </a>
+        </div>
         <Group gap={5}>
           {items}
         </Group>

@@ -23,12 +23,11 @@ async function getStatus(monitor: MonitorTarget): Promise<{ ping: number; up: bo
 		try {
 			const [hostname, port] = monitor.target.split(":")
 			
-			// Write "PING" and read response
+			// Write "PING\n"
 			const socket = connect({ hostname: hostname, port: Number(port) })
 			const reader = socket.readable.getReader()
 			const writer = socket.writable.getWriter()
 			await writer.write(new TextEncoder().encode("PING\n"))
-			await reader.read()  // The read here is necessary to actually test the connection, however it may hang if the server doesn't respond
 			await socket.close()
 
 			// TODO: should throw an error here but it doesn't?
@@ -109,35 +108,43 @@ export default {
 			status.up ? state.overallUp++ : state.overallDown++
 
 			// Update incidents
-			let incidentList = state.incident[monitor.id] || []
+
+			// Create a dummy incident to store the start time of the monitoring and simplify logic
+			state.incident[monitor.id] = state.incident[monitor.id] || [
+				{
+					start: [currentTimeSecond],
+					end: currentTimeSecond,
+					error: ['dummy']
+				}
+			]
+			// Then lastIncident here must not be undefined
 			const lastIncident = incidentList.slice(-1)[0]
 			const timeString = new Date().toLocaleString(config.dateLocale, { timeZone: config.timezone })
 
 			if (status.up) {
 				// Current status is up
 				// close existing incident if any
-				if (lastIncident && lastIncident.end === undefined) {
+				if (lastIncident.end === undefined) {
 					lastIncident.end = currentTimeSecond
 					await config.callback(`✔️${monitor.name} came back up at ${timeString} after ${Math.round((lastIncident.end - lastIncident.start.slice(-1)[0]) / 60)} minutes of downtime`)
 				}
 			} else {
 				// Current status is down
 				// open new incident if not already open
-				if (lastIncident === undefined || lastIncident?.end !== undefined) {
+				if (lastIncident.end !== undefined) {
 					incidentList.push({
 						start: [currentTimeSecond],
 						end: undefined,
 						error: [status.err]
 					})
 					await config.callback(`❌${monitor.name} went down at ${timeString} with error ${status.err}`)
-				} else if (lastIncident && lastIncident.end === undefined && lastIncident.error.slice(-1)[0] !== status.err) {
+				} else if (lastIncident.end === undefined && lastIncident.error.slice(-1)[0] !== status.err) {
 					// append if the error message changes
 					lastIncident.start.push(currentTimeSecond)
 					lastIncident.error.push(status.err)
 					await config.callback(`❌${monitor.name} is still down at ${timeString} with error ${status.err}`)
 				}
 			}
-			state.incident[monitor.id] = incidentList
 			
 			// append to latency data
 			let latencyLists = state.latency[monitor.id] || {
