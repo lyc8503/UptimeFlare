@@ -1,21 +1,21 @@
 
-import { Line } from "react-chartjs-2"
-import { Text } from "@mantine/core"
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, TimeScale } from 'chart.js'
+import { Text, Tooltip } from "@mantine/core"
 import { MonitorState, MonitorTarget } from "@/uptime.types";
-import 'chartjs-adapter-moment'
 import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
+import DetailChart from "./DetailChart";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  TimeScale
-)
+function getColor(percent: number | string, darker: boolean): string {
+  percent = Number(percent)
+  if (percent >= 99.9) {
+    return darker ? '#059669' : '#3bd671'
+  } else if (percent >= 99) {
+    return darker ? '#3bd671' : '#9deab8'
+  } else if (percent >= 95) {
+    return '#f29030'
+  } else {
+    return '#df484a'
+  }
+}
 
 
 export default function MonitorDetail({ monitor, state }: { monitor: MonitorTarget, state: MonitorState }) {
@@ -27,75 +27,50 @@ export default function MonitorDetail({ monitor, state }: { monitor: MonitorTarg
     </>
   )
 
-  const statusIcon = (state.incident[monitor.id].slice(-1)[0] ?? { end: 'dummy' }).end === undefined ? <IconAlertCircle style={{ width: '1em', height: '1em', color: '#b91c1c' }} /> : <IconCircleCheck style={{ width: '1em', height: '1em', color: '#059669' }} />
+  const statusIcon = state.incident[monitor.id].slice(-1)[0].end === undefined ? <IconAlertCircle style={{ width: '1em', height: '1em', color: '#b91c1c' }} /> : <IconCircleCheck style={{ width: '1em', height: '1em', color: '#059669' }} />
 
-  const latencyData = state.latency[monitor.id].recent.map((point) => ({ x: point.time * 1000, y: point.ping, loc: point.loc }))
+  let totalTime = Date.now() / 1000 - state.incident[monitor.id][0].start[0]
+  let downTime = 0
+  for (let incident of state.incident[monitor.id]) {
+    downTime += (incident.end ?? (Date.now() / 1000)) - incident.start[0]
+  }
 
-  let data = {
-    datasets: [
-      {
-        data: latencyData,
-        borderColor: 'rgb(112, 119, 140)',
-        borderWidth: 2,
-        radius: 0,
-        cubicInterpolationMode: 'monotone' as const,
-        tension: 0.4
-      }
-    ]
-  }
-  
-  let options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: {
-      mode: 'index' as const,
-      intersect: false,
-    },
-    plugins: {
-      tooltip: {
-        callbacks: {
-          label: (item: any) => {
-            if (item.parsed.y) {
-              return `${item.parsed.y}ms (${item.raw.loc})`
-            }
-          }
-        }
-      },
-      legend: {
-        display: false
-      },
-      title: {
-        display: true,
-        text: 'Response times(ms)',
-        align: 'start' as const
-      },
-    },
-    scales: {
-      x: {
-        type: 'time' as const,
-        ticks: {
-          source: 'auto' as const,
-          maxRotation: 0,
-          autoSkip: true
-        }
-      }
-    }
-  }
+  console.log(totalTime)
+  console.log(downTime)
+  const uptimePercent = ((totalTime - downTime) / totalTime * 100).toPrecision(4)
 
   const uptimePercentBars = []
+  
+  // const day = new Date()
+  // day.setHours(0, 0, 0, 0)
+  // const dayStart = day.getTime()
+
   for (let i = 0; i < 90; i++) {
-    uptimePercentBars.push(<div key={i} style={{ height: '50px', background: 'red' }}/>)
+
+    let dayDownTime = 0
+    let dayTotalTime = 0
+
+    if (state.incident[monitor.id][0].end)
+
+    uptimePercentBars.push(
+      <Tooltip label="Tooltip">
+        <div style={{ height: '20px', width: '0.8%', background: 'green', borderRadius: '2px', marginLeft: '0.155%', marginRight: '0.155%' }}/>
+      </Tooltip>
+    )
   }
 
   return (
     <>
-      <Text mt='sm' style={{ display: 'flex', alignItems: 'center' }}>{statusIcon} {monitor.name}</Text>
-      {/* <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, 1fr)' }}>
-        {uptimePercentBars}
-      </div> */}
-      <div style={{ height: '150px' }}>
-        <Line options={options} data={data} />
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Text mt='sm' style={{ display: 'inline-flex', alignItems: 'center' }}>{statusIcon} {monitor.name}</Text>
+        <Text mt='sm' fw={700} style={{ display: 'inline', color: getColor(uptimePercent, true) }}>Overall: {uptimePercent}%</Text>
       </div>
+
+      <div style={{ display: 'flex', flexWrap: 'nowrap', marginTop: '10px', marginBottom: '5px' }}>
+        {uptimePercentBars}
+      </div>
+
+      <DetailChart monitor={monitor} state={state} />
     </>
   )
 }
