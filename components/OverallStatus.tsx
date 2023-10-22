@@ -21,7 +21,7 @@ export default function OverallStatus({ state }: { state: { overallUp: number, o
       {icon}
     </Center>
     <Title mt="sm" style={{ textAlign: 'center' }} order={1}>{statusString}</Title>
-    <Title mt="sm" style={{ textAlign: 'center', color: '#70778c' }} order={5}>Last updated on: {new Date(state.lastUpdate * 1000).toLocaleString()} ({Math.round(Date.now() / 1000) - state.lastUpdate} sec ago)</Title>
+    <Title mt="sm" style={{ textAlign: 'center', color: '#70778c' }} order={5}>Last updated on: {`${new Date(state.lastUpdate * 1000).toLocaleString()} (${Math.round(Date.now() / 1000) - state.lastUpdate} sec ago)`}</Title>
   </>)
 }
 

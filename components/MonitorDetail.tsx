@@ -3,6 +3,7 @@ import { Text, Tooltip } from "@mantine/core"
 import { MonitorState, MonitorTarget } from "@/uptime.types";
 import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
 import DetailChart from "./DetailChart";
+import NoSsr from "./NoSsr";
 
 function getColor(percent: number | string, darker: boolean): string {
   percent = Number(percent)
@@ -50,10 +51,10 @@ export default function MonitorDetail({ monitor, state }: { monitor: MonitorTarg
     let dayDownTime = 0
     let dayTotalTime = 0
 
-    if (state.incident[monitor.id][0].end)
+    // if (state.incident[monitor.id][0].end)
 
     uptimePercentBars.push(
-      <Tooltip label="Tooltip">
+      <Tooltip key={i} label="Tooltip">
         <div style={{ height: '20px', width: '0.8%', background: 'green', borderRadius: '2px', marginLeft: '0.155%', marginRight: '0.155%' }}/>
       </Tooltip>
     )

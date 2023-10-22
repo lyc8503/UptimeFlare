@@ -39,6 +39,9 @@ export default function DetailChart({ monitor, state }: { monitor: MonitorTarget
       mode: 'index' as const,
       intersect: false,
     },
+    animation: {
+      duration: 0
+    },
     plugins: {
       tooltip: {
         callbacks: {
