@@ -1,9 +1,9 @@
 
-import { Text, Tooltip } from "@mantine/core"
-import { MonitorState, MonitorTarget } from "@/uptime.types";
-import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
-import DetailChart from "./DetailChart";
-import NoSsr from "./NoSsr";
+import { Text } from "@mantine/core"
+import { MonitorState, MonitorTarget } from "@/uptime.types"
+import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react"
+import DetailChart from "./DetailChart"
+import DetailBar from "./DetailBar"
 
 function getColor(percent: number | string, darker: boolean): string {
   percent = Number(percent)
@@ -17,7 +17,6 @@ function getColor(percent: number | string, darker: boolean): string {
     return '#df484a'
   }
 }
-
 
 export default function MonitorDetail({ monitor, state }: { monitor: MonitorTarget, state: MonitorState }) {
 
@@ -40,26 +39,6 @@ export default function MonitorDetail({ monitor, state }: { monitor: MonitorTarg
   console.log(downTime)
   const uptimePercent = ((totalTime - downTime) / totalTime * 100).toPrecision(4)
 
-  const uptimePercentBars = []
-  
-  // const day = new Date()
-  // day.setHours(0, 0, 0, 0)
-  // const dayStart = day.getTime()
-
-  for (let i = 0; i < 90; i++) {
-
-    let dayDownTime = 0
-    let dayTotalTime = 0
-
-    // if (state.incident[monitor.id][0].end)
-
-    uptimePercentBars.push(
-      <Tooltip key={i} label="Tooltip">
-        <div style={{ height: '20px', width: '0.8%', background: 'green', borderRadius: '2px', marginLeft: '0.155%', marginRight: '0.155%' }}/>
-      </Tooltip>
-    )
-  }
-
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -67,10 +46,7 @@ export default function MonitorDetail({ monitor, state }: { monitor: MonitorTarg
         <Text mt='sm' fw={700} style={{ display: 'inline', color: getColor(uptimePercent, true) }}>Overall: {uptimePercent}%</Text>
       </div>
 
-      <div style={{ display: 'flex', flexWrap: 'nowrap', marginTop: '10px', marginBottom: '5px' }}>
-        {uptimePercentBars}
-      </div>
-
+      <DetailBar monitor={monitor} state={state} />
       <DetailChart monitor={monitor} state={state} />
     </>
   )

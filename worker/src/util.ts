@@ -2,10 +2,8 @@ async function getWorkerLocation() {
   const res = await fetch('https://cloudflare.com/cdn-cgi/trace')
   const text = await res.text()
 
-  const loc = /^loc=(.*)$/m.exec(text)?.[1]
   const colo = /^colo=(.*)$/m.exec(text)?.[1]
-
-  return loc + '/' + colo
+  return colo
 }
 
 const fetchTimeout = (url: string, ms: number, { signal, ...options }: RequestInit<RequestInitCfProperties> | undefined = {}): Promise<Response> => {
