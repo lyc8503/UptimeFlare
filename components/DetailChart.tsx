@@ -2,6 +2,7 @@ import { Line } from "react-chartjs-2"
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip as ChartTooltip, Legend, TimeScale } from 'chart.js'
 import 'chartjs-adapter-moment'
 import { MonitorState, MonitorTarget } from "@/uptime.types"
+import { iataToCountry } from "@/util/iata"
 
 ChartJS.register(
   CategoryScale,
@@ -47,7 +48,7 @@ export default function DetailChart({ monitor, state }: { monitor: MonitorTarget
         callbacks: {
           label: (item: any) => {
             if (item.parsed.y) {
-              return `${item.parsed.y}ms (${item.raw.loc})`
+              return `${item.parsed.y}ms (${iataToCountry(item.raw.loc)})`
             }
           }
         }

@@ -63,7 +63,8 @@ const config = {
       timeout: 10000,
       headers: {
         "Cookie": "type=tunnel;"
-      }
+      },
+      responseKeyword: 'Hello'
     },
     {
       id: 'broken-test',
@@ -71,6 +72,27 @@ const config = {
       method: 'TCP_PING',
       target: '1.1.1.1:1234'
     },
+    {
+      id: '404test',
+      name: '404-test',
+      method: 'GET',
+      target: 'https://www.baidu.com/404',
+    },
+    {
+      id: '404test2',
+      name: '404-test2',
+      method: 'GET',
+      target: 'https://www.baidu.com/404',
+      expectedCodes: [404, 405]
+    },
+    {
+      id: '404test3',
+      name: '404-test3',
+      method: 'GET',
+      target: 'https://www.baidu.com/404',
+      expectedCodes: [404],
+      responseKeyword: 'Hello'
+    }
   ]
 } 
 

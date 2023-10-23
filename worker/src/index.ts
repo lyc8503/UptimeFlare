@@ -28,6 +28,7 @@ async function getStatus(monitor: MonitorTarget): Promise<{ ping: number; up: bo
 			const reader = socket.readable.getReader()
 			const writer = socket.writable.getWriter()
 			await writer.write(new TextEncoder().encode("PING\n"))
+			await reader.read()  // This now works as a workaround for https://github.com/cloudflare/workerd/issues/1305
 			await socket.close()
 
 			// TODO: should throw an error here but it doesn't?
@@ -48,7 +49,7 @@ async function getStatus(monitor: MonitorTarget): Promise<{ ping: number; up: bo
 		try {
 			const response = await fetchTimeout(monitor.target, monitor.timeout || 10000, {
 				method: monitor.method,
-				headers: monitor.headers,
+				headers: monitor.headers as any,
 				body: monitor.body,
 				cf: {
 					cacheTtlByStatus: {
@@ -59,6 +60,30 @@ async function getStatus(monitor: MonitorTarget): Promise<{ ping: number; up: bo
 			
 			console.log(`${monitor.name} responded with ${response.status}`)
 			status.ping = Date.now() - startTime
+			
+			if (monitor.expectedCodes) {
+				if (!monitor.expectedCodes.includes(response.status)) {
+					status.up = false
+					status.err = `Expected codes: ${JSON.stringify(monitor.expectedCodes)}, Got: ${response.status}`
+					return status
+				}
+			} else {
+				if (response.status < 200 || response.status > 299) {
+					status.up = false
+					status.err = `Expected codes: 2xx, Got: ${response.status}`
+					return status
+				}
+			}
+
+			if (monitor.responseKeyword) {
+				const responseBody = await response.text()
+				if (!responseBody.includes(monitor.responseKeyword)) {
+					status.up = false
+					status.err = "HTTP response doesn't contain the configured keyword"
+					return status
+				}
+			}
+
 			status.up = true
 			status.err = ""
 		} catch (e: any) {
@@ -80,7 +105,7 @@ async function getStatus(monitor: MonitorTarget): Promise<{ ping: number; up: bo
 
 export default {
 	async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
-		const workerLocation = await getWorkerLocation()
+		const workerLocation = await getWorkerLocation() || "ERROR"
 		console.log(`Running scheduled event on ${workerLocation}...`)
 
 		// Read state, set init state if it doesn't exist

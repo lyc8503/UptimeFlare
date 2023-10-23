@@ -22,17 +22,18 @@ type MonitorState = {
   }>
 }
 
-// TODO
 type MonitorTarget = {
   id: string,
   name: string,
   method: string,  // "TCP_PING" or Http Method (e.g. GET, POST, OPTIONS, etc.)
   target: string,  // url for http, hostname:port for tcp
 
-  expectedCode?: number[],
+  // HTTP Code
+  expectedCodes?: number[],
   timeout?: number,
-  headers?: Record<string, string>,
-  body?: string
+  headers?: Record<string, string | undefined>,
+  body?: BodyInit,
+  responseKeyword?: string
 }
 
 
