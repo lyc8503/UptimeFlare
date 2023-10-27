@@ -24,14 +24,12 @@ async function getStatus(monitor: MonitorTarget): Promise<{ ping: number; up: bo
 			const [hostname, port] = monitor.target.split(":")
 			
 			// Write "PING\n"
-			const socket = connect({ hostname: hostname, port: Number(port) })
-			const reader = socket.readable.getReader()
+			const socket = connect({ hostname: hostname, port: Number(port) }) 
 			const writer = socket.writable.getWriter()
 			await writer.write(new TextEncoder().encode("PING\n"))
-			await reader.read()  // This now works as a workaround for https://github.com/cloudflare/workerd/issues/1305
-			await socket.close()
+			// Can't do this: await socket.close()
 
-			// TODO: should throw an error here but it doesn't?
+			// https://github.com/cloudflare/workerd/issues/1305
 			await socket.closed
 			
 			console.log(`${monitor.name} connected to ${monitor.target}`)

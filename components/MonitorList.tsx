@@ -6,7 +6,7 @@ export default function MonitorList({ config, state }: { config: any, state: Mon
 
   return (
     <Center>
-      <Card shadow="sm" padding="lg" radius="md" ml="xl" mr="xl" mt="xl" withBorder style={{ width: '800px' }}>
+      <Card shadow="sm" padding="lg" radius="md" ml="xl" mr="xl" mt="xl" withBorder style={{ width: '865px' }}>
         {config.monitors.map((monitor: MonitorTarget) => (
           <div key={monitor.id}>
             <Card.Section ml="xs" mr="xs">

@@ -1,31 +1,23 @@
-import { useState } from 'react';
 import { Container, Group, Text } from '@mantine/core';
 import classes from '@/styles/Header.module.css';
+import config from '@/uptime.config';
 
-const links = [
-  { link: '/about', label: 'Features' },
-  { link: '/pricing', label: 'Pricing' },
-  { link: '/learn', label: 'Learn' },
-  { link: '/community', label: 'Community' },
-];
 
 export default function Header() {
-  const [active, setActive] = useState(links[0].link);
 
-  const items = links.map((link) => (
-    <a
-      key={link.label}
-      href={link.link}
-      className={classes.link}
-      data-active={active === link.link || undefined}
-      onClick={(event) => {
-        event.preventDefault();
-        setActive(link.link);
-      }}
-    >
-      {link.label}
-    </a>
-  ));
+  const linkToElement = (link: { label: string; link: string; highlight?: boolean; }) => {
+    return (
+      <a
+        key={link.label}
+        href={link.link}
+        target='_blank'
+        className={classes.link}
+        data-active={link.highlight}
+      >
+        {link.label}
+      </a>
+    )
+  }
 
   return (
     <header className={classes.header}>
@@ -36,9 +28,15 @@ export default function Header() {
             <Text size='xl' span fw={700} variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: 90 }}>UptimeFlare</Text>
           </a>
         </div>
-        <Group gap={5}>
-          {items}
+
+        <Group gap={5} visibleFrom='sm'>
+          {config.page.links.map(linkToElement)}
         </Group>
+
+        <Group gap={5} hiddenFrom='sm'>
+          {config.page.links.filter(link => link.highlight).map(linkToElement)}
+        </Group>
+
       </Container>
     </header>
   );

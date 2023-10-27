@@ -27,7 +27,7 @@ export default function MonitorDetail({ monitor, state }: { monitor: MonitorTarg
     </>
   )
 
-  const statusIcon = state.incident[monitor.id].slice(-1)[0].end === undefined ? <IconAlertCircle style={{ width: '1em', height: '1em', color: '#b91c1c' }} /> : <IconCircleCheck style={{ width: '1em', height: '1em', color: '#059669' }} />
+  const statusIcon = state.incident[monitor.id].slice(-1)[0].end === undefined ? <IconAlertCircle style={{ width: '1.25em', height: '1.25em', color: '#b91c1c' }} /> : <IconCircleCheck style={{ width: '1.25em', height: '1.25em', color: '#059669' }} />
 
   let totalTime = Date.now() / 1000 - state.incident[monitor.id][0].start[0]
   let downTime = 0
@@ -42,7 +42,7 @@ export default function MonitorDetail({ monitor, state }: { monitor: MonitorTarg
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Text mt='sm' style={{ display: 'inline-flex', alignItems: 'center' }}>{statusIcon} {monitor.name}</Text>
+        <Text mt='sm' fw={700} style={{ display: 'inline-flex', alignItems: 'center' }}>{statusIcon} {monitor.name}</Text>
         <Text mt='sm' fw={700} style={{ display: 'inline', color: getColor(uptimePercent, true) }}>Overall: {uptimePercent}%</Text>
       </div>
 

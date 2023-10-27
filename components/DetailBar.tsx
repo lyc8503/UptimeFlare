@@ -1,5 +1,6 @@
 import { MonitorState, MonitorTarget } from "@/uptime.types";
-import { Tooltip } from "@mantine/core";
+import { Box, Tooltip } from "@mantine/core";
+import { useEffect, useRef } from "react";
 
 
 export default function DetailBar({ monitor, state }: { monitor: MonitorTarget, state: MonitorState }) {  
@@ -22,14 +23,24 @@ export default function DetailBar({ monitor, state }: { monitor: MonitorTarget, 
 
     uptimePercentBars.push(
       <Tooltip key={i} label="Tooltip">
-        <div style={{ height: '20px', width: '0.8%', background: 'green', borderRadius: '2px', marginLeft: '0.155%', marginRight: '0.155%' }}/>
+        <div style={{ height: '20px', width: '7px', background: 'green', borderRadius: '2px', marginLeft: '1px', marginRight: '1px' }}/>
       </Tooltip>
     )
   }
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'nowrap', marginTop: '10px', marginBottom: '5px' }}>
-      {uptimePercentBars}
-    </div>
+    <>
+      <Box style={{ display: 'flex', flexWrap: 'nowrap', marginTop: '10px', marginBottom: '5px' }} visibleFrom='540'>
+        {uptimePercentBars}
+      </Box>
+
+      {/* <Box style={{ display: 'flex', flexWrap: 'nowrap', marginTop: '10px', marginBottom: '5px' }} visibleFrom='270' hiddenFrom='540'>
+        {uptimePercentBars.slice(-60)}
+      </Box>
+
+      <Box style={{ display: 'flex', flexWrap: 'nowrap', marginTop: '10px', marginBottom: '5px' }} hiddenFrom='270'>
+        {uptimePercentBars.slice(-30)}
+      </Box> */}
+    </>
   )
 }
