@@ -14,4 +14,14 @@ const fetchTimeout = (url: string, ms: number, { signal, ...options }: RequestIn
   return promise.finally(() => clearTimeout(timeout))
 }
 
-export { getWorkerLocation, fetchTimeout }
+function withTimeout<T> (millis: number, promise: Promise<T>): Promise<T> {
+  const timeout = new Promise<T>((resolve, reject) =>
+  setTimeout(() => reject(new Error(`Promise timed out after ${millis}ms`)), millis))
+
+  return Promise.race([
+    promise,
+    timeout
+  ])
+}
+
+export { getWorkerLocation, fetchTimeout, withTimeout }

@@ -1,6 +1,6 @@
 import { connect } from 'cloudflare:sockets'
 import config from '../../uptime.config'
-import { fetchTimeout, getWorkerLocation } from './util'
+import { fetchTimeout, getWorkerLocation, withTimeout } from './util'
 import { MonitorState, MonitorTarget } from "../../uptime.types"
 
 export interface Env {
@@ -30,7 +30,7 @@ async function getStatus(monitor: MonitorTarget): Promise<{ ping: number; up: bo
 			// Can't do this: await socket.close()
 
 			// https://github.com/cloudflare/workerd/issues/1305
-			await socket.closed
+			await withTimeout(monitor.timeout || 10000, socket.closed)
 			
 			console.log(`${monitor.name} connected to ${monitor.target}`)
 

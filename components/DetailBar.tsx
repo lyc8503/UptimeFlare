@@ -1,6 +1,5 @@
 import { MonitorState, MonitorTarget } from "@/uptime.types";
 import { Box, Tooltip } from "@mantine/core";
-import { useEffect, useRef } from "react";
 
 
 export default function DetailBar({ monitor, state }: { monitor: MonitorTarget, state: MonitorState }) {  

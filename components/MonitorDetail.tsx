@@ -22,8 +22,8 @@ export default function MonitorDetail({ monitor, state }: { monitor: MonitorTarg
 
   if (!state.latency[monitor.id]) return (
     <>
-      <Text>{monitor.name}</Text>
-      <Text>No data available, please make sure you have deployed your workers with latest config and check your worker status!</Text>
+      <Text mt='sm' fw={700}>{monitor.name}</Text>
+      <Text mt='sm' fw={700}>No data available, please make sure you have deployed your workers with latest config and check your worker status!</Text>
     </>
   )
 
