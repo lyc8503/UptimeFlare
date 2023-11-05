@@ -10,9 +10,7 @@ const config = {
     ],
   },
   callback: async (statusChangeMsg: string) => {
-    await fetch(
-      'https://server.lyc8503.site/wepush?key=wepushkey&msg=' + statusChangeMsg
-    )
+    await fetch('https://server.lyc8503.site/wepush?key=wepushkey&msg=' + statusChangeMsg)
   },
   monitors: [
     {

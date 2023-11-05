@@ -3,11 +3,7 @@ import classes from '@/styles/Header.module.css'
 import config from '@/uptime.config'
 
 export default function Header() {
-  const linkToElement = (link: {
-    label: string
-    link: string
-    highlight?: boolean
-  }) => {
+  const linkToElement = (link: { label: string; link: string; highlight?: boolean }) => {
     return (
       <a
         key={link.label}
@@ -46,9 +42,7 @@ export default function Header() {
         </Group>
 
         <Group gap={5} hiddenFrom="sm">
-          {config.page.links
-            .filter((link) => link.highlight)
-            .map(linkToElement)}
+          {config.page.links.filter((link) => link.highlight).map(linkToElement)}
         </Group>
       </Container>
     </header>

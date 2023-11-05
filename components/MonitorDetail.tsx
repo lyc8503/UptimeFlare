@@ -31,21 +31,17 @@ export default function MonitorDetail({
           {monitor.name}
         </Text>
         <Text mt="sm" fw={700}>
-          No data available, please make sure you have deployed your workers
-          with latest config and check your worker status!
+          No data available, please make sure you have deployed your workers with latest config and
+          check your worker status!
         </Text>
       </>
     )
 
   const statusIcon =
     state.incident[monitor.id].slice(-1)[0].end === undefined ? (
-      <IconAlertCircle
-        style={{ width: '1.25em', height: '1.25em', color: '#b91c1c' }}
-      />
+      <IconAlertCircle style={{ width: '1.25em', height: '1.25em', color: '#b91c1c' }} />
     ) : (
-      <IconCircleCheck
-        style={{ width: '1.25em', height: '1.25em', color: '#059669' }}
-      />
+      <IconCircleCheck style={{ width: '1.25em', height: '1.25em', color: '#059669' }} />
     )
 
   let totalTime = Date.now() / 1000 - state.incident[monitor.id][0].start[0]
@@ -56,26 +52,15 @@ export default function MonitorDetail({
 
   console.log(totalTime)
   console.log(downTime)
-  const uptimePercent = (
-    ((totalTime - downTime) / totalTime) *
-    100
-  ).toPrecision(4)
+  const uptimePercent = (((totalTime - downTime) / totalTime) * 100).toPrecision(4)
 
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Text
-          mt="sm"
-          fw={700}
-          style={{ display: 'inline-flex', alignItems: 'center' }}
-        >
+        <Text mt="sm" fw={700} style={{ display: 'inline-flex', alignItems: 'center' }}>
           {statusIcon} {monitor.name}
         </Text>
-        <Text
-          mt="sm"
-          fw={700}
-          style={{ display: 'inline', color: getColor(uptimePercent, true) }}
-        >
+        <Text mt="sm" fw={700} style={{ display: 'inline', color: getColor(uptimePercent, true) }}>
           Overall: {uptimePercent}%
         </Text>
       </div>

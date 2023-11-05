@@ -26,8 +26,8 @@ export default function Home({ state }: { state: MonitorState }) {
         {state === undefined ? (
           <Center>
             <Text fw={700}>
-              Monitor State is not defined now, please check your worker&apos;s
-              status and KV binding!
+              Monitor State is not defined now, please check your worker&apos;s status and KV
+              binding!
             </Text>
           </Center>
         ) : (
@@ -64,10 +64,7 @@ export async function getServerSideProps() {
   const { UPTIMEFLARE_STATE } = process.env as unknown as {
     UPTIMEFLARE_STATE: KVNamespace
   }
-  const state = (await UPTIMEFLARE_STATE?.get(
-    'state',
-    'json'
-  )) as unknown as MonitorState
+  const state = (await UPTIMEFLARE_STATE?.get('state', 'json')) as unknown as MonitorState
 
   return { props: { state } }
 }

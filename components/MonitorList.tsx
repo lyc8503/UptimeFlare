@@ -2,13 +2,7 @@ import { MonitorState, MonitorTarget } from '@/uptime.types'
 import { Card, Center, Divider } from '@mantine/core'
 import MonitorDetail from './MonitorDetail'
 
-export default function MonitorList({
-  config,
-  state,
-}: {
-  config: any
-  state: MonitorState
-}) {
+export default function MonitorList({ config, state }: { config: any; state: MonitorState }) {
   return (
     <Center>
       <Card
