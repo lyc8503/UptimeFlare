@@ -1,8 +1,13 @@
-import { MonitorState, MonitorTarget } from "@/uptime.types";
-import { Box, Tooltip } from "@mantine/core";
+import { MonitorState, MonitorTarget } from '@/uptime.types'
+import { Box, Tooltip } from '@mantine/core'
 
-
-export default function DetailBar({ monitor, state }: { monitor: MonitorTarget, state: MonitorState }) {  
+export default function DetailBar({
+  monitor,
+  state,
+}: {
+  monitor: MonitorTarget
+  state: MonitorState
+}) {
   // const day = new Date()
   // day.setHours(0, 0, 0, 0)
   // const dayStart = day.getTime()
@@ -12,9 +17,8 @@ export default function DetailBar({ monitor, state }: { monitor: MonitorTarget, 
   }
 
   const uptimePercentBars = []
-  
-  for (let i = 89; i > 0; i--) {
 
+  for (let i = 89; i > 0; i--) {
     let dayDownTime = 0
     let dayTotalTime = 0
 
@@ -22,14 +26,31 @@ export default function DetailBar({ monitor, state }: { monitor: MonitorTarget, 
 
     uptimePercentBars.push(
       <Tooltip key={i} label="Tooltip">
-        <div style={{ height: '20px', width: '7px', background: 'green', borderRadius: '2px', marginLeft: '1px', marginRight: '1px' }}/>
+        <div
+          style={{
+            height: '20px',
+            width: '7px',
+            background: 'green',
+            borderRadius: '2px',
+            marginLeft: '1px',
+            marginRight: '1px',
+          }}
+        />
       </Tooltip>
     )
   }
 
   return (
     <>
-      <Box style={{ display: 'flex', flexWrap: 'nowrap', marginTop: '10px', marginBottom: '5px' }} visibleFrom='540'>
+      <Box
+        style={{
+          display: 'flex',
+          flexWrap: 'nowrap',
+          marginTop: '10px',
+          marginBottom: '5px',
+        }}
+        visibleFrom="540"
+      >
         {uptimePercentBars}
       </Box>
 

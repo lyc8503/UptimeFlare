@@ -1,8 +1,18 @@
-import { Line } from "react-chartjs-2"
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip as ChartTooltip, Legend, TimeScale } from 'chart.js'
+import { Line } from 'react-chartjs-2'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip as ChartTooltip,
+  Legend,
+  TimeScale,
+} from 'chart.js'
 import 'chartjs-adapter-moment'
-import { MonitorState, MonitorTarget } from "@/uptime.types"
-import { iataToCountry } from "@/util/iata"
+import { MonitorState, MonitorTarget } from '@/uptime.types'
+import { iataToCountry } from '@/util/iata'
 
 ChartJS.register(
   CategoryScale,
@@ -15,10 +25,18 @@ ChartJS.register(
   TimeScale
 )
 
-
-export default function DetailChart({ monitor, state }: { monitor: MonitorTarget, state: MonitorState }) {
-
-  const latencyData = state.latency[monitor.id].recent.map((point) => ({ x: point.time * 1000, y: point.ping, loc: point.loc }))
+export default function DetailChart({
+  monitor,
+  state,
+}: {
+  monitor: MonitorTarget
+  state: MonitorState
+}) {
+  const latencyData = state.latency[monitor.id].recent.map((point) => ({
+    x: point.time * 1000,
+    y: point.ping,
+    loc: point.loc,
+  }))
 
   let data = {
     datasets: [
@@ -28,11 +46,11 @@ export default function DetailChart({ monitor, state }: { monitor: MonitorTarget
         borderWidth: 2,
         radius: 0,
         cubicInterpolationMode: 'monotone' as const,
-        tension: 0.4
-      }
-    ]
+        tension: 0.4,
+      },
+    ],
   }
-  
+
   let options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -41,7 +59,7 @@ export default function DetailChart({ monitor, state }: { monitor: MonitorTarget
       intersect: false,
     },
     animation: {
-      duration: 0
+      duration: 0,
     },
     plugins: {
       tooltip: {
@@ -50,16 +68,16 @@ export default function DetailChart({ monitor, state }: { monitor: MonitorTarget
             if (item.parsed.y) {
               return `${item.parsed.y}ms (${iataToCountry(item.raw.loc)})`
             }
-          }
-        }
+          },
+        },
       },
       legend: {
-        display: false
+        display: false,
       },
       title: {
         display: true,
         text: 'Response times(ms)',
-        align: 'start' as const
+        align: 'start' as const,
       },
     },
     scales: {
@@ -68,10 +86,10 @@ export default function DetailChart({ monitor, state }: { monitor: MonitorTarget
         ticks: {
           source: 'auto' as const,
           maxRotation: 0,
-          autoSkip: true
-        }
-      }
-    }
+          autoSkip: true,
+        },
+      },
+    },
   }
 
   return (
@@ -80,4 +98,3 @@ export default function DetailChart({ monitor, state }: { monitor: MonitorTarget
     </div>
   )
 }
-

@@ -1,12 +1,26 @@
-import { MonitorState, MonitorTarget } from "@/uptime.types";
-import { Card, Center, Divider } from "@mantine/core";
-import MonitorDetail from "./MonitorDetail";
+import { MonitorState, MonitorTarget } from '@/uptime.types'
+import { Card, Center, Divider } from '@mantine/core'
+import MonitorDetail from './MonitorDetail'
 
-export default function MonitorList({ config, state }: { config: any, state: MonitorState }) {
-
+export default function MonitorList({
+  config,
+  state,
+}: {
+  config: any
+  state: MonitorState
+}) {
   return (
     <Center>
-      <Card shadow="sm" padding="lg" radius="md" ml="xl" mr="xl" mt="xl" withBorder style={{ width: '865px' }}>
+      <Card
+        shadow="sm"
+        padding="lg"
+        radius="md"
+        ml="xl"
+        mr="xl"
+        mt="xl"
+        withBorder
+        style={{ width: '865px' }}
+      >
         {config.monitors.map((monitor: MonitorTarget) => (
           <div key={monitor.id}>
             <Card.Section ml="xs" mr="xs">
@@ -17,6 +31,5 @@ export default function MonitorList({ config, state }: { config: any, state: Mon
         ))}
       </Card>
     </Center>
-    )
+  )
 }
-

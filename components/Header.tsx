@@ -1,16 +1,18 @@
-import { Container, Group, Text } from '@mantine/core';
-import classes from '@/styles/Header.module.css';
-import config from '@/uptime.config';
-
+import { Container, Group, Text } from '@mantine/core'
+import classes from '@/styles/Header.module.css'
+import config from '@/uptime.config'
 
 export default function Header() {
-
-  const linkToElement = (link: { label: string; link: string; highlight?: boolean; }) => {
+  const linkToElement = (link: {
+    label: string
+    link: string
+    highlight?: boolean
+  }) => {
     return (
       <a
         key={link.label}
         href={link.link}
-        target='_blank'
+        target="_blank"
         className={classes.link}
         data-active={link.highlight}
       >
@@ -23,21 +25,32 @@ export default function Header() {
     <header className={classes.header}>
       <Container size="md" className={classes.inner}>
         <div>
-          <a href='https://github.com/lyc8503/UptimeFlare' target='_blank'>
-            <Text size='xl' span>🕒</Text>
-            <Text size='xl' span fw={700} variant="gradient" gradient={{ from: 'blue', to: 'cyan', deg: 90 }}>UptimeFlare</Text>
+          <a href="https://github.com/lyc8503/UptimeFlare" target="_blank">
+            <Text size="xl" span>
+              🕒
+            </Text>
+            <Text
+              size="xl"
+              span
+              fw={700}
+              variant="gradient"
+              gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
+            >
+              UptimeFlare
+            </Text>
           </a>
         </div>
 
-        <Group gap={5} visibleFrom='sm'>
+        <Group gap={5} visibleFrom="sm">
           {config.page.links.map(linkToElement)}
         </Group>
 
-        <Group gap={5} hiddenFrom='sm'>
-          {config.page.links.filter(link => link.highlight).map(linkToElement)}
+        <Group gap={5} hiddenFrom="sm">
+          {config.page.links
+            .filter((link) => link.highlight)
+            .map(linkToElement)}
         </Group>
-
       </Container>
     </header>
-  );
+  )
 }
