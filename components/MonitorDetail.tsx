@@ -3,19 +3,7 @@ import { MonitorState, MonitorTarget } from '@/uptime.types'
 import { IconAlertCircle, IconCircleCheck } from '@tabler/icons-react'
 import DetailChart from './DetailChart'
 import DetailBar from './DetailBar'
-
-function getColor(percent: number | string, darker: boolean): string {
-  percent = Number(percent)
-  if (percent >= 99.9) {
-    return darker ? '#059669' : '#3bd671'
-  } else if (percent >= 99) {
-    return darker ? '#3bd671' : '#9deab8'
-  } else if (percent >= 95) {
-    return '#f29030'
-  } else {
-    return '#df484a'
-  }
-}
+import { getColor } from '@/util/color'
 
 export default function MonitorDetail({
   monitor,
@@ -50,8 +38,6 @@ export default function MonitorDetail({
     downTime += (incident.end ?? Date.now() / 1000) - incident.start[0]
   }
 
-  console.log(totalTime)
-  console.log(downTime)
   const uptimePercent = (((totalTime - downTime) / totalTime) * 100).toPrecision(4)
 
   return (
