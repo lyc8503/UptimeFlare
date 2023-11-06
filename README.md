@@ -26,12 +26,9 @@ Another **serverless (and free!)** uptime monitoring & status page on Cloudflare
 
 My status page (Online demo): https://uptimeflare.pages.dev/
 
-Some screenshots: 
+Some screenshots:
 
-![Desktop, Light theme](docs/desktop.jpg)
-
-![Mobile, Dark theme](docs/mobile.jpg)
-
+![Desktop, Light theme](docs/desktop.png)
 
 ## Quickstart
 
