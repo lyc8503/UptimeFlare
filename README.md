@@ -13,7 +13,7 @@ Another **serverless (and free!)** uptime monitoring & status page on Cloudflare
 - Up to 90-day uptime history and uptime percentage
 - Custom request method & headers & body for HTTP(s)
 - Custom status code & keyword check for HTTP(s)
-- Email Notifications & Customizable Webhook
+- Customizable Webhook
 
 #### Status page
 
@@ -26,14 +26,22 @@ Another **serverless (and free!)** uptime monitoring & status page on Cloudflare
 
 My status page (Online demo): https://uptimeflare.pages.dev/
 
-Some screenshots: TODO
+Some screenshots: 
+
+![Desktop, Light theme](docs/desktop.jpg)
+
+![Mobile, Dark theme](docs/mobile.jpg)
+
 
 ## Quickstart
 
-## More documentation
+Please refer to [Quickstart](https://github.com/lyc8503/UptimeFlare/wiki/Quickstart)
+
+## Documentation
 
 ## TODOs
 
 - SSL?
 - Slack / Telegram
 - Incident timeline
+- Email notification via Cloudflare Email Workers
