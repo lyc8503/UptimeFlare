@@ -2,9 +2,5 @@ name = "uptimeflare-worker"
 main = "src/index.ts"
 compatibility_date = "2023-05-15"
 
-kv_namespaces = [
-  { binding = "UPTIMEFLARE_STATE", id = "ff7ab44866d746aaa19f2225e464ad3e" }
-]
-
 [triggers]
 crons = ["*/2 * * * *"] # run every 2 minutes

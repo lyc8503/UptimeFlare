@@ -1,4 +1,4 @@
-# UptimeFlare
+# 🕒UptimeFlare
 
 Another **serverless (and free!)** uptime monitoring & status page on Cloudflare Workers with more advanced features and nice UI.
 
@@ -22,7 +22,7 @@ Another **serverless (and free!)** uptime monitoring & status page on Cloudflare
 - Customizable status page
 - Use your own domain with CNAME
 
-## Demo
+## 🪧Demo
 
 My status page (Online demo): https://uptimeflare.pages.dev/
 
@@ -30,11 +30,11 @@ Some screenshots:
 
 ![Desktop, Light theme](docs/desktop.png)
 
-## Quickstart
+## ⚡Quickstart
 
 Please refer to [Quickstart](https://github.com/lyc8503/UptimeFlare/wiki/Quickstart)
 
-## Documentation
+## 📄Documentation
 
 ## TODOs
 
