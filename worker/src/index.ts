@@ -20,18 +20,20 @@ async function getStatus(
 
   if (monitor.method === 'TCP_PING') {
     // TCP port endpoint monitor
-    // TODO: TCP timeout
     try {
       const [hostname, port] = monitor.target.split(':')
 
       // Write "PING\n"
       const socket = connect({ hostname: hostname, port: Number(port) })
       const writer = socket.writable.getWriter()
+      const reader = socket.readable.getReader()
       await writer.write(new TextEncoder().encode('PING\n'))
-      // Can't do this: await socket.close()
+      await withTimeout(monitor.timeout || 10000, reader.read())
+      await socket.close()
 
+      // Not having an `opened` promise now...
       // https://github.com/cloudflare/workerd/issues/1305
-      await withTimeout(monitor.timeout || 10000, socket.closed)
+      // await withTimeout(monitor.timeout || 10000, socket.closed)
 
       console.log(`${monitor.name} connected to ${monitor.target}`)
 
