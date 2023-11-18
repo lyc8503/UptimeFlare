@@ -1,6 +1,3 @@
-name = "uptimeflare-worker"
+name = "uptimeflare_worker"
 main = "src/index.ts"
-compatibility_date = "2023-05-15"
-
-[triggers]
-crons = ["*/2 * * * *"] # run every 2 minutes
+compatibility_date = "2023-11-08"

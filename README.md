@@ -1,10 +1,10 @@
-# 🕒UptimeFlare
+# ⚡UptimeFlare
 
 Another **serverless (and free!)** uptime monitoring & status page on Cloudflare Workers with more advanced features and nice UI.
 
 ## ⭐Features
 
-- **Opensource** & Easy to deploy (in 10 minutes without local tools) & Free
+- **Opensource** & Easy to deploy (in 10 minutes) & Free
 
 #### Monitoring
 
@@ -22,7 +22,7 @@ Another **serverless (and free!)** uptime monitoring & status page on Cloudflare
 - Customizable status page
 - Use your own domain with CNAME
 
-## 🪧Demo
+## 📈Demo
 
 My status page (Online demo): https://uptimeflare.pages.dev/
 

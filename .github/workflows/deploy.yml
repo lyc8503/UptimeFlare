@@ -1,0 +1,72 @@
+name: Deploy to Cloudflare
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2.0.3
+        with:
+          terraform_version: 1.6.4
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: 'npm'
+
+      # Automatically get an account id via the API Token
+      - name: Fetch Account ID
+        id: fetch_account_id
+        run: |
+          ACCOUNT_ID=$(curl -X GET "https://api.cloudflare.com/client/v4/accounts" -H "Authorization: Bearer "$CLOUDFLARE_API_TOKEN -H "Content-Type:application/json" | jq ".result[0].id" -r)
+          if [[ "$ACCOUNT_ID" == "null" ]]; then
+            echo "Failed to get an account id, please make sure you have set up CLOUDFLARE_API_TOKEN correctly!"
+            exit 1
+          else
+            echo 'account_id='$ACCOUNT_ID >> $GITHUB_OUTPUT
+          fi
+
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Install packages
+        run: |
+          npm install
+          cd worker
+          npm install
+
+      - name: Build worker
+        run: |
+          cd worker
+          npx wrangler deploy src/index.ts --outdir dist --dry-run
+
+      - name: Build page
+        run: |
+          npx @cloudflare/next-on-pages
+
+      - name: Deploy using Terraform
+        # We're using terraform for first-time setup here,
+        # since we didn't setup a remote backend to store state,
+        # following runs will fail with name conflict, which is normal.
+        continue-on-error: true
+        
+        run: |
+          terraform init
+          terraform apply -auto-approve -input=false
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}
+
+      # Currently Terraform Cloudflare provider doesn't support direct upload, use wrangler to upload instead.
+      - name: Upload pages
+        run: |
+          npx wrangler pages deploy .vercel/output/static --project-name uptimeflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
