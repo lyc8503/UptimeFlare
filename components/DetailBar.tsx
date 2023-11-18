@@ -27,7 +27,7 @@ export default function DetailBar({
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
 
-  for (let i = 89; i > 0; i--) {
+  for (let i = 89; i >= 0; i--) {
     const dayStart = Math.round(todayStart.getTime() / 1000) - i * 86400
     const dayEnd = dayStart + 86400
 
