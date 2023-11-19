@@ -162,7 +162,7 @@ export default {
           lastIncident.end = currentTimeSecond
           await config.callback(
             `✔️${monitor.name} came back up at ${timeString} after ${Math.round(
-              (lastIncident.end - lastIncident.start.slice(-1)[0]) / 60
+              (lastIncident.end - lastIncident.start[0]) / 60
             )} minutes of downtime`
           )
         }
