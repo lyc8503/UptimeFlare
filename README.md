@@ -32,7 +32,7 @@ Some screenshots:
 
 ## ⚡Quickstart / 📄Documentation
 
-Please refer to [Quickstart](https://github.com/lyc8503/UptimeFlare/wiki/Quickstart) and (https://github.com/lyc8503/UptimeFlare/wiki)
+Please refer to [Quickstart](https://github.com/lyc8503/UptimeFlare/wiki/Quickstart) and [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
 
 ## TODOs
 
