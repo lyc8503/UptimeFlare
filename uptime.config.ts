@@ -33,6 +33,8 @@ const config = {
       method: 'POST',
       // `target` is a valid URL
       target: 'https://example.com',
+      // [OPTIONAL] `tooltip` is only used at status page to show a tooltip
+      tooltip: 'This is a tooltip for this monitor',
       // [OPTIONAL] `expectedCodes` is an array of acceptable HTTP response codes, if not specified, default to 2xx
       expectedCodes: [200],
       // [OPTIONAL] `timeout` in millisecond, if not specified, default to 10000
@@ -55,6 +57,7 @@ const config = {
       method: 'TCP_PING',
       // `target` should be `host:port` for tcp monitors
       target: '1.2.3.4:22',
+      tooltip: 'My production server SSH',
       timeout: 5000,
     },
   ],

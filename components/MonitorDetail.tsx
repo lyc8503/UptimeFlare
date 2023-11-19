@@ -1,4 +1,4 @@
-import { Text } from '@mantine/core'
+import { Text, Tooltip } from '@mantine/core'
 import { MonitorState, MonitorTarget } from '@/uptime.types'
 import { IconAlertCircle, IconCircleCheck } from '@tabler/icons-react'
 import DetailChart from './DetailChart'
@@ -40,12 +40,21 @@ export default function MonitorDetail({
 
   const uptimePercent = (((totalTime - downTime) / totalTime) * 100).toPrecision(4)
 
+  const monitorNameElement = (
+    <Text mt="sm" fw={700} style={{ display: 'inline-flex', alignItems: 'center' }}>
+      {statusIcon} {monitor.name}
+    </Text>
+  )
+
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Text mt="sm" fw={700} style={{ display: 'inline-flex', alignItems: 'center' }}>
-          {statusIcon} {monitor.name}
-        </Text>
+        {monitor.tooltip ? (
+          <Tooltip label={monitor.tooltip}>{monitorNameElement}</Tooltip>
+        ) : (
+          monitorNameElement
+        )}
+
         <Text mt="sm" fw={700} style={{ display: 'inline', color: getColor(uptimePercent, true) }}>
           Overall: {uptimePercent}%
         </Text>
