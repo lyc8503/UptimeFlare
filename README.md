@@ -40,3 +40,4 @@ Please refer to [Quickstart](https://github.com/lyc8503/UptimeFlare/wiki/Quickst
 - Slack / Telegram webhook example
 - Incident timeline
 - Email notification via Cloudflare Email Workers
+- Specify region for monitors
