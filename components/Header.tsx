@@ -42,7 +42,7 @@ export default function Header() {
         </Group>
 
         <Group gap={5} hiddenFrom="sm">
-          {config.page.links.filter((link) => link.highlight).map(linkToElement)}
+          {config.page.links.filter((link) => (link as any).highlight).map(linkToElement)}
         </Group>
       </Container>
     </header>
