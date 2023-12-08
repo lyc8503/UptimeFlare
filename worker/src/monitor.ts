@@ -37,6 +37,9 @@ export async function getStatus(
       status.err = ''
     } catch (e: Error | any) {
       console.log(`${monitor.name} errored with ${e.name}: ${e.message}`)
+      if (e.message.includes('timed out')) {
+        status.ping = monitor.timeout || 10000
+      }
       status.up = false
       status.err = e.name + ': ' + e.message
     }
