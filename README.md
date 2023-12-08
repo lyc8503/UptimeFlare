@@ -9,6 +9,7 @@ Another **serverless (and free!)** uptime monitoring & status page on Cloudflare
 #### Monitoring
 
 - Up to 50 **2-minute** interval check on free plan (Up to unlimited 1-min check on paid Workers plan)
+- **Geo-specific checks** from more than [310 cities](https://www.cloudflare.com/network/) around the world
 - Monitoring for **HTTP/HTTPS/TCP port**
 - Up to 90-day uptime history and uptime percentage
 - Custom request method & headers & body for HTTP(s)
@@ -36,8 +37,8 @@ Please refer to [Quickstart](https://github.com/lyc8503/UptimeFlare/wiki/Quickst
 
 ## TODOs
 
-- SSL certificate checks
-- Slack / Telegram webhook example
-- Incident timeline
-- Email notification via Cloudflare Email Workers
-- Specify region for monitors
+- [ ] SSL certificate checks
+- [ ] Slack / Telegram webhook example
+- [ ] Incident timeline
+- [ ] Email notification via Cloudflare Email Workers
+- [x] Specify region for monitors
