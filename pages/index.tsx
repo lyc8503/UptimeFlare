@@ -1,9 +1,9 @@
 import Head from 'next/head'
 
 import { Inter } from 'next/font/google'
-import { MonitorState } from '@/uptime.types'
+import { MonitorState, MonitorTarget } from '@/uptime.types'
 import { KVNamespace } from '@cloudflare/workers-types'
-import config from '@/uptime.config'
+import { pageConfig, workerConfig } from '@/uptime.config'
 import OverallStatus from '@/components/OverallStatus'
 import Header from '@/components/Header'
 import MonitorList from '@/components/MonitorList'
@@ -12,11 +12,17 @@ import { Center, Divider, Text } from '@mantine/core'
 export const runtime = 'experimental-edge'
 const inter = Inter({ subsets: ['latin'] })
 
-export default function Home({ state }: { state: MonitorState }) {
+export default function Home({
+  state,
+  monitors,
+}: {
+  state: MonitorState
+  monitors: MonitorTarget[]
+}) {
   return (
     <>
       <Head>
-        <title>{config.page.title}</title>
+        <title>{pageConfig.title}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -33,7 +39,7 @@ export default function Home({ state }: { state: MonitorState }) {
         ) : (
           <div>
             <OverallStatus state={state} />
-            <MonitorList config={config} state={state} />
+            <MonitorList monitors={monitors} state={state} />
           </div>
         )}
 
@@ -66,5 +72,14 @@ export async function getServerSideProps() {
   }
   const state = (await UPTIMEFLARE_STATE?.get('state', 'json')) as unknown as MonitorState
 
-  return { props: { state } }
+  // Only present these values to client
+  const monitors = workerConfig.monitors.map((monitor) => {
+    return {
+      id: monitor.id,
+      name: monitor.name,
+      tooltip: monitor.tooltip,
+    }
+  })
+
+  return { props: { state, monitors } }
 }

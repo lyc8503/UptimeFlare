@@ -1,26 +1,15 @@
-const config = {
-  // Your locale for server-side callback. (client-side will always follow browser settings)
-  dateLocale: 'zh-CN',
-  // Your timezone for server-side callback. (client-side will always follow browser settings)
-  timezone: 'Asia/Shanghai',
-  page: {
-    // Title for your status page
-    title: "lyc8503's Status Page",
-    // Links shown at the header of your status page, could set `highlight` to `true`
-    links: [
-      { link: 'https://github.com/lyc8503', label: 'GitHub' },
-      { link: 'https://blog.lyc8503.site/', label: 'Blog' },
-      { link: 'mailto:me@lyc8503.site', label: 'Email Me', highlight: true },
-    ],
-  },
-  callback: async (statusChangeMsg: string) => {
-    // Write any typescript here
-    // Example `statusChangeMsg` string:
-    // "❌My Blog went down at 2023/11/18 14:08:59 with error Timeout after 10000ms"
-    // "✔️My Blog came back up at 2023/11/18 14:10:48 after 2 minutes of downtime"
-    // Example:
-    // await fetch('https://api.example.com/callback?msg=' + statusChangeMsg)
-  },
+const pageConfig = {
+  // Title for your status page
+  title: "lyc8503's Status Page",
+  // Links shown at the header of your status page, could set `highlight` to `true`
+  links: [
+    { link: 'https://github.com/lyc8503', label: 'GitHub' },
+    { link: 'https://blog.lyc8503.site/', label: 'Blog' },
+    { link: 'mailto:me@lyc8503.site', label: 'Email Me', highlight: true },
+  ],
+}
+
+const workerConfig = {
   // Define all your monitors here
   monitors: [
     // Example HTTP Monitor
@@ -50,7 +39,7 @@ const config = {
       responseKeyword: 'success',
       // [OPTIONAL] if specified, the check will run in your specified region,
       // refer to docs https://github.com/lyc8503/UptimeFlare/wiki/Geo-specific-checks-setup before setting this value
-      checkLocationWorkerRoute: 'https://xxx.example.com'
+      checkLocationWorkerRoute: 'https://xxx.example.com',
     },
     // Example TCP Monitor
     {
@@ -64,7 +53,43 @@ const config = {
       timeout: 5000,
     },
   ],
+  callbacks: {
+    onStatusChange: async (
+      id: string,
+      name: string,
+      isUp: boolean,
+      timeIncidentStart: number,
+      timeNow: number,
+      reason: string
+    ) => {
+      // This callback will be called when any monitor's status changed
+      // Write any Typescript code here
+      // Example implementation:
+      // const timeString = new Date(timeNow * 1000).toLocaleString('zh-CN', {
+      //   timeZone: 'Asia/Shanghai',
+      // })
+      // let statusChangeMsg
+      // if (isUp) {
+      //   statusChangeMsg = `✔️${name} came back up at ${timeString} after ${Math.round(
+      //     (timeNow - timeIncidentStart) / 60
+      //   )} minutes of downtime`
+      // } else {
+      //   statusChangeMsg = `❌${name} was down at ${timeString} with error ${reason}`
+      // }
+      // await fetch('https://api.example.com/callback?msg=' + statusChangeMsg)
+    },
+    onIncident: async (
+      id: string,
+      name: string,
+      timeIncidentStart: number,
+      timeNow: number,
+      currentError: string
+    ) => {
+      // This callback will be called EVERY 2 MINTUES if there's an on-going incident for any monitor
+      // Write any Typescript code here
+    },
+  },
 }
 
 // Don't forget this, otherwise compilation fails.
-export default config
+export { pageConfig, workerConfig }

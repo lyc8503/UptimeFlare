@@ -1,4 +1,4 @@
-import config from '../../uptime.config'
+import { workerConfig } from '../../uptime.config'
 import { getWorkerLocation } from './util'
 import { MonitorState } from '../../uptime.types'
 import { getStatus } from './monitor'
@@ -17,7 +17,7 @@ export default {
     }
 
     const targetId = (await request.json<{ target: string }>())['target']
-    const target = config.monitors.find((m) => m.id === targetId)
+    const target = workerConfig.monitors.find((m) => m.id === targetId)
 
     if (target === undefined) {
       return new Response('Target Not Found', { status: 404 })
@@ -59,9 +59,8 @@ export default {
     state.overallUp = 0
 
     // Check each monitor
-    // TODO: callback exception handler
     // TODO: concurrent status check
-    for (const monitor of config.monitors) {
+    for (const monitor of workerConfig.monitors) {
       console.log(`[${workerLocation}] Checking ${monitor.name}...`)
 
       let checkLocation = workerLocation
@@ -97,7 +96,6 @@ export default {
       status.up ? state.overallUp++ : state.overallDown++
 
       // Update incidents
-
       // Create a dummy incident to store the start time of the monitoring and simplify logic
       state.incident[monitor.id] = state.incident[monitor.id] || [
         {
@@ -108,20 +106,26 @@ export default {
       ]
       // Then lastIncident here must not be undefined
       const lastIncident = state.incident[monitor.id].slice(-1)[0]
-      const timeString = new Date().toLocaleString(config.dateLocale, {
-        timeZone: config.timezone,
-      })
 
       if (status.up) {
         // Current status is up
         // close existing incident if any
         if (lastIncident.end === undefined) {
           lastIncident.end = currentTimeSecond
-          await config.callback(
-            `✔️${monitor.name} came back up at ${timeString} after ${Math.round(
-              (lastIncident.end - lastIncident.start[0]) / 60
-            )} minutes of downtime`
-          )
+
+          try {
+            await workerConfig.callbacks.onStatusChange(
+              monitor.id,
+              monitor.name,
+              true,
+              lastIncident.start[0],
+              currentTimeSecond,
+              'OK'
+            )
+          } catch (e) {
+            console.log('Error calling callback: ')
+            console.log(e)
+          }
         }
       } else {
         // Current status is down
@@ -132,9 +136,20 @@ export default {
             end: undefined,
             error: [status.err],
           })
-          await config.callback(
-            `❌${monitor.name} went down at ${timeString} with error ${status.err}`
-          )
+
+          try {
+            await workerConfig.callbacks.onStatusChange(
+              monitor.id,
+              monitor.name,
+              false,
+              currentTimeSecond,
+              currentTimeSecond,
+              status.err
+            )
+          } catch (e) {
+            console.log('Error calling callback: ')
+            console.log(e)
+          }
         } else if (
           lastIncident.end === undefined &&
           lastIncident.error.slice(-1)[0] !== status.err
@@ -142,9 +157,33 @@ export default {
           // append if the error message changes
           lastIncident.start.push(currentTimeSecond)
           lastIncident.error.push(status.err)
-          await config.callback(
-            `❌${monitor.name} is still down at ${timeString} with error ${status.err}`
+
+          try {
+            await workerConfig.callbacks.onStatusChange(
+              monitor.id,
+              monitor.name,
+              false,
+              lastIncident.start[0],
+              currentTimeSecond,
+              status.err
+            )
+          } catch (e) {
+            console.log('Error calling callback: ')
+            console.log(e)
+          }
+        }
+
+        try {
+          await workerConfig.callbacks.onIncident(
+            monitor.id,
+            monitor.name,
+            lastIncident.start[0],
+            currentTimeSecond,
+            status.err
           )
+        } catch (e) {
+          console.log('Error calling callback: ')
+          console.log(e)
         }
       }
 
