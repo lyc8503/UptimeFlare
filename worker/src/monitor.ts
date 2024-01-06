@@ -22,7 +22,7 @@ export async function getStatus(
       const socket = connect({ hostname: hostname, port: Number(port) })
       const writer = socket.writable.getWriter()
       const reader = socket.readable.getReader()
-      await writer.write(new TextEncoder().encode('PING\n'))
+      await withTimeout(monitor.timeout || 10000, writer.write(new TextEncoder().encode('PING\n')))
       await withTimeout(monitor.timeout || 10000, reader.read())
       await socket.close()
 
@@ -63,9 +63,8 @@ export async function getStatus(
       if (monitor.expectedCodes) {
         if (!monitor.expectedCodes.includes(response.status)) {
           status.up = false
-          status.err = `Expected codes: ${JSON.stringify(monitor.expectedCodes)}, Got: ${
-            response.status
-          }`
+          status.err = `Expected codes: ${JSON.stringify(monitor.expectedCodes)}, Got: ${response.status
+            }`
           return status
         }
       } else {
