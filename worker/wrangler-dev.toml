@@ -1,0 +1,4 @@
+name = "uptimeflare_worker"
+main = "src/index.ts"
+compatibility_date = "2023-11-08"
+kv_namespaces = [{ binding = "UPTIMEFLARE_STATE", id = "UPTIMEFLARE_STATE" }]

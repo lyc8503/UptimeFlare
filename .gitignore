@@ -36,3 +36,5 @@ next-env.d.ts
 
 .terraform/
 terraform.tfstate*
+
+/.wrangler

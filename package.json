@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "preview": "npx @cloudflare/next-on-pages && wrangler pages dev .vercel/output/static --compatibility-flag nodejs_compat --kv UPTIMEFLARE_STATE",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -25,6 +26,7 @@
     "react-dom": "^18"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.8.5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
