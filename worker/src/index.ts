@@ -199,7 +199,7 @@ export default {
         time: currentTimeSecond,
       }
       latencyLists.recent.push(record)
-      if (latencyLists.all.length === 0 || currentTimeSecond - latencyLists.all[0].time > 60 * 60) {
+      if (latencyLists.all.length === 0 || currentTimeSecond - latencyLists.all.slice(-1)[0].time > 60 * 60) {
         latencyLists.all.push(record)
       }
 
