@@ -13,12 +13,17 @@ export const runtime = 'experimental-edge'
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home({
-  state,
+  state: stateStr,
   monitors,
 }: {
-  state: MonitorState
+  state: string
   monitors: MonitorTarget[]
 }) {
+  let state;
+  if (stateStr !== undefined) {
+    state = JSON.parse(stateStr) as MonitorState
+  }
+
   return (
     <>
       <Head>
@@ -70,7 +75,9 @@ export async function getServerSideProps() {
   const { UPTIMEFLARE_STATE } = process.env as unknown as {
     UPTIMEFLARE_STATE: KVNamespace
   }
-  const state = (await UPTIMEFLARE_STATE?.get('state', 'json')) as unknown as MonitorState
+
+  // Read state as string from KV, to avoid hitting server-side cpu time limit
+  const state = (await UPTIMEFLARE_STATE?.get('state')) as unknown as MonitorState
 
   // Only present these values to client
   const monitors = workerConfig.monitors.map((monitor) => {
