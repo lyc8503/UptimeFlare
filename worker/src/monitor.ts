@@ -17,18 +17,12 @@ export async function getStatus(
     // TCP port endpoint monitor
     try {
       const [hostname, port] = monitor.target.split(':')
-
-      // Write "PING\n"
       const socket = connect({ hostname: hostname, port: Number(port) })
-      const writer = socket.writable.getWriter()
-      const reader = socket.readable.getReader()
-      await withTimeout(monitor.timeout || 10000, writer.write(new TextEncoder().encode('PING\n')))
-      await withTimeout(monitor.timeout || 10000, reader.read())
-      await socket.close()
 
-      // Not having an `opened` promise now...
-      // https://github.com/cloudflare/workerd/issues/1305
-      // await withTimeout(monitor.timeout || 10000, socket.closed)
+      // Now we have an `opened` promise!
+      // @ts-ignore
+      await withTimeout(monitor.timeout || 10000, socket.opened)
+      await socket.close()
 
       console.log(`${monitor.name} connected to ${monitor.target}`)
 
