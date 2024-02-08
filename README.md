@@ -2,7 +2,7 @@
 
 A more advanced, serverless, and free uptime monitoring & status page solution, powered by Cloudflare Workers, complete with a user-friendly interface.
 
-⭐Features
+## ⭐Features
 - Open-source, easy to deploy (in under 10 minutes, no local tools required), and free
 - Monitoring capabilities
   - Up to 50 checks at 2-minute intervals
