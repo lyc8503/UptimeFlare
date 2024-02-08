@@ -1,27 +1,22 @@
 # 📈UptimeFlare
 
-Another **serverless (and free!)** uptime monitoring & status page on Cloudflare Workers with more advanced features and nice UI.
+A more advanced, serverless, and free uptime monitoring & status page solution, powered by Cloudflare Workers, complete with a user-friendly interface.
 
-## ⭐Features
-
-- **Opensource** & Easy to deploy (in 10 minutes **without local tools**) & Free
-
-#### Monitoring
-
-- Up to 50 **2-minute** interval check
-- **Geo-specific checks** from more than [310 cities](https://www.cloudflare.com/network/) around the world
-- Monitoring for **HTTP/HTTPS/TCP port**
-- Up to 90-day uptime history and uptime percentage
-- Custom request method & headers & body for HTTP(s)
-- Custom status code & keyword check for HTTP(s)
-- Customizable Webhook
-
-#### Status page
-
-- **Interactive ping(response time) chart** for all type of monitors
-- Responsive UI & Follow system theme
-- Customizable status page
-- Use your own domain with CNAME
+⭐Features
+- Open-source, easy to deploy (in under 10 minutes, no local tools required), and free
+- Monitoring capabilities
+  - Up to 50 checks at 2-minute intervals
+  - Geo-specific checks from over [310 cities](https://www.cloudflare.com/network/) worldwide
+  - Support for HTTP/HTTPS/TCP port monitoring
+  - Up to 90-day uptime history and uptime percentage tracking
+  - Customizable request methods, headers, and body for HTTP(s)
+  - Custom status code & keyword checks for HTTP(s)
+  - Customizable Webhook
+- Status page
+  - Interactive ping (response time) chart for all types of monitors
+  - Responsive UI that adapts to your system theme
+  - Customizable status page
+  - Use your own domain with CNAME
 
 ## 👀Demo
 
