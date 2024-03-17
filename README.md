@@ -34,7 +34,9 @@ Please refer to [Quickstart](https://github.com/lyc8503/UptimeFlare/wiki/Quickst
 
 - [x] TCP `opened` promise
 - [x] ~~SSL certificate checks~~
-- [ ] Slack / Telegram webhook example
+- [x] Telegram example
+- [x] [Bark](https://bark.day.app) example
+- [ ] Slack example
 - [ ] Incident timeline
 - [ ] Email notification via Cloudflare Email Workers
 - [x] Specify region for monitors

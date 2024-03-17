@@ -10,6 +10,8 @@ const pageConfig = {
 }
 
 const workerConfig = {
+  // Write KV at most every 10 minutes unless the status changed.
+  kvWriteCooldownMinutes: 10,
   // Define all your monitors here
   monitors: [
     // Example HTTP Monitor
@@ -18,6 +20,8 @@ const workerConfig = {
       id: 'foo_monitor',
       // `name` is used at status page and callback message
       name: 'My API Monitor',
+      // `url` for clickable link at status page
+      url: 'https://example.com',
       // `method` should be a valid HTTP Method
       method: 'POST',
       // `target` is a valid URL
@@ -55,40 +59,139 @@ const workerConfig = {
   ],
   callbacks: {
     onStatusChange: async (
-      id: string,
-      name: string,
+      env: Env,
+      monitor: any,
       isUp: boolean,
       timeIncidentStart: number,
       timeNow: number,
       reason: string
     ) => {
-      // This callback will be called when any monitor's status changed
-      // Write any Typescript code here
-      // Example implementation:
-      // const timeString = new Date(timeNow * 1000).toLocaleString('zh-CN', {
-      //   timeZone: 'Asia/Shanghai',
-      // })
-      // let statusChangeMsg
-      // if (isUp) {
-      //   statusChangeMsg = `✔️${name} came back up at ${timeString} after ${Math.round(
-      //     (timeNow - timeIncidentStart) / 60
-      //   )} minutes of downtime`
-      // } else {
-      //   statusChangeMsg = `❌${name} was down at ${timeString} with error ${reason}`
-      // }
-      // await fetch('https://api.example.com/callback?msg=' + statusChangeMsg)
+      await notify(env, monitor, isUp, timeIncidentStart, timeNow, reason)
     },
     onIncident: async (
-      id: string,
-      name: string,
+      env: Env,
+      monitor: any,
+      isUp: boolean,
       timeIncidentStart: number,
       timeNow: number,
-      currentError: string
+      reason: string
     ) => {
       // This callback will be called EVERY 2 MINTUES if there's an on-going incident for any monitor
       // Write any Typescript code here
     },
   },
+}
+
+
+const escapeMarkdown = (text: string) => {
+  return text.replace(/[_*[\](){}~`>#+\-=|.!\\]/g, '\\$&');
+};
+
+async function notify(
+  env: Env,
+  monitor: any,
+  isUp: boolean,
+  timeIncidentStart: number,
+  timeNow: number,
+  reason: string,
+) {
+  const dateFormatter = new Intl.DateTimeFormat('en-US', {
+    month: 'numeric',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Asia/Shanghai',
+  });
+
+  let downtimeDuration = Math.round((timeNow - timeIncidentStart) / 60);
+  const timeIncidentStartFormatted = dateFormatter.format(new Date(timeIncidentStart * 1000));
+  let statusText = isUp
+    ? `The service is up again after being down for ${downtimeDuration} minutes.`
+    : `Service became unavailable at ${timeIncidentStartFormatted}. Issue: ${reason || 'unspecified'}`;
+
+  console.log('Notifying: ', monitor.name, statusText);
+
+  if (env.BARK_SERVER && env.BARK_DEVICE_KEY) {
+    try {
+      let title = isUp ? `✅ ${monitor.name} is up again!` : `🔴 ${monitor.name} is currently down.`;
+      await sendBarkNotification(env, monitor, title, statusText);
+    } catch (error) {
+      console.error('Error sending Bark notification:', error);
+    }
+  }
+
+  if (env.SECRET_TELEGRAM_CHAT_ID && env.SECRET_TELEGRAM_API_TOKEN) {
+    try {
+      let operationalLabel = isUp ? 'Up' : 'Down';
+      let statusEmoji = isUp ? '✅' : '🔴';
+      let telegramText = `*${escapeMarkdown(
+        monitor.name,
+      )}* is currently *${operationalLabel}*\n${statusEmoji} ${escapeMarkdown(statusText)}`;
+      await notifyTelegram(env, monitor, isUp, telegramText);
+    } catch (error) {
+      console.error('Error sending Telegram notification:', error);
+    }
+  }
+}
+
+export async function notifyTelegram(env: Env, monitor: any, operational: boolean, text: string) {
+  const chatId = env.SECRET_TELEGRAM_CHAT_ID;
+  const apiToken = env.SECRET_TELEGRAM_API_TOKEN;
+
+  const payload = new URLSearchParams({
+    chat_id: chatId,
+    parse_mode: 'MarkdownV2',
+    text: text,
+  });
+
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${apiToken}/sendMessage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: payload.toString(),
+    });
+
+    if (!response.ok) {
+      console.error(
+        `Failed to send Telegram notification "${text}",  ${response.status} ${
+          response.statusText
+        } ${await response.text()}`,
+      );
+    }
+  } catch (error) {
+    console.error('Error sending Telegram notification:', error);
+  }
+}
+
+async function sendBarkNotification(env: Env, monitor: any, title: string, body: string, group: string = '') {
+  const barkServer = env.BARK_SERVER;
+  const barkDeviceKey = env.BARK_DEVICE_KEY;
+  const barkUrl = `${barkServer}/push`;
+  const data = {
+    title: title,
+    body: body,
+    group: group,
+    url: monitor.url,
+    device_key: barkDeviceKey,
+  };
+
+  const response = await fetch(barkUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (response.ok) {
+    console.log('Bark notification sent successfully.');
+  } else {
+    const respText = await response.text();
+    console.error('Failed to send Bark notification:', response.status, response.statusText, respText);
+  }
 }
 
 // Don't forget this, otherwise compilation fails.

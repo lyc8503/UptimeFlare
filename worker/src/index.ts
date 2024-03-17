@@ -58,8 +58,12 @@ export default {
     state.overallDown = 0
     state.overallUp = 0
 
+    let statusChaged = false
+    const currentTimeSecond = Math.round(Date.now() / 1000)
+
     // Check each monitor
     // TODO: concurrent status check
+
     for (const monitor of workerConfig.monitors) {
       console.log(`[${workerLocation}] Checking ${monitor.name}...`)
 
@@ -112,11 +116,12 @@ export default {
         // close existing incident if any
         if (lastIncident.end === undefined) {
           lastIncident.end = currentTimeSecond
+          statusChaged = true
 
           try {
             await workerConfig.callbacks.onStatusChange(
-              monitor.id,
-              monitor.name,
+              env,
+              monitor,
               true,
               lastIncident.start[0],
               currentTimeSecond,
@@ -136,11 +141,12 @@ export default {
             end: undefined,
             error: [status.err],
           })
+          statusChaged = true
 
           try {
             await workerConfig.callbacks.onStatusChange(
-              monitor.id,
-              monitor.name,
+              env,
+              monitor,
               false,
               currentTimeSecond,
               currentTimeSecond,
@@ -157,11 +163,12 @@ export default {
           // append if the error message changes
           lastIncident.start.push(currentTimeSecond)
           lastIncident.error.push(status.err)
+          statusChaged = true
 
           try {
             await workerConfig.callbacks.onStatusChange(
-              monitor.id,
-              monitor.name,
+              env,
+              monitor,
               false,
               lastIncident.start[0],
               currentTimeSecond,
@@ -175,8 +182,8 @@ export default {
 
         try {
           await workerConfig.callbacks.onIncident(
-            monitor.id,
-            monitor.name,
+            env,
+            monitor,
             lastIncident.start[0],
             currentTimeSecond,
             status.err
@@ -215,6 +222,12 @@ export default {
 
     // Update state
     state.lastUpdate = Math.round(Date.now() / 1000)
-    await env.UPTIMEFLARE_STATE.put('state', JSON.stringify(state))
+    if (
+      statusChanged ||
+      currentTimeSecond - state.lastUpdate >= workerConfig.kvWriteCooldownMinutes * 60
+    ) {
+      state.lastUpdate = currentTimeSecond
+      await env.UPTIMEFLARE_STATE.put('state', JSON.stringify(state))
+    }
   },
 }
