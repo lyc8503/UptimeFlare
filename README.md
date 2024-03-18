@@ -5,7 +5,7 @@ A more advanced, serverless, and free uptime monitoring & status page solution, 
 ## ⭐Features
 - Open-source, easy to deploy (in under 10 minutes, no local tools required), and free
 - Monitoring capabilities
-  - Up to 50 checks at 2-minute intervals
+  - Up to 50 checks at 1-minute intervals
   - Geo-specific checks from over [310 cities](https://www.cloudflare.com/network/) worldwide
   - Support for HTTP/HTTPS/TCP port monitoring
   - Up to 90-day uptime history and uptime percentage tracking
@@ -38,5 +38,5 @@ Please refer to [Quickstart](https://github.com/lyc8503/UptimeFlare/wiki/Quickst
 - [x] [Bark](https://bark.day.app) example
 - [ ] Slack example
 - [ ] Incident timeline
-- [ ] Email notification via Cloudflare Email Workers
+- [x] ~~Email notification via Cloudflare Email Workers~~
 - [x] Specify region for monitors

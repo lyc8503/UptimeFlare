@@ -10,8 +10,8 @@ const pageConfig = {
 }
 
 const workerConfig = {
-  // Write KV at most every 10 minutes unless the status changed.
-  kvWriteCooldownMinutes: 10,
+  // Write KV at most every 3 minutes unless the status changed.
+  kvWriteCooldownMinutes: 3,
   // Define all your monitors here
   monitors: [
     // Example HTTP Monitor
@@ -66,6 +66,10 @@ const workerConfig = {
       timeNow: number,
       reason: string
     ) => {
+      // This callback will be called when there's a status change for any monitor
+      // Write any Typescript code here
+
+      // By default, this sends Bark and Telegram notification on every status change if you setup Env correctly.
       await notify(env, monitor, isUp, timeIncidentStart, timeNow, reason)
     },
     onIncident: async (
@@ -76,7 +80,7 @@ const workerConfig = {
       timeNow: number,
       reason: string
     ) => {
-      // This callback will be called EVERY 2 MINTUES if there's an on-going incident for any monitor
+      // This callback will be called EVERY 1 MINTUE if there's an on-going incident for any monitor
       // Write any Typescript code here
     },
   },
@@ -156,8 +160,7 @@ export async function notifyTelegram(env: Env, monitor: any, operational: boolea
 
     if (!response.ok) {
       console.error(
-        `Failed to send Telegram notification "${text}",  ${response.status} ${
-          response.statusText
+        `Failed to send Telegram notification "${text}",  ${response.status} ${response.statusText
         } ${await response.text()}`,
       );
     }
