@@ -76,7 +76,6 @@ const workerConfig = {
     onIncident: async (
       env: any,
       monitor: any,
-      isUp: boolean,
       timeIncidentStart: number,
       timeNow: number,
       reason: string
