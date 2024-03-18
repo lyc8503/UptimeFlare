@@ -40,9 +40,19 @@ export default function MonitorDetail({
 
   const uptimePercent = (((totalTime - downTime) / totalTime) * 100).toPrecision(4)
 
+  // Conditionally render monitor name with or without hyperlink based on monitor.url presence
   const monitorNameElement = (
     <Text mt="sm" fw={700} style={{ display: 'inline-flex', alignItems: 'center' }}>
       {statusIcon} {monitor.name}
+      {monitor.url ? (
+        <a href={monitor.url} style={{ display: 'inline-flex', alignItems: 'center', color: 'inherit', textDecoration: 'none' }}>
+          {statusIcon} {monitor.name}
+        </a>
+      ) : (
+        <>
+          {statusIcon} {monitor.name}
+        </>
+      )}
     </Text>
   )
 
