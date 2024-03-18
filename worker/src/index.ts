@@ -220,14 +220,18 @@ export default {
       state.latency[monitor.id] = latencyLists
     }
 
+    console.log(`statusChanged: ${statusChanged}, lastUpdate: ${state.lastUpdate}, currentTime: ${currentTimeSecond}`)
     // Update state
-    state.lastUpdate = Math.round(Date.now() / 1000)
+    // Allow for a cooldown period before writing to KV
     if (
       statusChanged ||
-      currentTimeSecond - state.lastUpdate >= workerConfig.kvWriteCooldownMinutes * 60
+      currentTimeSecond - state.lastUpdate >= workerConfig.kvWriteCooldownMinutes * 60 - 10  // Allow for 10 seconds of clock drift
     ) {
+      console.log("Updating state...")
       state.lastUpdate = currentTimeSecond
       await env.UPTIMEFLARE_STATE.put('state', JSON.stringify(state))
+    } else {
+      console.log("Skipping state update due to cooldown period.")
     }
   },
 }
