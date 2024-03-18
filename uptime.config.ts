@@ -20,14 +20,14 @@ const workerConfig = {
       id: 'foo_monitor',
       // `name` is used at status page and callback message
       name: 'My API Monitor',
-      // `url` for clickable link at status page
-      url: 'https://example.com',
       // `method` should be a valid HTTP Method
       method: 'POST',
       // `target` is a valid URL
       target: 'https://example.com',
-      // [OPTIONAL] `tooltip` is only used at status page to show a tooltip
+      // [OPTIONAL] `tooltip` is ONLY used at status page to show a tooltip
       tooltip: 'This is a tooltip for this monitor',
+      // [OPTIONAL] `statusPageLink` is ONLY used for clickable link at status page
+      statusPageLink: 'https://example.com',
       // [OPTIONAL] `expectedCodes` is an array of acceptable HTTP response codes, if not specified, default to 2xx
       expectedCodes: [200],
       // [OPTIONAL] `timeout` in millisecond, if not specified, default to 10000
@@ -54,12 +54,13 @@ const workerConfig = {
       // `target` should be `host:port` for tcp monitors
       target: '1.2.3.4:22',
       tooltip: 'My production server SSH',
+      statusPageLink: 'https://example.com',
       timeout: 5000,
     },
   ],
   callbacks: {
     onStatusChange: async (
-      env: Env,
+      env: any,
       monitor: any,
       isUp: boolean,
       timeIncidentStart: number,
@@ -69,11 +70,11 @@ const workerConfig = {
       // This callback will be called when there's a status change for any monitor
       // Write any Typescript code here
 
-      // By default, this sends Bark and Telegram notification on every status change if you setup Env correctly.
+      // By default, this sends Bark and Telegram notification on every status change if you setup Cloudflare env variables correctly.
       await notify(env, monitor, isUp, timeIncidentStart, timeNow, reason)
     },
     onIncident: async (
-      env: Env,
+      env: any,
       monitor: any,
       isUp: boolean,
       timeIncidentStart: number,
@@ -86,13 +87,14 @@ const workerConfig = {
   },
 }
 
-
+// Below is code for sending Telegram & Bark notification
+// You can safely ignore them
 const escapeMarkdown = (text: string) => {
   return text.replace(/[_*[\](){}~`>#+\-=|.!\\]/g, '\\$&');
 };
 
 async function notify(
-  env: Env,
+  env: any,
   monitor: any,
   isUp: boolean,
   timeIncidentStart: number,
@@ -139,7 +141,7 @@ async function notify(
   }
 }
 
-export async function notifyTelegram(env: Env, monitor: any, operational: boolean, text: string) {
+export async function notifyTelegram(env: any, monitor: any, operational: boolean, text: string) {
   const chatId = env.SECRET_TELEGRAM_CHAT_ID;
   const apiToken = env.SECRET_TELEGRAM_API_TOKEN;
 
@@ -169,7 +171,7 @@ export async function notifyTelegram(env: Env, monitor: any, operational: boolea
   }
 }
 
-async function sendBarkNotification(env: Env, monitor: any, title: string, body: string, group: string = '') {
+async function sendBarkNotification(env: any, monitor: any, title: string, body: string, group: string = '') {
   const barkServer = env.BARK_SERVER;
   const barkDeviceKey = env.BARK_DEVICE_KEY;
   const barkUrl = `${barkServer}/push`;

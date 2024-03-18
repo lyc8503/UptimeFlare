@@ -34,6 +34,7 @@ type MonitorTarget = {
   method: string // "TCP_PING" or Http Method (e.g. GET, POST, OPTIONS, etc.)
   target: string // url for http, hostname:port for tcp
   tooltip?: string
+  statusPageLink?: string
   checkLocationWorkerRoute?: string
 
   // HTTP Code
