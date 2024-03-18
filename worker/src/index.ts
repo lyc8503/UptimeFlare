@@ -58,7 +58,7 @@ export default {
     state.overallDown = 0
     state.overallUp = 0
 
-    let statusChaged = false
+    let statusChanged = false
     const currentTimeSecond = Math.round(Date.now() / 1000)
 
     // Check each monitor
@@ -116,7 +116,7 @@ export default {
         // close existing incident if any
         if (lastIncident.end === undefined) {
           lastIncident.end = currentTimeSecond
-          statusChaged = true
+          statusChanged = true
 
           try {
             await workerConfig.callbacks.onStatusChange(
@@ -141,7 +141,7 @@ export default {
             end: undefined,
             error: [status.err],
           })
-          statusChaged = true
+          statusChanged = true
 
           try {
             await workerConfig.callbacks.onStatusChange(
@@ -163,7 +163,7 @@ export default {
           // append if the error message changes
           lastIncident.start.push(currentTimeSecond)
           lastIncident.error.push(status.err)
-          statusChaged = true
+          statusChanged = true
 
           try {
             await workerConfig.callbacks.onStatusChange(

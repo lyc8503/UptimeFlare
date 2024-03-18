@@ -67,7 +67,7 @@ jobs:
           terraform apply -auto-approve -input=false
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          TF_VAR_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || steps.fetch_account_id.outputs.account_id }}
+          TF_VAR_CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}
 
       # Still need to upload worker to keep it up-to-date (Terraform will fail after first-time setup)
       - name: Upload worker
@@ -75,7 +75,7 @@ jobs:
           curl --fail-with-body -X PUT https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/content --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN -F 'index.js=@worker/dist/index.js;type=application/javascript+module' -F 'metadata={"main_module": "index.js"}'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || steps.fetch_account_id.outputs.account_id }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}
 
       # Currently Terraform Cloudflare provider doesn't support direct upload, use wrangler to upload instead.
       - name: Upload pages
@@ -83,4 +83,4 @@ jobs:
           npx wrangler pages deploy .vercel/output/static --project-name uptimeflare
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || steps.fetch_account_id.outputs.account_id }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}
