@@ -8,6 +8,7 @@ import OverallStatus from '@/components/OverallStatus'
 import Header from '@/components/Header'
 import MonitorList from '@/components/MonitorList'
 import { Center, Divider, Text } from '@mantine/core'
+import MonitorDetail from '@/components/MonitorDetail'
 
 export const runtime = 'experimental-edge'
 const inter = Inter({ subsets: ['latin'] })
@@ -22,6 +23,24 @@ export default function Home({
   let state;
   if (stateStr !== undefined) {
     state = JSON.parse(stateStr) as MonitorState
+  }
+
+  // Specify monitorId in URL hash to view a specific monitor (can be used in iframe)
+  const monitorId = window.location.hash.substring(1);
+  if (monitorId) {
+    const monitor = monitors.find((monitor) => monitor.id === monitorId);
+    if (!monitor || !state) {
+      return (
+        <Text fw={700}>
+          Monitor with id {monitorId} not found!
+        </Text>
+      )
+    }
+    return (
+      <div style={{ maxWidth: '810px' }}>
+        <MonitorDetail monitor={monitor} state={state} />
+      </div>
+    )
   }
 
   return (
