@@ -1,4 +1,4 @@
-# 📈UptimeFlare
+# 📈[UptimeFlare](https://github.com/lyc8503/UptimeFlare)
 
 A more advanced, serverless, and free uptime monitoring & status page solution, powered by Cloudflare Workers, complete with a user-friendly interface.
 
