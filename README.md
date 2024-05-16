@@ -30,13 +30,15 @@ Some screenshots:
 
 Please refer to [Quickstart](https://github.com/lyc8503/UptimeFlare/wiki/Quickstart) and [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
 
-## TODOs
+## New features (TODOs)
 
+- [x] Specify region for monitors
 - [x] TCP `opened` promise
-- [x] ~~SSL certificate checks~~
 - [x] Telegram example
 - [x] [Bark](https://bark.day.app) example
-- [ ] Slack example
+- [ ] Improve docs by providing simple examples
+- [ ] Notification grace period
+- [ ] SSL certificate checks
+- [ ] Self-host Dockerfile
+- [ ] Email notification via Cloudflare Email Workers
 - [ ] Incident timeline
-- [x] ~~Email notification via Cloudflare Email Workers~~
-- [x] Specify region for monitors
