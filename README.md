@@ -34,11 +34,13 @@ Please refer to [Quickstart](https://github.com/lyc8503/UptimeFlare/wiki/Quickst
 
 - [x] Specify region for monitors
 - [x] TCP `opened` promise
-- [x] Telegram example
-- [x] [Bark](https://bark.day.app) example
+- [x] Use apprise to support different notification channels
+- [x] ~~Telegram example~~
+- [x] ~~[Bark](https://bark.day.app) example~~
+- [x] ~~Email notification via Cloudflare Email Workers~~
 - [ ] Improve docs by providing simple examples
 - [ ] Notification grace period
 - [ ] SSL certificate checks
 - [ ] Self-host Dockerfile
-- [ ] Email notification via Cloudflare Email Workers
 - [ ] Incident timeline
+- [ ] Remove old incidents

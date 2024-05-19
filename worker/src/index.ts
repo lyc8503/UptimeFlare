@@ -1,5 +1,5 @@
 import { workerConfig } from '../../uptime.config'
-import { getWorkerLocation } from './util'
+import { formatStatusChangeNotification, getWorkerLocation, notifyWithApprise } from './util'
 import { MonitorState } from '../../uptime.types'
 import { getStatus } from './monitor'
 
@@ -42,6 +42,34 @@ export default {
     const workerLocation = (await getWorkerLocation()) || 'ERROR'
     console.log(`Running scheduled event on ${workerLocation}...`)
 
+    // Auxiliary function to format notification and send it via apprise
+    let formatAndNotify = async (
+      monitor: any,
+      isUp: boolean,
+      timeIncidentStart: number,
+      timeNow: number,
+      reason: string
+    ) => {
+      if (workerConfig.notification?.appriseApiServer && workerConfig.notification?.recipientUrl) {
+        const notification = formatStatusChangeNotification(
+          monitor,
+          isUp,
+          timeIncidentStart,
+          timeNow,
+          reason,
+          workerConfig.notification?.timeZone ?? 'Etc/GMT'
+        )
+        await notifyWithApprise(
+          workerConfig.notification.appriseApiServer,
+          workerConfig.notification.recipientUrl,
+          notification.title,
+          notification.body
+        )
+      } else {
+        console.log(`Apprise API server or recipient URL not set, skipping apprise notification for ${monitor.name}`)
+      }
+    }
+
     // Read state, set init state if it doesn't exist
     let state =
       ((await env.UPTIMEFLARE_STATE.get('state', {
@@ -63,10 +91,10 @@ export default {
 
     // Check each monitor
     // TODO: concurrent status check
-
     for (const monitor of workerConfig.monitors) {
       console.log(`[${workerLocation}] Checking ${monitor.name}...`)
 
+      let monitorStatusChanged = false
       let checkLocation = workerLocation
       let status
 
@@ -109,16 +137,33 @@ export default {
         },
       ]
       // Then lastIncident here must not be undefined
-      const lastIncident = state.incident[monitor.id].slice(-1)[0]
+      let lastIncident = state.incident[monitor.id].slice(-1)[0]
 
       if (status.up) {
         // Current status is up
         // close existing incident if any
         if (lastIncident.end === undefined) {
           lastIncident.end = currentTimeSecond
-          statusChanged = true
-
+          monitorStatusChanged = true
           try {
+            if (
+              // grace period not set OR ...
+              workerConfig.notification?.gracePeriod === undefined ||
+              // only when we have sent a notification for DOWN status, we will send a notification for UP status (within 30 seconds of possible drift)
+              currentTimeSecond - lastIncident.start[0] >= (workerConfig.notification.gracePeriod + 1) * 60 - 30
+            ) {
+              await formatAndNotify(
+                monitor,
+                true,
+                lastIncident.start[0],
+                currentTimeSecond,
+                'OK'
+              )
+            } else {
+              console.log(`grace period (${workerConfig.notification?.gracePeriod}m) not met, skipping apprise UP notification for ${monitor.name}`)
+            }
+
+            console.log('Calling config onStatusChange callback...')
             await workerConfig.callbacks.onStatusChange(
               env,
               monitor,
@@ -141,21 +186,7 @@ export default {
             end: undefined,
             error: [status.err],
           })
-          statusChanged = true
-
-          try {
-            await workerConfig.callbacks.onStatusChange(
-              env,
-              monitor,
-              false,
-              currentTimeSecond,
-              currentTimeSecond,
-              status.err
-            )
-          } catch (e) {
-            console.log('Error calling callback: ')
-            console.log(e)
-          }
+          monitorStatusChanged = true
         } else if (
           lastIncident.end === undefined &&
           lastIncident.error.slice(-1)[0] !== status.err
@@ -163,28 +194,62 @@ export default {
           // append if the error message changes
           lastIncident.start.push(currentTimeSecond)
           lastIncident.error.push(status.err)
-          statusChanged = true
+          monitorStatusChanged = true
+        }
 
-          try {
+        const currentIncident = state.incident[monitor.id].slice(-1)[0]
+        try {
+          if (
+            // monitor status changed AND...
+            (monitorStatusChanged && (
+              // grace period not set OR ...
+              workerConfig.notification?.gracePeriod === undefined ||
+              // have sent a notification for DOWN status
+              currentTimeSecond - currentIncident.start[0] >= (workerConfig.notification.gracePeriod + 1) * 60 - 30
+            ))
+            ||
+            (
+              // grace period is set AND...
+              workerConfig.notification?.gracePeriod !== undefined &&
+              (
+                // grace period is met
+                currentTimeSecond - currentIncident.start[0] >= workerConfig.notification.gracePeriod * 60 - 30 &&
+                currentTimeSecond - currentIncident.start[0] < workerConfig.notification.gracePeriod * 60 + 30
+              )
+            )) {
+            await formatAndNotify(
+              monitor,
+              false,
+              currentIncident.start[0],
+              currentTimeSecond,
+              status.err
+            )
+          } else {
+            console.log(`Grace period (${workerConfig.notification?.gracePeriod}m) not met (currently down for ${currentTimeSecond - currentIncident.start[0]}s, changed ${monitorStatusChanged}), skipping apprise DOWN notification for ${monitor.name}`)
+          }
+
+          if (monitorStatusChanged) {
+            console.log('Calling config onStatusChange callback...')
             await workerConfig.callbacks.onStatusChange(
               env,
               monitor,
               false,
-              lastIncident.start[0],
+              currentIncident.start[0],
               currentTimeSecond,
               status.err
             )
-          } catch (e) {
-            console.log('Error calling callback: ')
-            console.log(e)
           }
+        } catch (e) {
+          console.log('Error calling callback: ')
+          console.log(e)
         }
 
         try {
+          console.log('Calling config onIncident callback...')
           await workerConfig.callbacks.onIncident(
             env,
             monitor,
-            lastIncident.start[0],
+            currentIncident.start[0],
             currentTimeSecond,
             status.err
           )
@@ -218,6 +283,9 @@ export default {
         latencyLists.all.shift()
       }
       state.latency[monitor.id] = latencyLists
+      // TODO: discard old incidents
+
+      statusChanged ||= monitorStatusChanged
     }
 
     console.log(`statusChanged: ${statusChanged}, lastUpdate: ${state.lastUpdate}, currentTime: ${currentTimeSecond}`)
