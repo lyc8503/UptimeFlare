@@ -11,6 +11,7 @@ A more advanced, serverless, and free uptime monitoring & status page solution, 
   - Up to 90-day uptime history and uptime percentage tracking
   - Customizable request methods, headers, and body for HTTP(s)
   - Custom status code & keyword checks for HTTP(s)
+  - Downtime notification supporting [100+ notification channels](https://github.com/caronc/apprise/wiki)
   - Customizable Webhook
 - Status page
   - Interactive ping (response time) chart for all types of monitors
@@ -34,12 +35,12 @@ Please refer to [Quickstart](https://github.com/lyc8503/UptimeFlare/wiki/Quickst
 
 - [x] Specify region for monitors
 - [x] TCP `opened` promise
-- [x] Use apprise to support different notification channels
+- [x] Use apprise to support various notification channels
 - [x] ~~Telegram example~~
 - [x] ~~[Bark](https://bark.day.app) example~~
 - [x] ~~Email notification via Cloudflare Email Workers~~
-- [ ] Improve docs by providing simple examples
-- [ ] Notification grace period
+- [x] Improve docs by providing simple examples
+- [x] Notification grace period
 - [ ] SSL certificate checks
 - [ ] Self-host Dockerfile
 - [ ] Incident timeline
