@@ -1,11 +1,11 @@
 const pageConfig = {
   // Title for your status page
-  title: "lyc8503's Status Page",
+  title: "LinHome's Status Page",
   // Links shown at the header of your status page, could set `highlight` to `true`
   links: [
-    { link: 'https://github.com/lyc8503', label: 'GitHub' },
-    { link: 'https://blog.lyc8503.site/', label: 'Blog' },
-    { link: 'mailto:me@lyc8503.site', label: 'Email Me', highlight: true },
+    { link: 'https://trite-goldenrod-cycle.glitch.me/', label: 'Fan' },
+    { link: 'https://motley-hickory-brian.glitch.me/', label: 'Linbmv' },
+    { link: 'mailto:ad@040103.xyz', label: 'Email Me', highlight: true },
   ],
 }
 
