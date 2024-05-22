@@ -14,62 +14,101 @@ const workerConfig = {
   kvWriteCooldownMinutes: 3,
   // Define all your monitors here
   monitors: [
-    // Example HTTP Monitor
     {
-      // `id` should be unique, history will be kept if the `id` remains constant
-      id: 'foo_monitor',
-      // `name` is used at status page and callback message
-      name: 'Linbmv',
-      // `method` should be a valid HTTP Method
-      method: 'POST',
-      // `target` is a valid URL
-      target: 'https://motley-hickory-brian.glitch.me/',
-      // [OPTIONAL] `tooltip` is ONLY used at status page to show a tooltip
-      tooltip: 'This is a tooltip for this monitor',
-      // [OPTIONAL] `statusPageLink` is ONLY used for clickable link at status page
-      statusPageLink: 'https://motley-hickory-brian.glitch.me/',
-      // [OPTIONAL] `expectedCodes` is an array of acceptable HTTP response codes, if not specified, default to 2xx
-      expectedCodes: [200],
-      // [OPTIONAL] `timeout` in millisecond, if not specified, default to 10000
-      timeout: 199,
-      // [OPTIONAL] headers to be sent
-      headers: {
-        'User-Agent': 'Uptimeflare',
-        Authorization: 'Bearer YOUR_TOKEN_HERE',
-      },
-      // [OPTIONAL] body to be sent
-      body: 'Hello, world!',
-      // [OPTIONAL] if specified, the response must contains the keyword to be considered as operational.
-      responseKeyword: 'success',
-      // [OPTIONAL] if specified, the check will run in your specified region,
-      // refer to docs https://github.com/lyc8503/UptimeFlare/wiki/Geo-specific-checks-setup before setting this value
-      checkLocationWorkerRoute: 'https://xxx.example.com',
+      id: 'Gptonglitch_aa',
+      name: 'Gptonglitch_aa',
+      method: 'GET',
+      target: 'https://admitted-marked-chicory.glitch.me/',
+      tooltip: 'Monitor 1 - admitted-marked-chicory',
+      statusPageLink: 'https://admitted-marked-chicory.glitch.me/',
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206, 207, 208, 226, 299],
+      timeout: 10000,
     },
-    // Example TCP Monitor
     {
-      id: 'test_tcp_monitor',
-      name: 'Example TCP Monitor',
-      // `method` should be `TCP_PING` for tcp monitors
-      method: 'TCP_PING',
-      // `target` should be `host:port` for tcp monitors
-      target: '1.2.3.4:22',
-      tooltip: 'My production server SSH',
-      statusPageLink: 'https://example.com',
-      timeout: 5000,
+      id: 'Gptonglitch_ab',
+      name: 'Gptonglitch_ab',
+      method: 'GET',
+      target: 'https://debonair-sly-sternum.glitch.me/',
+      tooltip: 'Monitor 2 - debonair-sly-sternum',
+      statusPageLink: 'https://debonair-sly-sternum.glitch.me/',
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206, 207, 208, 226, 299],
+      timeout: 10000,
+    },
+    {
+      id: 'Gptonglitch_ac',
+      name: 'Gptonglitch_ac',
+      method: 'GET',
+      target: 'https://inexpensive-internal-seatbelt.glitch.me/',
+      tooltip: 'Monitor 3 - inexpensive-internal-seatbelt',
+      statusPageLink: 'https://inexpensive-internal-seatbelt.glitch.me/',
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206, 207, 208, 226, 299],
+      timeout: 10000,
+    },
+    {
+      id: 'Gptonglitch_ad',
+      name: 'Gptonglitch_ad',
+      method: 'GET',
+      target: 'https://grandiose-ambiguous-slip.glitch.me/',
+      tooltip: 'Monitor 4 - grandiose-ambiguous-slip',
+      statusPageLink: 'https://grandiose-ambiguous-slip.glitch.me/',
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206, 207, 208, 226, 299],
+      timeout: 10000,
+    },
+    {
+      id: 'Gptonglitch_ae',
+      name: 'Gptonglitch_ae',
+      method: 'GET',
+      target: 'https://tundra-abiding-produce.glitch.me/',
+      tooltip: 'Monitor 5 - tundra-abiding-produce',
+      statusPageLink: 'https://tundra-abiding-produce.glitch.me/',
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206, 207, 208, 226, 299],
+      timeout: 10000,
+    },
+    {
+      id: 'Gptonglitch_af',
+      name: 'Gptonglitch_af',
+      method: 'GET',
+      target: 'https://jewel-opaque-sword.glitch.me/',
+      tooltip: 'Monitor 6 - jewel-opaque-sword',
+      statusPageLink: 'https://jewel-opaque-sword.glitch.me/',
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206, 207, 208, 226, 299],
+      timeout: 10000,
+    },
+    {
+      id: 'Gptonglitch_ag',
+      name: 'Gptonglitch_ag',
+      method: 'GET',
+      target: 'https://sideways-flashy-turret.glitch.me/',
+      tooltip: 'Monitor 7 - sideways-flashy-turret',
+      statusPageLink: 'https://sideways-flashy-turret.glitch.me/',
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206, 207, 208, 226, 299],
+      timeout: 10000,
+    },
+    {
+      id: 'Gptonglitch_aofan',
+      name: 'Gptonglitch_aofan',
+      method: 'GET',
+      target: 'https://trite-goldenrod-cycle.glitch.me/',
+      tooltip: 'Monitor 8 - trite-goldenrod-cycle',
+      statusPageLink: 'https://trite-goldenrod-cycle.glitch.me/',
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206, 207, 208, 226, 299],
+      timeout: 10000,
+    },
+    {
+      id: 'Gptonglitch_linbmv',
+      name: 'Gptonglitch_linbmv',
+      method: 'GET',
+      target: 'https://motley-hickory-brian.glitch.me/',
+      tooltip: 'Monitor 9 - motley-hickory-brian',
+      statusPageLink: 'https://motley-hickory-brian.glitch.me/',
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206, 207, 208, 226, 299],
+      timeout: 10000,
     },
   ],
   notification: {
-    // [Optional] apprise API server URL
-    // if not specified, no notification will be sent
     appriseApiServer: "https://apprise.example.com/notify",
-    // [Optional] recipient URL for apprise, refer to https://github.com/caronc/apprise
-    // if not specified, no notification will be sent
     recipientUrl: "tgram://bottoken/ChatID",
-    // [Optional] timezone used in notification messages, default to "Etc/GMT"
     timeZone: "Asia/Shanghai",
-    // [Optional] grace period in minutes before sending a notification
-    // notification will be sent only if the monitor is down for N continuous checks after the initial failure
-    // if not specified, notification will be sent immediately
     gracePeriod: 5,
   },
   callbacks: {
@@ -83,9 +122,6 @@ const workerConfig = {
     ) => {
       // This callback will be called when there's a status change for any monitor
       // Write any Typescript code here
-
-      // This will not follow the grace period settings and will be called immediately when the status changes
-      // You need to handle the grace period manually if you want to implement it
     },
     onIncident: async (
       env: any,
@@ -98,7 +134,8 @@ const workerConfig = {
       // Write any Typescript code here
     },
   },
-}
+};
 
 // Don't forget this, otherwise compilation fails.
-export { pageConfig, workerConfig }
+export { workerConfig }
+
