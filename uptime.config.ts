@@ -7,7 +7,7 @@ const pageConfig = {
     { link: 'https://motley-hickory-brian.glitch.me/', label: 'Linbmv' },
     { link: 'mailto:ad@040103.xyz', label: 'Email Me', highlight: true },
   ],
-}
+};
 
 const workerConfig = {
   // Write KV at most every 3 minutes unless the status changed.
@@ -106,9 +106,9 @@ const workerConfig = {
     },
   ],
   notification: {
-    appriseApiServer: "https://apprise.example.com/notify",
-    recipientUrl: "tgram://bottoken/ChatID",
-    timezone: "Asia/Singapore",
+    appriseApiServer: 'https://apprise.example.com/notify',
+    recipientUrl: 'tgram://bottoken/ChatID',
+    timeZone: 'Asia/Singapore',
     gracePeriod: 5,
   },
   callbacks: {
@@ -127,15 +127,4 @@ const workerConfig = {
       env: any,
       monitor: any,
       timeIncidentStart: number,
-      timeNow: number,
-      reason: string
-    ) => {
-      // This callback will be called EVERY 1 MINTUE if there's an on-going incident for any monitor
-      // Write any Typescript code here
-    },
-  },
-};
-
-// Don't forget this, otherwise compilation fails.
-export { workerConfig }
-
+     
