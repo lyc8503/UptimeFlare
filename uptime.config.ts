@@ -108,7 +108,7 @@ const workerConfig = {
   notification: {
     appriseApiServer: "https://apprise.example.com/notify",
     recipientUrl: "tgram://bottoken/ChatID",
-    timeZone: "Asia/Shanghai",
+    timezone: "Asia/Singapore",
     gracePeriod: 5,
   },
   callbacks: {
