@@ -131,4 +131,21 @@ const workerConfig = {
         reason: string
       ) => {
         // This callback will be called when there's a status change for any monitor
-        // Write any Types
+        // Write any Typescript code here
+      },
+      onIncident: async (
+        env: any,
+        monitor: any,
+        timeIncidentStart: number,
+        timeNow: number,
+        reason: string
+      ) => {
+        // This callback will be called EVERY 1 MINUTE if there's an on-going incident for any monitor
+        // Write any Typescript code here
+      },
+    }
+  }
+};
+
+// Don't forget this, otherwise compilation fails.
+export { pageConfig, workerConfig }
