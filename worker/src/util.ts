@@ -55,12 +55,12 @@ function formatStatusChangeNotification(
   } else if (timeNow == timeIncidentStart) {
     return {
       title: `🔴 ${monitor.name} is currently down.`,
-      body: `Service is unavailable at ${timeNowFormatted}. Issue: ${reason || 'unspecified'}`,
+      body: `Service is unavailable at ${timeNowFormatted}.\n**Issue:** ${reason || 'unspecified'}`,
     }
   } else {
     return {
       title: `🔴 ${monitor.name} is still down.`,
-      body: `Service is unavailable since ${timeIncidentStartFormatted} (${downtimeDuration} minutes). Issue: ${reason || 'unspecified'}`,
+      body: `Service is unavailable since ${timeIncidentStartFormatted} (${downtimeDuration} minutes).\n**Issue:** ${reason || 'unspecified'}`,
     }
   }
 }
@@ -83,7 +83,7 @@ async function notifyWithApprise(
         title,
         body,
         type: 'warning',
-        format: 'text'
+        format: 'markdown'
       }),
     })
 
