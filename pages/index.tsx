@@ -19,6 +19,8 @@ export default function Home({
 }: {
   state: string
   monitors: MonitorTarget[]
+  tooltip?: string
+  statusPageLink?: string
 }) {
   let state;
   if (stateStr !== undefined) {
@@ -103,8 +105,8 @@ export async function getServerSideProps() {
     return {
       id: monitor.id,
       name: monitor.name,
-      tooltip: monitor?.tooltip,
-      statusPageLink: monitor?.statusPageLink
+      tooltip: 'Default Tooltip Value', //monitor?.tooltip,
+      statusPageLink: 'statusPageLink', //monitor?.statusPageLink
     }
   })
 
