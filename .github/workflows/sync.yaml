@@ -11,6 +11,9 @@ on:
         type: boolean
         required: true
         default: false
+      override-token:
+        description: '[Optional] Replace the default token with the supplied PAT. Used to resolve `refusing to allow a GitHub App to create or update workflow... `'
+        required: false
 
 jobs:
   sync_latest_from_upstream:
@@ -20,6 +23,8 @@ jobs:
     steps:
       - name: Checkout target repo
         uses: actions/checkout@v3
+        with:
+          token: ${{ inputs.override-token || secrets.GITHUB_TOKEN }}
 
       - name: Current config
         run: |
