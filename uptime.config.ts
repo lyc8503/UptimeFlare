@@ -4,8 +4,8 @@ const pageConfig = {
   // Links shown at the header of your status page, could set `highlight` to `true`
   links: [
     { link: 'https://github.com/lyc8503', label: 'GitHub' },
-    { link: 'https://blog.lyc8503.site/', label: 'Blog' },
-    { link: 'mailto:me@lyc8503.site', label: 'Email Me', highlight: true },
+    { link: 'https://blog.lyc8503.net/', label: 'Blog' },
+    { link: 'mailto:me@lyc8503.net', label: 'Email Me', highlight: true },
   ],
 }
 
