@@ -283,7 +283,27 @@ export default {
         latencyLists.all.shift()
       }
       state.latency[monitor.id] = latencyLists
-      // TODO: discard old incidents
+
+      // discard old incidents
+      let incidentList = state.incident[monitor.id]
+      while (incidentList.length > 0 && incidentList[0].end && incidentList[0].end < currentTimeSecond - 90 * 24 * 60 * 60) {
+        incidentList.shift()
+      }
+
+      if (incidentList.length == 0 || (
+        incidentList[0].start[0] > currentTimeSecond - 90 * 24 * 60 * 60 &&
+        incidentList[0].error[0] != 'dummy'
+      )) {
+        // put the dummy incident back
+        incidentList.unshift(
+          {
+            start: [currentTimeSecond - 90 * 24 * 60 * 60],
+            end: currentTimeSecond - 90 * 24 * 60 * 60,
+            error: ['dummy'],
+          }
+        )
+      }
+      state.incident[monitor.id] = incidentList
 
       statusChanged ||= monitorStatusChanged
     }

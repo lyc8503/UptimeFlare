@@ -1,4 +1,4 @@
-# 📈[UptimeFlare](https://github.com/lyc8503/UptimeFlare)
+# ✔[UptimeFlare](https://github.com/lyc8503/UptimeFlare)
 
 A more advanced, serverless, and free uptime monitoring & status page solution, powered by Cloudflare Workers, complete with a user-friendly interface.
 
@@ -44,4 +44,4 @@ Please refer to [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
 - [ ] SSL certificate checks
 - [ ] Self-host Dockerfile
 - [ ] Incident timeline
-- [ ] Remove old incidents
+- [x] Remove old incidents
