@@ -105,8 +105,10 @@ export async function getServerSideProps() {
     return {
       id: monitor.id,
       name: monitor.name,
-      tooltip: 'Default Tooltip Value', //monitor?.tooltip,
-      statusPageLink: 'statusPageLink', //monitor?.statusPageLink
+      // @ts-ignore
+      tooltip: monitor?.tooltip,
+      // @ts-ignore
+      statusPageLink: monitor?.statusPageLink
     }
   })
 
