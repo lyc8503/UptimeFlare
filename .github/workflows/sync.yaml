@@ -1,0 +1,45 @@
+name: Upstream Sync
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      manual-trigger:
+        description: 'This will pull the upstream code while preserving your configuration file. Configuration file compatibility is not guaranteed, and you may need to manually update the configuration file after pulling.'
+        type: boolean
+        required: true
+        default: false
+
+jobs:
+  sync_latest_from_upstream:
+    name: Sync latest commits from upstream repo
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout target repo
+        uses: actions/checkout@v3
+
+      - name: Current config
+        run: |
+          cat uptime.config.ts
+          cp uptime.config.ts /tmp/origin.config.ts
+
+      - name: Sync upstream changes
+        id: sync
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # Fetch latest code
+          git clone https://github.com/lyc8503/UptimeFlare /tmp/latest
+          rm -rf /tmp/latest/.git
+
+          # Clean current repo and update
+          git rm -rf '*'
+          cp -r /tmp/latest/. .
+          cp /tmp/origin.config.ts uptime.config.ts
+          git add .
+          git commit -m "Sync latest code from upstream"
+          git push
