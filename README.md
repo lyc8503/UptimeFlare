@@ -10,7 +10,7 @@ A more advanced, serverless, and free uptime monitoring & status page solution, 
 
 
 ## ⭐Features
-- Open-source, easy to deploy (in under 10 分钟之前, no local tools required), and free
+- Open-source, easy to deploy (in under 10 minutes, no local tools required), and free
 - Monitoring capabilities
   - Up to 50 checks at 1-minute intervals
   - Geo-specific checks from over [310 cities](https://www.cloudflare.com/network/) worldwide
@@ -20,7 +20,7 @@ A more advanced, serverless, and free uptime monitoring & status page solution, 
   - Custom status code & keyword checks for HTTP(s)
   - Downtime notification supporting [100+ notification channels](https://github.com/caronc/apprise/wiki)
   - Customizable Webhook
-  - Status page
+- Status page
   - Support iframe reference status page
   - Interactive ping (response time) chart for all types of monitors
   - Responsive UI that adapts to your system theme
