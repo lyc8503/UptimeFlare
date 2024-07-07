@@ -58,7 +58,7 @@ export default {
       timeNow: number,
       reason: string
     ) => {
-      if (workerConfig.notification?.appriseApiServer && workerConfig.notification?.recipientUrl) {
+      if (workerConfig.notification?.appriseApiServer && workerConfig.notification.recipientUrl) {
         const notification = formatStatusChangeNotification(
           monitor,
           isUp,
@@ -191,7 +191,7 @@ export default {
             }
 
             console.log('Calling config onStatusChange callback...')
-            await workerConfig.callbacks.onStatusChange(
+            await workerConfig.callbacks?.onStatusChange?.(
               env,
               monitor,
               true,
@@ -257,7 +257,7 @@ export default {
 
           if (monitorStatusChanged) {
             console.log('Calling config onStatusChange callback...')
-            await workerConfig.callbacks.onStatusChange(
+            await workerConfig.callbacks?.onStatusChange?.(
               env,
               monitor,
               false,
@@ -273,7 +273,7 @@ export default {
 
         try {
           console.log('Calling config onIncident callback...')
-          await workerConfig.callbacks.onIncident(
+          await workerConfig.callbacks?.onIncident?.(
             env,
             monitor,
             currentIncident.start[0],
