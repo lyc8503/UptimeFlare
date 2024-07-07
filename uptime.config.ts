@@ -1,4 +1,6 @@
-const pageConfig = {
+import type { PageConfig, UptimeConfig } from './uptime.types'
+
+const pageConfig: PageConfig = {
   // Title for your status page
   title: "lyc8503's Status Page",
   // Links shown at the header of your status page, could set `highlight` to `true`
@@ -9,7 +11,7 @@ const pageConfig = {
   ],
 }
 
-const workerConfig = {
+const workerConfig: UptimeConfig = {
   // Write KV at most every 3 minutes unless the status changed.
   kvWriteCooldownMinutes: 3,
   // Define all your monitors here
@@ -61,12 +63,12 @@ const workerConfig = {
   notification: {
     // [Optional] apprise API server URL
     // if not specified, no notification will be sent
-    appriseApiServer: "https://apprise.example.com/notify",
+    appriseApiServer: 'https://apprise.example.com/notify',
     // [Optional] recipient URL for apprise, refer to https://github.com/caronc/apprise
     // if not specified, no notification will be sent
-    recipientUrl: "tgram://bottoken/ChatID",
+    recipientUrl: 'tgram://bottoken/ChatID',
     // [Optional] timezone used in notification messages, default to "Etc/GMT"
-    timeZone: "Asia/Shanghai",
+    timeZone: 'Asia/Shanghai',
     // [Optional] grace period in minutes before sending a notification
     // notification will be sent only if the monitor is down for N continuous checks after the initial failure
     // if not specified, notification will be sent immediately
@@ -83,7 +85,6 @@ const workerConfig = {
     ) => {
       // This callback will be called when there's a status change for any monitor
       // Write any Typescript code here
-
       // This will not follow the grace period settings and will be called immediately when the status changes
       // You need to handle the grace period manually if you want to implement it
     },
