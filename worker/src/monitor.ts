@@ -2,9 +2,13 @@ import { connect } from "cloudflare:sockets";
 import { MonitorTarget } from "../../uptime.types";
 import { withTimeout, fetchTimeout } from "./util";
 
-export async function getStatus(
-  monitor: MonitorTarget
-): Promise<{ ping: number; up: boolean; err: string }> {
+export interface Status {
+  ping: number
+  up: boolean
+  err: string
+}
+
+export async function getStatus(monitor: MonitorTarget): Promise<Status> {
   let status = {
     ping: 0,
     up: false,

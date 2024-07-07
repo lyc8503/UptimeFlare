@@ -1,41 +1,49 @@
 import { workerConfig } from '../../uptime.config'
 import { formatStatusChangeNotification, getWorkerLocation, notifyWithApprise } from './util'
 import { MonitorState } from '../../uptime.types'
-import { getStatus } from './monitor'
+import { getStatus, Status } from './monitor'
 
 export interface Env {
   UPTIMEFLARE_STATE: KVNamespace
 }
 
+interface CheckLocationWorkerResult {
+  location: string
+  status: Record<string, Status>
+}
+
 export default {
   async fetch(request: Request): Promise<Response> {
-    const workerLocation = request.cf?.colo
+    const workerLocation = request.cf?.colo as string
     console.log(`Handling request event at ${workerLocation}...`)
 
     if (request.method !== 'POST') {
       return new Response('Remote worker is working...', { status: 405 })
     }
 
-    const targetId = (await request.json<{ target: string }>())['target']
-    const target = workerConfig.monitors.find((m) => m.id === targetId)
+    const targetIds = new Set((await request.json<{ targets: string[] }>())['targets'])
+    const targets = workerConfig.monitors.filter(({ id }) => targetIds.has(id))
 
-    if (target === undefined) {
+    if (!targets.length) {
       return new Response('Target Not Found', { status: 404 })
     }
 
-    const status = await getStatus(target)
+    const status: Record<string, Status> = {}
 
-    return new Response(
-      JSON.stringify({
-        location: workerLocation,
-        status: status,
-      }),
-      {
-        headers: {
-          'content-type': 'application/json;charset=UTF-8',
-        },
-      }
-    )
+    for (const target of targets) {
+      status[target.id] = await getStatus(target)
+    }
+
+    const result: CheckLocationWorkerResult = {
+      location: workerLocation,
+      status,
+    }
+
+    return new Response(JSON.stringify(result), {
+      headers: {
+        'content-type': 'application/json;charset=UTF-8',
+      },
+    })
   },
 
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
@@ -43,7 +51,7 @@ export default {
     console.log(`Running scheduled event on ${workerLocation}...`)
 
     // Auxiliary function to format notification and send it via apprise
-    let formatAndNotify = async (
+    const formatAndNotify = async (
       monitor: any,
       isUp: boolean,
       timeIncidentStart: number,
@@ -89,6 +97,33 @@ export default {
     let statusChanged = false
     const currentTimeSecond = Math.round(Date.now() / 1000)
 
+    // Check monitors with `checkLocationWorkerRoute`
+    const groupedCheckLocation = new Map<string, string[]>()
+    const groupedCheckLocationResult = new Map<string, CheckLocationWorkerResult>()
+    workerConfig.monitors.forEach(({ id, checkLocationWorkerRoute: url }) => {
+      if (!url) return
+      const targets = groupedCheckLocation.get(url) || []
+      if (!groupedCheckLocation.has(url)) {
+        groupedCheckLocation.set(url, targets)
+      }
+      targets.push(id)
+    })
+    for (const [url, targets] of groupedCheckLocation) {
+      // Initiate a check from a different location
+      console.log('Calling worker: ' + url)
+      try {
+        const resp = await (
+          await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify({ targets }),
+          })
+        ).json<CheckLocationWorkerResult>()
+        groupedCheckLocationResult.set(url, resp)
+      } catch (err) {
+        console.log('Error calling worker: ' + err)
+      }
+    }
+
     // Check each monitor
     // TODO: concurrent status check
     for (const monitor of workerConfig.monitors) {
@@ -96,24 +131,16 @@ export default {
 
       let monitorStatusChanged = false
       let checkLocation = workerLocation
-      let status
+      let status: Status
 
       if (monitor.checkLocationWorkerRoute) {
-        // Initiate a check from a different location
-        try {
-          console.log('Calling worker: ' + monitor.checkLocationWorkerRoute)
-          const resp = await (
-            await fetch(monitor.checkLocationWorkerRoute, {
-              method: 'POST',
-              body: JSON.stringify({
-                target: monitor.id,
-              }),
-            })
-          ).json<{ location: string; status: { ping: number; up: boolean; err: string } }>()
-          checkLocation = resp.location
-          status = resp.status
-        } catch (err) {
-          console.log('Error calling worker: ' + err)
+        // Get check result from a different location
+        const result = groupedCheckLocationResult.get(monitor.checkLocationWorkerRoute)
+        const resultStatus = result?.status[monitor.id]
+        if (resultStatus) {
+          checkLocation = result.location
+          status = resultStatus
+        } else {
           status = { ping: 0, up: false, err: 'Error initiating check from remote worker' }
         }
       } else {
