@@ -1,4 +1,4 @@
-mport { Text, Tooltip } from '@mantine/core'
+import { Text, Tooltip } from '@mantine/core'
 import { MonitorState, MonitorTarget } from '@/uptime.types'
 import { IconAlertCircle, IconCircleCheck } from '@tabler/icons-react'
 import DetailChart from './DetailChart'
