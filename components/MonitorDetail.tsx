@@ -1,4 +1,4 @@
-import { Text, Tooltip } from '@mantine/core'
+mport { Text, Tooltip } from '@mantine/core'
 import { MonitorState, MonitorTarget } from '@/uptime.types'
 import { IconAlertCircle, IconCircleCheck } from '@tabler/icons-react'
 import DetailChart from './DetailChart'
@@ -19,10 +19,10 @@ export default function MonitorDetail({
           {monitor.name}
         </Text>
         <Text mt="sm" fw={700}>
-          没有可用的数据。请确保您已使用最新配置部署了Workers，并检查Workers状态！
+          无可用数据，请检查Workers是否正确配置！
         </Text>
       </>
-    )Workers
+    )
 
   const statusIcon =
     state.incident[monitor.id].slice(-1)[0].end === undefined ? (
@@ -64,7 +64,7 @@ export default function MonitorDetail({
         )}
 
         <Text mt="sm" fw={700} style={{ display: 'inline', color: getColor(uptimePercent, true) }}>
-          在线率: {uptimePercent}%
+          Overall: {uptimePercent}%
         </Text>
       </div>
 
