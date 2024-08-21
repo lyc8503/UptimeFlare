@@ -47,12 +47,13 @@ export default function DetailBar({
       <Tooltip
         multiline
         key={i}
+        events={{ hover: true, focus: false, touch: true }}
         label={
           Number.isNaN(Number(dayPercent)) ? (
             'No Data'
           ) : (
             <>
-              <div>{dayPercent + '%'}</div>
+              <div>{dayPercent + '% at ' + new Date(dayStart * 1000).toLocaleDateString()}</div>
               {dayDownTime > 0 && (
                 <div>{`Down for ${moment.preciseDiff(moment(0), moment(dayDownTime * 1000))}`}</div>
               )}
