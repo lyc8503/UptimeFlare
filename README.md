@@ -18,6 +18,8 @@ A more advanced, serverless, and free uptime monitoring & status page solution, 
   - Responsive UI that adapts to your system theme
   - Customizable status page
   - Use your own domain with CNAME
+  - Optional password authentication (private status page)
+  - JSON API for fetching realtime status data
 
 ## 👀Demo
 
@@ -44,4 +46,6 @@ Please refer to [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
 - [ ] SSL certificate checks
 - [ ] Self-host Dockerfile
 - [ ] Incident timeline
+- [ ] Improve `checkLocationWorkerRoute` and fix possible `proxy failed`
+- [ ] Groups 
 - [x] Remove old incidents
