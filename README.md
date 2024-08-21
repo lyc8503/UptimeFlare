@@ -7,8 +7,6 @@
 
 A more advanced, serverless, and free uptime monitoring & status page solution, powered by Cloudflare Workers, complete with a user-friendly interface.
 
-
-
 ## ⭐Features
 - Open-source, easy to deploy (in under 10 minutes, no local tools required), and free
 - Monitoring capabilities
@@ -21,11 +19,12 @@ A more advanced, serverless, and free uptime monitoring & status page solution, 
   - Downtime notification supporting [100+ notification channels](https://github.com/caronc/apprise/wiki)
   - Customizable Webhook
 - Status page
-  - Support iframe reference status page
   - Interactive ping (response time) chart for all types of monitors
   - Responsive UI that adapts to your system theme
   - Customizable status page
   - Use your own domain with CNAME
+  - Optional password authentication (private status page)
+  - JSON API for fetching realtime status data
 
 ## 👀Demo
 
@@ -52,4 +51,6 @@ Please refer to [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
 - [ ] SSL certificate checks
 - [ ] Self-host Dockerfile
 - [ ] Incident timeline
+- [ ] Improve `checkLocationWorkerRoute` and fix possible `proxy failed`
+- [ ] Groups 
 - [x] Remove old incidents
