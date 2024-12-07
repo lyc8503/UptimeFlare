@@ -36,7 +36,7 @@ Some screenshots:
 
 ## ⚡Quickstart / 📄Documentation
 
-Please refer to [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
+Please refer to [Wiki](https://github.com/lyc8503/UptimeFlare/wiki) [Chinese WiKi](https://github.com/bian2022/UptimeFlare-zh/wiki)
 
 ## New features (TODOs)
 
