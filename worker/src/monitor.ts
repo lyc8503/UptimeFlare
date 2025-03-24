@@ -72,12 +72,23 @@ export async function getStatus(
         }
       }
 
-      if (monitor.responseKeyword) {
+      if (monitor.responseKeyword || monitor.responseForbiddenKeyword) {
+        // Only read response body if we have a keyword to check
         const responseBody = await response.text()
-        if (!responseBody.includes(monitor.responseKeyword)) {
+
+        // MUST contain responseKeyword
+        if (monitor.responseKeyword && !responseBody.includes(monitor.responseKeyword)) {
           console.log(`${monitor.name} expected keyword ${monitor.responseKeyword}, not found in response (truncated to 100 chars): ${responseBody.slice(0, 100)}`)
           status.up = false
           status.err = "HTTP response doesn't contain the configured keyword"
+          return status
+        }
+
+        // MUST NOT contain responseForbiddenKeyword
+        if (monitor.responseForbiddenKeyword && responseBody.includes(monitor.responseForbiddenKeyword)) {
+          console.log(`${monitor.name} forbidden keyword ${monitor.responseForbiddenKeyword}, found in response (truncated to 100 chars): ${responseBody.slice(0, 100)}`)
+          status.up = false
+          status.err = "HTTP response contains the configured forbidden keyword"
           return status
         }
       }

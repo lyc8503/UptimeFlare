@@ -55,3 +55,4 @@ Please refer to [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
 - [ ] Groups 
 - [x] Remove old incidents
 - [ ] Known issue: `fetch` doesn't support non-standard port
+- [ ] Update wiki and add docs for dev

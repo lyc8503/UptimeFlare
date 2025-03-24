@@ -43,6 +43,8 @@ const workerConfig = {
       body: 'Hello, world!',
       // [OPTIONAL] if specified, the response must contains the keyword to be considered as operational.
       responseKeyword: 'success',
+      // [OPTIONAL] if specified, the response must NOT contains the keyword to be considered as operational.
+      responseForbiddenKeyword: 'bad gateway',
       // [OPTIONAL] if specified, the check will run in your specified region,
       // refer to docs https://github.com/lyc8503/UptimeFlare/wiki/Geo-specific-checks-setup before setting this value
       checkLocationWorkerRoute: 'https://xxx.example.com',

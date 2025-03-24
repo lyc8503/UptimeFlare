@@ -43,6 +43,7 @@ type MonitorTarget = {
   headers?: Record<string, string | undefined>
   body?: BodyInit
   responseKeyword?: string
+  responseForbiddenKeyword?: string
 }
 
 export type { MonitorState, MonitorTarget }
