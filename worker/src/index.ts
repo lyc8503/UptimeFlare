@@ -262,8 +262,8 @@ export default {
       // append to latency data
       let latencyLists = state.latency[monitor.id] || {
         recent: [],
-        all: [],
       }
+      latencyLists.all = []
 
       const record = {
         loc: checkLocation,
@@ -271,16 +271,10 @@ export default {
         time: currentTimeSecond,
       }
       latencyLists.recent.push(record)
-      if (latencyLists.all.length === 0 || currentTimeSecond - latencyLists.all.slice(-1)[0].time > 60 * 60) {
-        latencyLists.all.push(record)
-      }
 
       // discard old data
       while (latencyLists.recent[0]?.time < currentTimeSecond - 12 * 60 * 60) {
         latencyLists.recent.shift()
-      }
-      while (latencyLists.all[0]?.time < currentTimeSecond - 90 * 24 * 60 * 60) {
-        latencyLists.all.shift()
       }
       state.latency[monitor.id] = latencyLists
 
