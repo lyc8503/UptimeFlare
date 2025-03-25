@@ -52,7 +52,7 @@ Please refer to [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
 - [x] ~~Self-host Dockerfile~~
 - [x] Incident history
 - [ ] Improve `checkLocationWorkerRoute` and fix possible `proxy failed`
-- [ ] Groups 
+- [x] Groups 
 - [x] Remove old incidents
 - [ ] Known issue: `fetch` doesn't support non-standard port
 - [ ] Update wiki and add docs for dev

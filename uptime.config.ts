@@ -7,6 +7,13 @@ const pageConfig = {
     { link: 'https://blog.lyc8503.net/', label: 'Blog' },
     { link: 'mailto:me@lyc8503.net', label: 'Email Me', highlight: true },
   ],
+  // [OPTIONAL] Group your monitors
+  // If not specified, all monitors will be shown in a single list
+  // If specified, monitors will be grouped and ordered, not-listed monitors will be invisble (but still monitored)
+  group: {
+    "🌐 Public (example group name)": ['foo_monitor', 'bar_monitor', 'more monitor ids...'],
+    "🔐 Private": ['test_tcp_monitor'],
+  },
 }
 
 const workerConfig = {
