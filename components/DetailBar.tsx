@@ -97,7 +97,7 @@ export default function DetailBar({
               setModalTitle(`🚨 ${monitor.name} incidents at ${new Date(dayStart * 1000).toLocaleDateString()}`)
               setModelContent(
                 <>
-                  {incidentReasons.map((reason) => (<div>{reason}</div>))}
+                  {incidentReasons.map((reason, index) => (<div key={index}>{reason}</div>))}
                 </>
               )
               setModalOpened(true)
