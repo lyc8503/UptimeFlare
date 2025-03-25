@@ -36,6 +36,7 @@ type MonitorTarget = {
   tooltip?: string
   statusPageLink?: string
   checkLocationWorkerRoute?: string
+  hideLatencyChart?: boolean
 
   // HTTP Code
   expectedCodes?: number[]

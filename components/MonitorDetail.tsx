@@ -70,7 +70,7 @@ export default function MonitorDetail({
       </div>
 
       <DetailBar monitor={monitor} state={state} />
-      <DetailChart monitor={monitor} state={state} />
+      {!monitor.hideLatencyChart && <DetailChart monitor={monitor} state={state} />}
     </>
   )
 }

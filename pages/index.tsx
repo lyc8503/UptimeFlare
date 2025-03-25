@@ -108,7 +108,9 @@ export async function getServerSideProps() {
       // @ts-ignore
       tooltip: monitor?.tooltip,
       // @ts-ignore
-      statusPageLink: monitor?.statusPageLink
+      statusPageLink: monitor?.statusPageLink,
+      // @ts-ignore
+      hideLatencyChart: monitor?.hideLatencyChart,
     }
   })
 

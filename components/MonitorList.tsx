@@ -1,5 +1,5 @@
 import { MonitorState, MonitorTarget } from '@/uptime.types'
-import { Card, Center, Divider } from '@mantine/core'
+import { Card, Center } from '@mantine/core'
 import MonitorDetail from './MonitorDetail'
 
 export default function MonitorList({ monitors, state }: { monitors: any; state: MonitorState }) {
@@ -20,7 +20,6 @@ export default function MonitorList({ monitors, state }: { monitors: any; state:
             <Card.Section ml="xs" mr="xs">
               <MonitorDetail monitor={monitor} state={state} />
             </Card.Section>
-            <Divider />
           </div>
         ))}
       </Card>
