@@ -1,8 +1,8 @@
 import { MonitorState, MonitorTarget } from '@/uptime.types'
 import { getColor } from '@/util/color'
-import { Box, Tooltip } from '@mantine/core'
+import { Box, Tooltip, Modal } from '@mantine/core'
 import { useResizeObserver } from '@mantine/hooks'
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 const moment = require('moment')
 require('moment-precise-range-plugin')
 
@@ -14,6 +14,9 @@ export default function DetailBar({
   state: MonitorState
 }) {
   const [barRef, barRect] = useResizeObserver()
+  const [modalOpened, setModalOpened] = useState(false)
+  const [modalTitle, setModalTitle] = useState('')
+  const [modelContent, setModelContent] = useState(<div />)
 
   const overlapLen = (x1: number, x2: number, y1: number, y2: number) => {
     return Math.max(0, Math.min(x2, y2) - Math.max(x1, y1))
@@ -34,11 +37,30 @@ export default function DetailBar({
     const dayMonitorTime = overlapLen(dayStart, dayEnd, montiorStartTime, currentTime)
     let dayDownTime = 0
 
+    let incidentReasons: string[] = []
+
     for (let incident of state.incident[monitor.id]) {
       const incidentStart = incident.start[0]
       const incidentEnd = incident.end ?? currentTime
 
-      dayDownTime += overlapLen(dayStart, dayEnd, incidentStart, incidentEnd)
+      const overlap = overlapLen(dayStart, dayEnd, incidentStart, incidentEnd)
+      dayDownTime += overlap
+
+      // Incident history for the day
+      if (overlap > 0) {
+        for (let i = 0; i < incident.error.length; i++) {
+          let partStart = incident.start[i]
+          let partEnd = i === incident.error.length - 1 ? (incident.end ?? currentTime) : incident.start[i + 1]
+          partStart = Math.max(partStart, dayStart)
+          partEnd = Math.min(partEnd, dayEnd)
+
+          if (overlapLen(dayStart, dayEnd, partStart, partEnd) > 0) {
+            const startStr = new Date(partStart * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            const endStr = new Date(partEnd * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            incidentReasons.push(`[${startStr}-${endStr}] ${incident.error[i]}`)
+          }
+        }
+      }
     }
 
     const dayPercent = (((dayMonitorTime - dayDownTime) / dayMonitorTime) * 100).toPrecision(4)
@@ -55,9 +77,8 @@ export default function DetailBar({
             <>
               <div>{dayPercent + '% at ' + new Date(dayStart * 1000).toLocaleDateString()}</div>
               {dayDownTime > 0 && (
-                <div>{`Down for ${moment.preciseDiff(moment(0), moment(dayDownTime * 1000))}`}</div>
+                <div>{`Down for ${moment.preciseDiff(moment(0), moment(dayDownTime * 1000))} (click for detail)`}</div>
               )}
-              {/* TODO: lantency detail for each bar */}
             </>
           )
         }
@@ -71,6 +92,17 @@ export default function DetailBar({
             marginLeft: '1px',
             marginRight: '1px',
           }}
+          onClick={() => {
+            if (dayDownTime > 0) {
+              setModalTitle(`🚨 ${monitor.name} incidents at ${new Date(dayStart * 1000).toLocaleDateString()}`)
+              setModelContent(
+                <>
+                  {incidentReasons.map((reason) => (<div>{reason}</div>))}
+                </>
+              )
+              setModalOpened(true)
+            }
+          }}
         />
       </Tooltip>
     )
@@ -78,6 +110,9 @@ export default function DetailBar({
 
   return (
     <>
+      <Modal opened={modalOpened} onClose={() => setModalOpened(false)} title={modalTitle} size={'40em'}>
+        {modelContent}
+      </Modal>
       <Box
         style={{
           display: 'flex',
