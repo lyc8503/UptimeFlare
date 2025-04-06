@@ -1,6 +1,6 @@
 import { workerConfig } from '../../uptime.config'
 import { formatStatusChangeNotification, getWorkerLocation, notifyWithApprise } from './util'
-import { MonitorState } from '../../uptime.types'
+import { MonitorState, MonitorTarget } from '../../uptime.types'
 import { getStatus } from './monitor'
 
 export interface Env {
@@ -44,12 +44,20 @@ export default {
 
     // Auxiliary function to format notification and send it via apprise
     let formatAndNotify = async (
-      monitor: any,
+      monitor: MonitorTarget,
       isUp: boolean,
       timeIncidentStart: number,
       timeNow: number,
       reason: string
     ) => {
+      // Skip notification if monitor is in the skip list
+      // @ts-ignore
+      const skipList: string[] = workerConfig.notification?.skipNotificationIds
+      if (skipList && skipList.includes(monitor.id)) {
+        console.log(`Skipping notification for ${monitor.name} (${monitor.id} in skipNotificationIds)`)
+        return
+      }
+
       if (workerConfig.notification?.appriseApiServer && workerConfig.notification?.recipientUrl) {
         const notification = formatStatusChangeNotification(
           monitor,
