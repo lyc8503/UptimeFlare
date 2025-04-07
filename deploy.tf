@@ -16,14 +16,21 @@ variable "CLOUDFLARE_ACCOUNT_ID" {
   type = string
 }
 
+variable "REPO_NAME" {
+  # Repository name used for resource naming
+  type = string
+  default = "uptimeflare"
+  description = "The repository name used for naming Cloudflare resources"
+}
+
 resource "cloudflare_workers_kv_namespace" "uptimeflare_kv" {
   account_id = var.CLOUDFLARE_ACCOUNT_ID
-  title      = "uptimeflare_kv"
+  title      = "${var.REPO_NAME}-kv"
 }
 
 resource "cloudflare_worker_script" "uptimeflare" {
   account_id         = var.CLOUDFLARE_ACCOUNT_ID
-  name               = "uptimeflare_worker"
+  name               = "${var.REPO_NAME}-worker"
   content            = file("worker/dist/index.js")
   module             = true
   compatibility_date = "2023-11-08"
@@ -44,7 +51,7 @@ resource "cloudflare_worker_cron_trigger" "uptimeflare_worker_cron" {
 
 resource "cloudflare_pages_project" "uptimeflare" {
   account_id        = var.CLOUDFLARE_ACCOUNT_ID
-  name              = "uptimeflare"
+  name              = var.REPO_NAME
   production_branch = "main"
 
   deployment_configs {
