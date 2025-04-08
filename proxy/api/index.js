@@ -1,6 +1,7 @@
 // This is a Node.js implementation of status monitoring
 
 const location = ''
+const defaultTimeout = 5000  // 5 seconds, a lower default for deployments on platforms like Vercel
 
 const express = require('express')
 const net = require('net')
@@ -22,15 +23,6 @@ const fetchTimeout = (url, ms, options = {}) => {
   return promise.finally(() => clearTimeout(timeout))
 }
 
-function withTimeout(millis, promise) {
-  const timeout = new Promise((resolve, reject) =>
-    setTimeout(() => reject(new Error(`Promise timed out after ${millis}ms`)), millis)
-  )
-
-  return Promise.race([promise, timeout])
-}
-
-
 // TODO: More code reuse here
 async function getStatus(monitor) {
   let status = {
@@ -43,41 +35,49 @@ async function getStatus(monitor) {
 
   if (monitor.method === 'TCP_PING') {
     // TCP port endpoint monitor
+    let host, port
     try {
       // This is not a real https connection, but we need to add a dummy `https://` to parse the hostname & port
+      // TODO: ipv6 buggy
       const parsed = new URL("https://" + monitor.target)
+      host = parsed.hostname
+      port = parsed.port
+      
+      await new Promise((resolve, reject) => {
+          const socket = net.createConnection({ host: host, port: Number(port) })
 
-      const client = await net.createConnection(
-        { host: parsed.hostname, port: Number(parsed.port) },
-        () => {
-          console.log(`${monitor.name} connected to ${monitor.target}`)
-          status.ping = Date.now() - startTime
-          status.up = true
-          status.err = ''
-          client.end()
+          const timer = setTimeout(() => {
+            socket.destroy()
+            reject(new Error(`Timeout after ${monitor.timeout || defaultTimeout}ms`))
+          }, monitor.timeout || defaultTimeout)
+          
+          socket.on('connect', () => {
+            clearTimeout(timer)
+            socket.end()
+            resolve(null)
+          })
+
+          socket.on('error', (err) => {
+            clearTimeout(timer)
+            socket.destroy()
+            reject(err)
+          })
         }
       )
 
-      // const socket = connect({ hostname: parsed.hostname, port: Number(parsed.port) })
-
-      // // Now we have an `opened` promise!
-      // // @ts-ignore
-      // await withTimeout(monitor.timeout || 10000, socket.opened)
-      // await socket.close()
-
-      
+      status.up = true
+      status.err = ''
+      status.ping = Date.now() - startTime
     } catch (e) {
       console.log(`${monitor.name} errored with ${e.name}: ${e.message}`)
-      if (e.message.includes('timed out')) {
-        status.ping = monitor.timeout || 10000
-      }
       status.up = false
-      status.err = e.name + ': ' + e.message
+      status.err = e.name + ': ' + e.message.replace(host, '<redacted>').replace(port, '<redacted>')
+      status.ping = Date.now() - startTime
     }
   } else {
     // HTTP endpoint monitor
     try {
-      const response = await fetchTimeout(monitor.target, monitor.timeout || 10000, {
+      const response = await fetchTimeout(monitor.target, monitor.timeout || defaultTimeout, {
         method: monitor.method,
         headers: monitor.headers,
         body: monitor.body,
@@ -129,7 +129,7 @@ async function getStatus(monitor) {
     } catch (e) {
       console.log(`${monitor.name} errored with ${e.name}: ${e.message}`)
       if (e.name === 'AbortError') {
-        status.ping = monitor.timeout || 10000
+        status.ping = monitor.timeout || defaultTimeout
         status.up = false
         status.err = `Timeout after ${status.ping}ms`
       } else {
@@ -144,11 +144,11 @@ async function getStatus(monitor) {
 
 app.use(express.json());
 
-app.post('/', (req, res) => {
+app.post('/', async (req, res) => {
   res.json(
     {
-      location: getWorkerLocation(),
-      status: getStatus(req.body),
+      location: await getWorkerLocation(),
+      status: await getStatus(req.body),
     }
   )
 })
