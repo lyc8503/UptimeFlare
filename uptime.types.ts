@@ -35,8 +35,9 @@ type MonitorTarget = {
   target: string // url for http, hostname:port for tcp
   tooltip?: string
   statusPageLink?: string
-  checkLocationWorkerRoute?: string
   hideLatencyChart?: boolean
+  checkProxy?: string
+  checkProxyFallback?: boolean
 
   // HTTP Code
   expectedCodes?: number[]

@@ -106,23 +106,27 @@ export default {
       let checkLocation = workerLocation
       let status
 
-      if (monitor.checkLocationWorkerRoute) {
-        // Initiate a check from a different location
+      if (monitor.checkProxy) {
+        // Initiate a check using proxy (Geo-specific check)
         try {
-          console.log('Calling worker: ' + monitor.checkLocationWorkerRoute)
+          console.log('Calling check proxy: ' + monitor.checkProxy)
           const resp = await (
-            await fetch(monitor.checkLocationWorkerRoute, {
+            await fetch(monitor.checkProxy, {
               method: 'POST',
-              body: JSON.stringify({
-                target: monitor.id,
-              }),
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(monitor),
             })
           ).json<{ location: string; status: { ping: number; up: boolean; err: string } }>()
           checkLocation = resp.location
           status = resp.status
         } catch (err) {
-          console.log('Error calling worker: ' + err)
-          status = { ping: 0, up: false, err: 'Error initiating check from remote worker' }
+          console.log('Error calling proxy: ' + err)
+          if (monitor.checkProxyFallback) {
+            console.log('Falling back to local check...')
+            status = await getStatus(monitor)
+          } else {
+            status = { ping: 0, up: false, err: 'Error initiating check from remote worker' }
+          }
         }
       } else {
         // Initiate a check from the current location
