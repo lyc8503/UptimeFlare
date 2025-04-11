@@ -21,7 +21,6 @@ export async function getStatus(
       const socket = connect({ hostname: parsed.hostname, port: Number(parsed.port) })
 
       // Now we have an `opened` promise!
-      // @ts-ignore
       await withTimeout(monitor.timeout || 10000, socket.opened)
       await socket.close()
 
