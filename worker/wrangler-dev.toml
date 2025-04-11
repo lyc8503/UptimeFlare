@@ -1,3 +1,5 @@
+# The name will be set dynamically during deployment
+# Default name is used for local development
 name = "uptimeflare_worker"
 main = "src/index.ts"
 compatibility_date = "2023-11-08"

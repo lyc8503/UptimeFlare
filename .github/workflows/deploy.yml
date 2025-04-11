@@ -41,7 +41,7 @@ jobs:
 
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      
+
       # This is a temporary workaround to fix issue #13
       # On a new Cloudflare account, the terraform apply will fail with `workers.api.error.subdomain_required`
       # This may be due to the account not having a worker subdomain yet, so we create a dummy worker and then delete it.
@@ -55,7 +55,7 @@ jobs:
                --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
                --header 'Content-Type: application/javascript' \
                --data 'addEventListener('\''fetch'\'', (event) => event.respondWith(new Response('\''OK'\'')))'\
-          
+
           curl --request DELETE --fail-with-body \
                --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/dummy-ib4db6ntj5csdef3 \
                --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
@@ -70,6 +70,14 @@ jobs:
           cd worker
           npm install
 
+      - name: Update Package Names
+        run: |
+          node scripts/update-package-name.js
+
+      - name: Update Wrangler Config
+        run: |
+          node scripts/update-wrangler-config.js
+
       - name: Build worker
         run: |
           cd worker
@@ -78,6 +86,14 @@ jobs:
       - name: Build page
         run: |
           npx @cloudflare/next-on-pages
+
+      - name: Get Repository Name
+        id: repo_name
+        run: |
+          # Get repository name and convert to lowercase for Cloudflare compatibility
+          REPO_NAME=$(basename $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')
+          echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
+          echo "Using repository name: $REPO_NAME for Cloudflare resources"
 
       - name: Deploy using Terraform
         # We're using terraform for first-time setup here,
@@ -91,19 +107,25 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           TF_VAR_CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}
+          TF_VAR_REPO_NAME: ${{ steps.repo_name.outputs.repo_name }}
 
       # Still need to upload worker to keep it up-to-date (Terraform will fail after first-time setup)
       - name: Upload worker
         run: |
-          curl --fail-with-body -X PUT https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/content --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN -F 'index.js=@worker/dist/index.js;type=application/javascript+module' -F 'metadata={"main_module": "index.js"}'
+          WORKER_NAME="${REPO_NAME}-worker"
+          echo "Uploading worker with name: $WORKER_NAME"
+          curl --fail-with-body -X PUT "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/$WORKER_NAME/content" --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN -F 'index.js=@worker/dist/index.js;type=application/javascript+module' -F 'metadata={"main_module": "index.js"}'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}
+          REPO_NAME: ${{ steps.repo_name.outputs.repo_name }}
 
       # Currently Terraform Cloudflare provider doesn't support direct upload, use wrangler to upload instead.
       - name: Upload pages
         run: |
-          npx wrangler pages deploy .vercel/output/static --project-name uptimeflare
+          echo "Uploading pages with project name: $REPO_NAME"
+          npx wrangler pages deploy .vercel/output/static --project-name $REPO_NAME
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}
+          REPO_NAME: ${{ steps.repo_name.outputs.repo_name }}
