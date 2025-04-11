@@ -1,4 +1,3 @@
-import { connect } from "cloudflare:sockets";
 import { MonitorTarget } from "../../uptime.types";
 import { withTimeout, fetchTimeout } from "./util";
 
@@ -16,6 +15,7 @@ export async function getStatus(
   if (monitor.method === 'TCP_PING') {
     // TCP port endpoint monitor
     try {
+      const connect = await import(/* webpackIgnore: true */ "cloudflare:sockets").then((sockets) => sockets.connect)
       // This is not a real https connection, but we need to add a dummy `https://` to parse the hostname & port
       const parsed = new URL("https://" + monitor.target)
       const socket = connect({ hostname: parsed.hostname, port: Number(parsed.port) })
