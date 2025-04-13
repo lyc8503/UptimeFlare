@@ -2,9 +2,11 @@ import { workerConfig } from '../../uptime.config'
 import { formatStatusChangeNotification, getWorkerLocation, notifyWithApprise } from './util'
 import { MonitorState, MonitorTarget } from '../../uptime.types'
 import { getStatus } from './monitor'
+import { DurableObject } from 'cloudflare:workers'
 
 export interface Env {
   UPTIMEFLARE_STATE: KVNamespace
+  REMOTE_CHECKER_DO: DurableObjectNamespace<RemoteChecker>
 }
 
 export default {
@@ -77,16 +79,26 @@ export default {
       let status
 
       if (monitor.checkProxy) {
-        // Initiate a check using proxy (Geo-specific check)
+        // Initiate a check using proxy (Geo-specific monitoring)
         try {
           console.log('Calling check proxy: ' + monitor.checkProxy)
-          const resp = await (
-            await fetch(monitor.checkProxy, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(monitor),
+          let resp
+          if (monitor.checkProxy.startsWith("worker://")) {
+            const doLoc = monitor.checkProxy.replace("worker://", "")
+            const doId = env.REMOTE_CHECKER_DO.idFromName(doLoc)
+            const doStub = env.REMOTE_CHECKER_DO.get(doId, {
+              locationHint: doLoc as DurableObjectLocationHint
             })
-          ).json<{ location: string; status: { ping: number; up: boolean; err: string } }>()
+            resp = await doStub.getLocationAndStatus(monitor)
+          } else {
+            resp = await (
+              await fetch(monitor.checkProxy, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(monitor),
+              })
+            ).json<{location: string; status: {ping: number; up: boolean; err: string}}>()
+          }
           checkLocation = resp.location
           status = resp.status
         } catch (err) {
@@ -298,4 +310,20 @@ export default {
       console.log("Skipping state update due to cooldown period.")
     }
   },
+}
+
+export class RemoteChecker extends DurableObject {
+  constructor(ctx: DurableObjectState, env: Env) {
+    super(ctx, env)
+  }
+
+  async getLocationAndStatus(monitor: MonitorTarget): Promise<{location: string; status: {ping: number; up: boolean; err: string}}> {
+    const colo = await getWorkerLocation() as string
+    console.log(`Running remote checker (DurableObject) at ${colo}...`)
+    const status = await getStatus(monitor)
+    return {
+      location: colo,
+      status: status,
+    }
+  }
 }
