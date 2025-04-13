@@ -1,10 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  webpack: (config, { webpack }) => {
-    config.externals["cloudflare:sockets"] = "cloudflare:sockets"
-    return config
-  },
+  reactStrictMode: true
 }
 
 module.exports = nextConfig
