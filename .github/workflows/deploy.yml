@@ -47,7 +47,7 @@ jobs:
       # This may be due to the account not having a worker subdomain yet, so we create a dummy worker and then delete it.
       # Cloudflare should allocate a worker subdomain after this.
       # https://github.com/cloudflare/terraform-provider-cloudflare/issues/3304
-      - name: Create worker subdomain
+      - name: Create worker subdomain (temporary workaround)
         id: create_dummy_worker
         run: |
           curl --request PUT --fail-with-body \
@@ -79,6 +79,26 @@ jobs:
         run: |
           npx @cloudflare/next-on-pages
 
+      - name: Remove durable objects bindings (temporary workaround)
+        continue-on-error: true
+        # This is a workaround to fix Cloudflare provider 4.x import crash when there's a durable object binding.
+        run: |
+          # Get bindings without durable objects
+          NEW_BINDINGS=$(curl --request GET --fail-with-body \
+               --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/settings \
+               --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
+               --header 'Content-Type: application/json' | jq '.result.bindings | map(select(.type != "durable_object_namespace"))' -jc)
+          echo "New bindings: $NEW_BINDINGS"
+
+          # Remove durable objects bindings
+          curl --request PATCH --fail-with-body \
+               --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/settings \
+               --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
+               -F 'settings={"bindings":'$NEW_BINDINGS'}'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}
+
       - name: Deploy using Terraform
         # As we don't save terraform state somewhere, we need to import the existing resources
         run: |
@@ -109,7 +129,8 @@ jobs:
                --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/settings \
                --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
                --header 'Content-Type: application/json' | jq '.result.bindings' -jc)
-          CURRENT_BINDINGS=${${CURRENT_BINDINGS#?}%?}
+          CURRENT_BINDINGS="${CURRENT_BINDINGS:1:-1}"
+          echo "Current bindings: $CURRENT_BINDINGS"
 
           # Try migration first (required for the new durable object class, ignore failures)
           curl --request PATCH \
@@ -122,6 +143,13 @@ jobs:
                --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/settings \
                --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
                -F 'settings={"bindings":[{"type":"durable_object_namespace","name":"REMOTE_CHECKER_DO","class_name":"RemoteChecker"},'$CURRENT_BINDINGS']}'
+
+          # By the ways enable logs
+          curl --request PATCH \
+               --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/script-settings \
+               --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
+               --header 'Content-Type: application/json' \
+               -d '{"observability":{"enabled":true}}'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}
