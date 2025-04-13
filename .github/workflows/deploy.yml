@@ -100,6 +100,32 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           TF_VAR_CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}
 
+      # Terraform Cloudflare provider 4.x doesn't support durable objects, provider 5.x has unresolved issues blocking the deployment. (cloudflare/terraform-provider-cloudflare#5412)
+      # So I have to manually add durable objects bindings here.
+      - name: Add durable objects bindings
+        run: |
+          # Get current bindings
+          CURRENT_BINDINGS=$(curl --request GET --fail-with-body \
+               --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/settings \
+               --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
+               --header 'Content-Type: application/json' | jq '.result.bindings' -jc)
+          CURRENT_BINDINGS=${${CURRENT_BINDINGS#?}%?}
+
+          # Try migration first (required for the new durable object class, ignore failures)
+          curl --request PATCH \
+               --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/settings \
+               --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
+               -F 'settings={"bindings":[{"type":"durable_object_namespace","name":"REMOTE_CHECKER_DO","class_name":"RemoteChecker"},'$CURRENT_BINDINGS'],"migrations":{"new_sqlite_classes":["RemoteChecker"],"new_tag":"v1"}}'
+
+          # Actually add the binding
+          curl --request PATCH --fail-with-body \
+               --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/settings \
+               --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
+               -F 'settings={"bindings":[{"type":"durable_object_namespace","name":"REMOTE_CHECKER_DO","class_name":"RemoteChecker"},'$CURRENT_BINDINGS']}'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}
+
       # Currently Terraform Cloudflare provider doesn't support direct upload, use wrangler to upload instead.
       - name: Upload pages
         run: |
