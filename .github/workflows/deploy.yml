@@ -16,10 +16,10 @@ jobs:
         with:
           terraform_version: 1.6.4
 
-      - name: Use Node.js 18.x
+      - name: Use Node.js 22.x
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: 22.x
           cache: 'npm'
 
       # Automatically get an account id via the API Token
@@ -41,7 +41,7 @@ jobs:
 
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      
+
       # This is a temporary workaround to fix issue #13
       # On a new Cloudflare account, the terraform apply will fail with `workers.api.error.subdomain_required`
       # This may be due to the account not having a worker subdomain yet, so we create a dummy worker and then delete it.
@@ -55,7 +55,7 @@ jobs:
                --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
                --header 'Content-Type: application/javascript' \
                --data 'addEventListener('\''fetch'\'', (event) => event.respondWith(new Response('\''OK'\'')))'\
-          
+
           curl --request DELETE --fail-with-body \
                --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/dummy-ib4db6ntj5csdef3 \
                --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
@@ -80,25 +80,25 @@ jobs:
           npx @cloudflare/next-on-pages
 
       - name: Deploy using Terraform
-        # We're using terraform for first-time setup here,
-        # since we didn't setup a remote backend to store state,
-        # following runs will fail with name conflict, which is normal.
-        continue-on-error: true
-
+        # As we don't save terraform state somewhere, we need to import the existing resources
         run: |
           terraform init
+
+          KV_ID=$(curl https://api.cloudflare.com/client/v4/accounts/$TF_VAR_CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces\?per_page\=100 --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN | jq -r '.result[] | select(.title == "uptimeflare_kv") | .id')
+          if [ -n "$KV_ID" ]; then
+            echo "Importing existing resources..."
+            terraform import cloudflare_workers_kv_namespace.uptimeflare_kv "$TF_VAR_CLOUDFLARE_ACCOUNT_ID/$KV_ID"
+            terraform import cloudflare_worker_script.uptimeflare "$TF_VAR_CLOUDFLARE_ACCOUNT_ID/uptimeflare_worker"
+            terraform import cloudflare_worker_cron_trigger.uptimeflare_worker_cron "$TF_VAR_CLOUDFLARE_ACCOUNT_ID/uptimeflare_worker"
+            terraform import cloudflare_pages_project.uptimeflare "$TF_VAR_CLOUDFLARE_ACCOUNT_ID/uptimeflare"
+          else
+            echo "KV namespace not found, first-time setup."
+          fi
+
           terraform apply -auto-approve -input=false
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           TF_VAR_CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}
-
-      # Still need to upload worker to keep it up-to-date (Terraform will fail after first-time setup)
-      - name: Upload worker
-        run: |
-          curl --fail-with-body -X PUT https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/content --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN -F 'index.js=@worker/dist/index.js;type=application/javascript+module' -F 'metadata={"main_module": "index.js"}'
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}
 
       # Currently Terraform Cloudflare provider doesn't support direct upload, use wrangler to upload instead.
       - name: Upload pages
