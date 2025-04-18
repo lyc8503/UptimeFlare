@@ -1,4 +1,4 @@
-import { workerConfig } from '@/uptime.config'
+import { workerConfig } from '@/config'
 import { MonitorState } from '@/types/uptime.types'
 import { NextRequest } from 'next/server'
 

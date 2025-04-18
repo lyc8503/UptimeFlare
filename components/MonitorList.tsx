@@ -1,7 +1,7 @@
-import { MonitorState, MonitorTarget } from '@/uptime.types'
+import { MonitorState, MonitorTarget } from '@/types/uptime.types'
 import { Accordion, Card, Center, Text } from '@mantine/core'
 import MonitorDetail from './MonitorDetail'
-import { pageConfig } from '@/uptime.config';
+import { pageConfig } from '@/config'
 
 function countDownCount(state: MonitorState, ids: string[]) {
   let downCount = 0
@@ -28,45 +28,61 @@ function getStatusTextColor(state: MonitorState, ids: string[]) {
   }
 }
 
-export default function MonitorList({ monitors, state }: { monitors: MonitorTarget[]; state: MonitorState }) {
+export default function MonitorList({
+  monitors,
+  state,
+}: {
+  monitors: MonitorTarget[]
+  state: MonitorState
+}) {
   // @ts-ignore
   let group: any = pageConfig.group
   let groupedMonitor = group && Object.keys(group).length > 0
   let content
-  
+
   if (groupedMonitor) {
     // Grouped monitors
     content = (
-      <Accordion multiple defaultValue={Object.keys(group)} variant='contained'>
-        {
-          Object.keys(group).map(groupName => (
-            <Accordion.Item key={groupName} value={groupName}>
-              <Accordion.Control>
-                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                  <div>{groupName}</div>
-                  <Text fw={500} style={{ display: 'inline', paddingRight: '5px', color: getStatusTextColor(state, group[groupName])}}>
-                    {group[groupName].length - countDownCount(state, group[groupName])}
-                    /{group[groupName].length} Operational
-                  </Text>
-                </div>
-              </Accordion.Control>
-              <Accordion.Panel>
-                {
-                  monitors
-                  .filter(monitor => group[groupName].includes(monitor.id))
-                  .sort((a, b) => group[groupName].indexOf(a.id) - group[groupName].indexOf(b.id))
-                  .map(monitor => (
-                    <div key={monitor.id}>
-                      <Card.Section ml="xs" mr="xs">
-                        <MonitorDetail monitor={monitor} state={state} />
-                      </Card.Section>
-                    </div>
-                  ))
-                }
-                </Accordion.Panel>
-            </Accordion.Item>
-          ))
-        }
+      <Accordion multiple defaultValue={Object.keys(group)} variant="contained">
+        {Object.keys(group).map((groupName) => (
+          <Accordion.Item key={groupName} value={groupName}>
+            <Accordion.Control>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  alignItems: 'center',
+                }}
+              >
+                <div>{groupName}</div>
+                <Text
+                  fw={500}
+                  style={{
+                    display: 'inline',
+                    paddingRight: '5px',
+                    color: getStatusTextColor(state, group[groupName]),
+                  }}
+                >
+                  {group[groupName].length - countDownCount(state, group[groupName])}/
+                  {group[groupName].length} Operational
+                </Text>
+              </div>
+            </Accordion.Control>
+            <Accordion.Panel>
+              {monitors
+                .filter((monitor) => group[groupName].includes(monitor.id))
+                .sort((a, b) => group[groupName].indexOf(a.id) - group[groupName].indexOf(b.id))
+                .map((monitor) => (
+                  <div key={monitor.id}>
+                    <Card.Section ml="xs" mr="xs">
+                      <MonitorDetail monitor={monitor} state={state} />
+                    </Card.Section>
+                  </div>
+                ))}
+            </Accordion.Panel>
+          </Accordion.Item>
+        ))}
       </Accordion>
     )
   } else {

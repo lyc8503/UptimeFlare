@@ -1,4 +1,4 @@
-import { PageConfig, WorkerConfig } from './types/config'
+import { Maintenances, PageConfig, WorkerConfig } from '@/types/config'
 
 const pageConfig: PageConfig = {
   // Title for your status page
@@ -119,5 +119,16 @@ const workerConfig: WorkerConfig = {
   },
 }
 
+const maintenances: Maintenances[] = [
+  // {
+  //   title: 'Planned downtime',
+  //   body: 'Please be patient',
+  //   monitors: ['monitor-id-1', 'monitor-id-2'],
+  //   start: new Date('2025-04-19 00:00:00Z'),
+  //   end: new Date('2025-04-19 01:00:00Z'),
+  //   color: 'red',
+  // },
+]
+
 // Don't forget this, otherwise compilation fails.
-export { pageConfig, workerConfig }
+export { pageConfig, workerConfig, maintenances }
