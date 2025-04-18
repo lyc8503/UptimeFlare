@@ -1,3 +1,5 @@
+import { Monitor } from './config'
+
 type MonitorState = {
   lastUpdate: number
   overallUp: number
@@ -28,24 +30,8 @@ type MonitorState = {
   >
 }
 
-type MonitorTarget = {
-  id: string
-  name: string
-  method: string // "TCP_PING" or Http Method (e.g. GET, POST, OPTIONS, etc.)
-  target: string // url for http, hostname:port for tcp
-  tooltip?: string
-  statusPageLink?: string
-  hideLatencyChart?: boolean
-  checkProxy?: string
-  checkProxyFallback?: boolean
-
-  // HTTP Code
-  expectedCodes?: number[]
-  timeout?: number
-  headers?: Record<string, string | undefined>
+type MonitorTarget = Monitor & {
   body?: BodyInit
-  responseKeyword?: string
-  responseForbiddenKeyword?: string
 }
 
 export type { MonitorState, MonitorTarget }
