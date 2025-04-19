@@ -1,6 +1,6 @@
-import { workerConfig } from '../../uptime.config'
+import { workerConfig, maintenances } from '../../uptime.config'
 import { formatStatusChangeNotification, getWorkerLocation, notifyWithApprise } from './util'
-import { MonitorState, MonitorTarget } from '../../uptime.types'
+import { MonitorState, MonitorTarget } from '../../types/uptime.types'
 import { getStatus } from './monitor'
 import { DurableObject } from 'cloudflare:workers'
 
@@ -9,7 +9,7 @@ export interface Env {
   REMOTE_CHECKER_DO: DurableObjectNamespace<RemoteChecker>
 }
 
-export default {
+const Worker = {
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
     const workerLocation = (await getWorkerLocation()) || 'ERROR'
     console.log(`Running scheduled event on ${workerLocation}...`)
@@ -22,10 +22,17 @@ export default {
       timeNow: number,
       reason: string
     ) => {
+      const skipList: Set<string> = new Set(workerConfig.notification?.skipNotificationIds)
+      const now = new Date()
+      // build list of ids that are currently in maintenance (based on start & end OR if they are missing) and merge with the skipList setting
+      maintenances
+        .filter((m) => (!m.start && !m.end) || (m.start && m.end && now >= m.start && now <= m.end))
+        .map((e) => e.monitors || [])
+        .flat()
+        .map((monitor) => skipList.add(monitor))
+
       // Skip notification if monitor is in the skip list
-      // @ts-ignore
-      const skipList: string[] = workerConfig.notification?.skipNotificationIds
-      if (skipList && skipList.includes(monitor.id)) {
+      if (skipList && skipList.has(monitor.id)) {
         console.log(
           `Skipping notification for ${monitor.name} (${monitor.id} in skipNotificationIds)`
         )
@@ -159,7 +166,7 @@ export default {
             }
 
             console.log('Calling config onStatusChange callback...')
-            await workerConfig.callbacks.onStatusChange(
+            await workerConfig.callbacks?.onStatusChange(
               env,
               monitor,
               true,
@@ -230,7 +237,7 @@ export default {
 
           if (monitorStatusChanged) {
             console.log('Calling config onStatusChange callback...')
-            await workerConfig.callbacks.onStatusChange(
+            await workerConfig.callbacks?.onStatusChange(
               env,
               monitor,
               false,
@@ -246,7 +253,7 @@ export default {
 
         try {
           console.log('Calling config onIncident callback...')
-          await workerConfig.callbacks.onIncident(
+          await workerConfig.callbacks?.onIncident(
             env,
             monitor,
             currentIncident.start[0],
@@ -322,6 +329,8 @@ export default {
     }
   },
 }
+
+export default Worker
 
 export class RemoteChecker extends DurableObject {
   constructor(ctx: DurableObjectState, env: Env) {
