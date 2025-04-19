@@ -1,4 +1,4 @@
-import { PageConfig, WorkerConfig } from './types/config'
+import { Maintenances, PageConfig, WorkerConfig } from './types/config'
 
 const pageConfig: PageConfig = {
   // Title for your status page
@@ -119,5 +119,7 @@ const workerConfig: WorkerConfig = {
   },
 }
 
+const maintenances: Maintenances[] = []
+
 // Don't forget this, otherwise compilation fails.
-export { pageConfig, workerConfig }
+export { pageConfig, workerConfig, maintenances }
