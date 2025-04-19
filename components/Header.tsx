@@ -1,6 +1,6 @@
 import { Container, Group, Text } from '@mantine/core'
 import classes from '@/styles/Header.module.css'
-import { pageConfig } from '@/config'
+import { pageConfig } from '@/uptime.config'
 import { PageConfigLink } from '@/types/config'
 
 export default function Header() {

@@ -2,6 +2,7 @@ export type PageConfig = {
   title?: string
   links?: PageConfigLink[]
   group?: PageConfigGroup
+  maintenances?: Maintenances[]
 }
 
 export type Maintenances = {
