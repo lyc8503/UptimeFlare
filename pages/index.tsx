@@ -60,7 +60,7 @@ export default function Home({
           </Center>
         ) : (
           <div>
-            <OverallStatus state={state} maintenances={maintenances} />
+            <OverallStatus state={state} monitors={monitors} maintenances={maintenances} />
             <MonitorList monitors={monitors} state={state} />
           </div>
         )}
