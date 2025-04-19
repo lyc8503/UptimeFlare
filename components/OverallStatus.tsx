@@ -1,4 +1,4 @@
-import { Maintenances } from '@/types/config'
+import { Maintenances, Monitor } from '@/types/config'
 import { Alert, Card, Center, Container, List, ListItem, Text, Title } from '@mantine/core'
 import { IconCircleCheck, IconAlertCircle, IconInfoCircle } from '@tabler/icons-react'
 import { useEffect, useState } from 'react'
@@ -25,9 +25,11 @@ function useWindowVisibility() {
 export default function OverallStatus({
   state,
   maintenances,
+  monitors,
 }: {
   state: { overallUp: number; overallDown: number; lastUpdate: number }
-  maintenances?: Maintenances[]
+  maintenances: Maintenances[]
+  monitors: Monitor[]
 }) {
   let statusString = ''
   let icon = <IconAlertCircle style={{ width: 64, height: 64, color: '#b91c1c' }} />
@@ -63,8 +65,20 @@ export default function OverallStatus({
     return () => clearInterval(interval)
   })
 
-  // @TODO make dynamic
-  const showMaintenance = maintenances
+  const now = new Date()
+  let filteredMaintenances: (Omit<Maintenances, 'monitors'> & {
+    monitors: Monitor[] | undefined
+  })[] = (maintenances || [])
+    .filter((m) => (!m.start && !m.end) || (m.start && m.end && now >= m.start && now <= m.end))
+    .map((maintenance) => {
+      // enrich maintenace with monitor
+      return {
+        ...maintenance,
+        monitors: maintenance.monitors?.map(
+          (monitorId) => monitors.find((mon) => monitorId === mon.id)!
+        ),
+      }
+    })
 
   return (
     <>
@@ -79,8 +93,8 @@ export default function OverallStatus({
             currentTime - state.lastUpdate
           } sec ago)`}
         </Title>
-        {showMaintenance &&
-          maintenances.map((maintenance, idx) => (
+        {filteredMaintenances &&
+          filteredMaintenances.map((maintenance, idx) => (
             <Alert
               key={idx}
               icon={<IconInfoCircle />}
@@ -110,7 +124,7 @@ export default function OverallStatus({
                   </Text>
                   <List size="sm" withPadding>
                     {maintenance.monitors.map((comp, compIdx) => (
-                      <List.Item key={compIdx}>{comp}</List.Item>
+                      <List.Item key={compIdx}>{comp.name}</List.Item>
                     ))}
                   </List>
                 </>
