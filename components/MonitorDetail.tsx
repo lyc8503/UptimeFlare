@@ -4,6 +4,7 @@ import { IconAlertCircle, IconCircleCheck } from '@tabler/icons-react'
 import DetailChart from './DetailChart'
 import DetailBar from './DetailBar'
 import { getColor } from '@/util/color'
+import { maintenances } from '@/uptime.config'
 
 export default function MonitorDetail({
   monitor,
@@ -25,11 +26,32 @@ export default function MonitorDetail({
       </>
     )
 
-  const statusIcon =
+  let statusIcon =
     state.incident[monitor.id].slice(-1)[0].end === undefined ? (
-      <IconAlertCircle style={{ width: '1.25em', height: '1.25em', color: '#b91c1c' }} />
+      <IconAlertCircle
+        style={{ width: '1.25em', height: '1.25em', color: '#b91c1c', marginRight: '3px' }}
+      />
     ) : (
-      <IconCircleCheck style={{ width: '1.25em', height: '1.25em', color: '#059669' }} />
+      <IconCircleCheck
+        style={{ width: '1.25em', height: '1.25em', color: '#059669', marginRight: '3px' }}
+      />
+    )
+
+  // check in maintenances
+  const now = new Date()
+  const hasMaintenance = (maintenances || [])
+    .filter((m) => (!m.start && !m.end) || (m.start && m.end && now >= m.start && now <= m.end))
+    .find((maintenance) => maintenance.monitors?.includes(monitor.id))
+  if (hasMaintenance)
+    statusIcon = (
+      <IconAlertCircle
+        style={{
+          width: '1.25em',
+          height: '1.25em',
+          color: hasMaintenance?.color,
+          marginRight: '3px',
+        }}
+      />
     )
 
   let totalTime = Date.now() / 1000 - state.incident[monitor.id][0].start[0]
