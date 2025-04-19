@@ -43,7 +43,7 @@ function formatStatusChangeNotification(
     timeZone: timeZone,
   })
 
-  let downtimeDuration = Math.round((timeNow - timeIncidentStart) / 60);
+  let downtimeDuration = Math.round((timeNow - timeIncidentStart) / 60)
   const timeNowFormatted = dateFormatter.format(new Date(timeNow * 1000))
   const timeIncidentStartFormatted = dateFormatter.format(new Date(timeIncidentStart * 1000))
 
@@ -60,7 +60,9 @@ function formatStatusChangeNotification(
   } else {
     return {
       title: `🔴 ${monitor.name} is still down.`,
-      body: `Service is unavailable since ${timeIncidentStartFormatted} (${downtimeDuration} minutes). Issue: ${reason || 'unspecified'}`,
+      body: `Service is unavailable since ${timeIncidentStartFormatted} (${downtimeDuration} minutes). Issue: ${
+        reason || 'unspecified'
+      }`,
     }
   }
 }
@@ -71,7 +73,16 @@ async function notifyWithApprise(
   title: string,
   body: string
 ) {
-  console.log('Sending Apprise notification: ' + title + '-' + body + ' to ' + recipientUrl + ' via ' + appriseApiServer)
+  console.log(
+    'Sending Apprise notification: ' +
+      title +
+      '-' +
+      body +
+      ' to ' +
+      recipientUrl +
+      ' via ' +
+      appriseApiServer
+  )
   try {
     const resp = await fetchTimeout(appriseApiServer, 5000, {
       method: 'POST',
@@ -83,12 +94,14 @@ async function notifyWithApprise(
         title,
         body,
         type: 'warning',
-        format: 'text'
+        format: 'text',
       }),
     })
 
     if (!resp.ok) {
-      console.log('Error calling apprise server, code: ' + resp.status + ', response: ' + await resp.text())
+      console.log(
+        'Error calling apprise server, code: ' + resp.status + ', response: ' + (await resp.text())
+      )
     } else {
       console.log('Apprise notification sent successfully, code: ' + resp.status)
     }
@@ -97,4 +110,10 @@ async function notifyWithApprise(
   }
 }
 
-export { getWorkerLocation, fetchTimeout, withTimeout, notifyWithApprise, formatStatusChangeNotification }
+export {
+  getWorkerLocation,
+  fetchTimeout,
+  withTimeout,
+  notifyWithApprise,
+  formatStatusChangeNotification,
+}

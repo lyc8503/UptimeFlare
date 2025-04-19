@@ -50,13 +50,20 @@ export default function DetailBar({
       if (overlap > 0) {
         for (let i = 0; i < incident.error.length; i++) {
           let partStart = incident.start[i]
-          let partEnd = i === incident.error.length - 1 ? (incident.end ?? currentTime) : incident.start[i + 1]
+          let partEnd =
+            i === incident.error.length - 1 ? incident.end ?? currentTime : incident.start[i + 1]
           partStart = Math.max(partStart, dayStart)
           partEnd = Math.min(partEnd, dayEnd)
 
           if (overlapLen(dayStart, dayEnd, partStart, partEnd) > 0) {
-            const startStr = new Date(partStart * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-            const endStr = new Date(partEnd * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            const startStr = new Date(partStart * 1000).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+            const endStr = new Date(partEnd * 1000).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })
             incidentReasons.push(`[${startStr}-${endStr}] ${incident.error[i]}`)
           }
         }
@@ -77,7 +84,10 @@ export default function DetailBar({
             <>
               <div>{dayPercent + '% at ' + new Date(dayStart * 1000).toLocaleDateString()}</div>
               {dayDownTime > 0 && (
-                <div>{`Down for ${moment.preciseDiff(moment(0), moment(dayDownTime * 1000))} (click for detail)`}</div>
+                <div>{`Down for ${moment.preciseDiff(
+                  moment(0),
+                  moment(dayDownTime * 1000)
+                )} (click for detail)`}</div>
               )}
             </>
           )
@@ -94,10 +104,14 @@ export default function DetailBar({
           }}
           onClick={() => {
             if (dayDownTime > 0) {
-              setModalTitle(`🚨 ${monitor.name} incidents at ${new Date(dayStart * 1000).toLocaleDateString()}`)
+              setModalTitle(
+                `🚨 ${monitor.name} incidents at ${new Date(dayStart * 1000).toLocaleDateString()}`
+              )
               setModelContent(
                 <>
-                  {incidentReasons.map((reason, index) => (<div key={index}>{reason}</div>))}
+                  {incidentReasons.map((reason, index) => (
+                    <div key={index}>{reason}</div>
+                  ))}
                 </>
               )
               setModalOpened(true)
@@ -110,7 +124,12 @@ export default function DetailBar({
 
   return (
     <>
-      <Modal opened={modalOpened} onClose={() => setModalOpened(false)} title={modalTitle} size={'40em'}>
+      <Modal
+        opened={modalOpened}
+        onClose={() => setModalOpened(false)}
+        title={modalTitle}
+        size={'40em'}
+      >
         {modelContent}
       </Modal>
       <Box

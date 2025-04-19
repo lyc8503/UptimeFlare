@@ -1,24 +1,24 @@
 import { Center, Title } from '@mantine/core'
 import { IconCircleCheck, IconAlertCircle } from '@tabler/icons-react'
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 
 function useWindowVisibility() {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
     const handleVisibilityChange = () => {
-      console.log('visibility change', document.visibilityState);
-      setIsVisible(document.visibilityState === 'visible');
-    };
+      console.log('visibility change', document.visibilityState)
+      setIsVisible(document.visibilityState === 'visible')
+    }
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [])
 
-  return isVisible;
+  return isVisible
 }
 
 export default function OverallStatus({
@@ -36,12 +36,14 @@ export default function OverallStatus({
     statusString = 'All systems operational'
     icon = <IconCircleCheck style={{ width: 64, height: 64, color: '#059669' }} />
   } else {
-    statusString = `Some systems not operational (${state.overallDown} out of ${state.overallUp + state.overallDown})`
+    statusString = `Some systems not operational (${state.overallDown} out of ${
+      state.overallUp + state.overallDown
+    })`
   }
 
   const [openTime] = useState(Math.round(Date.now() / 1000))
   const [currentTime, setCurrentTime] = useState(Math.round(Date.now() / 1000))
-  const isWindowVisible = useWindowVisibility();
+  const isWindowVisible = useWindowVisibility()
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -66,7 +68,9 @@ export default function OverallStatus({
       </Title>
       <Title mt="sm" style={{ textAlign: 'center', color: '#70778c' }} order={5}>
         Last updated on:{' '}
-        {`${new Date(state.lastUpdate * 1000).toLocaleString()} (${currentTime - state.lastUpdate} sec ago)`}
+        {`${new Date(state.lastUpdate * 1000).toLocaleString()} (${
+          currentTime - state.lastUpdate
+        } sec ago)`}
       </Title>
     </>
   )
