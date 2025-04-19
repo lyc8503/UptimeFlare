@@ -1,7 +1,7 @@
 // This is a Node.js implementation of status monitoring
 
 const location = ''
-const defaultTimeout = 5000  // 5 seconds, a lower default for deployments on platforms like Vercel
+const defaultTimeout = 5000 // 5 seconds, a lower default for deployments on platforms like Vercel
 
 const express = require('express')
 const net = require('net')
@@ -39,31 +39,30 @@ async function getStatus(monitor) {
     try {
       // This is not a real https connection, but we need to add a dummy `https://` to parse the hostname & port
       // TODO: ipv6 buggy
-      const parsed = new URL("https://" + monitor.target)
+      const parsed = new URL('https://' + monitor.target)
       host = parsed.hostname
       port = parsed.port
-      
+
       await new Promise((resolve, reject) => {
-          const socket = net.createConnection({ host: host, port: Number(port) })
+        const socket = net.createConnection({ host: host, port: Number(port) })
 
-          const timer = setTimeout(() => {
-            socket.destroy()
-            reject(new Error(`Timeout after ${monitor.timeout || defaultTimeout}ms`))
-          }, monitor.timeout || defaultTimeout)
-          
-          socket.on('connect', () => {
-            clearTimeout(timer)
-            socket.end()
-            resolve(null)
-          })
+        const timer = setTimeout(() => {
+          socket.destroy()
+          reject(new Error(`Timeout after ${monitor.timeout || defaultTimeout}ms`))
+        }, monitor.timeout || defaultTimeout)
 
-          socket.on('error', (err) => {
-            clearTimeout(timer)
-            socket.destroy()
-            reject(err)
-          })
-        }
-      )
+        socket.on('connect', () => {
+          clearTimeout(timer)
+          socket.end()
+          resolve(null)
+        })
+
+        socket.on('error', (err) => {
+          clearTimeout(timer)
+          socket.destroy()
+          reject(err)
+        })
+      })
 
       status.up = true
       status.err = ''
@@ -90,8 +89,9 @@ async function getStatus(monitor) {
         if (!monitor.expectedCodes.includes(response.status)) {
           console.log(`${monitor.name} expected ${monitor.expectedCodes}, got ${response.status}`)
           status.up = false
-          status.err = `Expected codes: ${JSON.stringify(monitor.expectedCodes)}, Got: ${response.status
-            }`
+          status.err = `Expected codes: ${JSON.stringify(monitor.expectedCodes)}, Got: ${
+            response.status
+          }`
           return status
         }
       } else {
@@ -109,17 +109,28 @@ async function getStatus(monitor) {
 
         // MUST contain responseKeyword
         if (monitor.responseKeyword && !responseBody.includes(monitor.responseKeyword)) {
-          console.log(`${monitor.name} expected keyword ${monitor.responseKeyword}, not found in response (truncated to 100 chars): ${responseBody.slice(0, 100)}`)
+          console.log(
+            `${monitor.name} expected keyword ${
+              monitor.responseKeyword
+            }, not found in response (truncated to 100 chars): ${responseBody.slice(0, 100)}`
+          )
           status.up = false
           status.err = "HTTP response doesn't contain the configured keyword"
           return status
         }
 
         // MUST NOT contain responseForbiddenKeyword
-        if (monitor.responseForbiddenKeyword && responseBody.includes(monitor.responseForbiddenKeyword)) {
-          console.log(`${monitor.name} forbidden keyword ${monitor.responseForbiddenKeyword}, found in response (truncated to 100 chars): ${responseBody.slice(0, 100)}`)
+        if (
+          monitor.responseForbiddenKeyword &&
+          responseBody.includes(monitor.responseForbiddenKeyword)
+        ) {
+          console.log(
+            `${monitor.name} forbidden keyword ${
+              monitor.responseForbiddenKeyword
+            }, found in response (truncated to 100 chars): ${responseBody.slice(0, 100)}`
+          )
           status.up = false
-          status.err = "HTTP response contains the configured forbidden keyword"
+          status.err = 'HTTP response contains the configured forbidden keyword'
           return status
         }
       }
@@ -142,19 +153,17 @@ async function getStatus(monitor) {
   return status
 }
 
-app.use(express.json());
+app.use(express.json())
 
 app.post('/', async (req, res) => {
-  res.json(
-    {
-      location: await getWorkerLocation(),
-      status: await getStatus(req.body),
-    }
-  )
+  res.json({
+    location: await getWorkerLocation(),
+    status: await getStatus(req.body),
+  })
 })
 
 app.listen(port, () => {
   console.log(`App listening on port ${port}`)
 })
 
-module.exports = app;
+module.exports = app

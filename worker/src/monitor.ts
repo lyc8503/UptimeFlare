@@ -1,5 +1,5 @@
-import { MonitorTarget } from "../../uptime.types";
-import { withTimeout, fetchTimeout } from "./util";
+import { MonitorTarget } from '../../uptime.types'
+import { withTimeout, fetchTimeout } from './util'
 
 export async function getStatus(
   monitor: MonitorTarget
@@ -15,9 +15,11 @@ export async function getStatus(
   if (monitor.method === 'TCP_PING') {
     // TCP port endpoint monitor
     try {
-      const connect = await import(/* webpackIgnore: true */ "cloudflare:sockets").then((sockets) => sockets.connect)
+      const connect = await import(/* webpackIgnore: true */ 'cloudflare:sockets').then(
+        (sockets) => sockets.connect
+      )
       // This is not a real https connection, but we need to add a dummy `https://` to parse the hostname & port
-      const parsed = new URL("https://" + monitor.target)
+      const parsed = new URL('https://' + monitor.target)
       const socket = connect({ hostname: parsed.hostname, port: Number(parsed.port) })
 
       // Now we have an `opened` promise!
@@ -58,8 +60,9 @@ export async function getStatus(
         if (!monitor.expectedCodes.includes(response.status)) {
           console.log(`${monitor.name} expected ${monitor.expectedCodes}, got ${response.status}`)
           status.up = false
-          status.err = `Expected codes: ${JSON.stringify(monitor.expectedCodes)}, Got: ${response.status
-            }`
+          status.err = `Expected codes: ${JSON.stringify(monitor.expectedCodes)}, Got: ${
+            response.status
+          }`
           return status
         }
       } else {
@@ -77,17 +80,28 @@ export async function getStatus(
 
         // MUST contain responseKeyword
         if (monitor.responseKeyword && !responseBody.includes(monitor.responseKeyword)) {
-          console.log(`${monitor.name} expected keyword ${monitor.responseKeyword}, not found in response (truncated to 100 chars): ${responseBody.slice(0, 100)}`)
+          console.log(
+            `${monitor.name} expected keyword ${
+              monitor.responseKeyword
+            }, not found in response (truncated to 100 chars): ${responseBody.slice(0, 100)}`
+          )
           status.up = false
           status.err = "HTTP response doesn't contain the configured keyword"
           return status
         }
 
         // MUST NOT contain responseForbiddenKeyword
-        if (monitor.responseForbiddenKeyword && responseBody.includes(monitor.responseForbiddenKeyword)) {
-          console.log(`${monitor.name} forbidden keyword ${monitor.responseForbiddenKeyword}, found in response (truncated to 100 chars): ${responseBody.slice(0, 100)}`)
+        if (
+          monitor.responseForbiddenKeyword &&
+          responseBody.includes(monitor.responseForbiddenKeyword)
+        ) {
+          console.log(
+            `${monitor.name} forbidden keyword ${
+              monitor.responseForbiddenKeyword
+            }, found in response (truncated to 100 chars): ${responseBody.slice(0, 100)}`
+          )
           status.up = false
-          status.err = "HTTP response contains the configured forbidden keyword"
+          status.err = 'HTTP response contains the configured forbidden keyword'
           return status
         }
       }
