@@ -1,24 +1,17 @@
 import { Maintenances, Monitor } from '@/types/config'
-import { Alert, Center, Container, List, Text, Title } from '@mantine/core'
-import { IconCircleCheck, IconAlertCircle, IconAlertTriangle } from '@tabler/icons-react'
+import { Center, Container, Title } from '@mantine/core'
+import { IconCircleCheck, IconAlertCircle } from '@tabler/icons-react'
 import { useEffect, useState } from 'react'
+import MaintenanceAlert from './MaintenanceAlert'
+import { pageConfig } from '@/uptime.config'
 
 function useWindowVisibility() {
   const [isVisible, setIsVisible] = useState(true)
-
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      console.log('visibility change', document.visibilityState)
-      setIsVisible(document.visibilityState === 'visible')
-    }
-
+    const handleVisibilityChange = () => setIsVisible(document.visibilityState === 'visible')
     document.addEventListener('visibilitychange', handleVisibilityChange)
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [])
-
   return isVisible
 }
 
@@ -31,6 +24,9 @@ export default function OverallStatus({
   maintenances: Maintenances[]
   monitors: Monitor[]
 }) {
+  let group = pageConfig.group
+  let groupedMonitor = (group && Object.keys(group).length > 0) || false
+
   let statusString = ''
   let icon = <IconAlertCircle style={{ width: 64, height: 64, color: '#b91c1c' }} />
   if (state.overallUp === 0 && state.overallDown === 0) {
@@ -52,16 +48,12 @@ export default function OverallStatus({
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!isWindowVisible) {
-        return
-      }
+      if (!isWindowVisible) return
       if (currentTime - state.lastUpdate > 300 && currentTime - openTime > 30) {
-        // trigger a re-fetch
         window.location.reload()
       }
       setCurrentTime(Math.round(Date.now() / 1000))
     }, 1000)
-
     return () => clearInterval(interval)
   })
 
@@ -70,71 +62,29 @@ export default function OverallStatus({
     monitors: Monitor[] | undefined
   })[] = (maintenances || [])
     .filter((m) => (!m.start && !m.end) || (m.start && m.end && now >= m.start && now <= m.end))
-    .map((maintenance) => {
-      // enrich maintenace with monitor
-      return {
-        ...maintenance,
-        monitors: maintenance.monitors?.map(
-          (monitorId) => monitors.find((mon) => monitorId === mon.id)!
-        ),
-      }
-    })
+    .map((maintenance) => ({
+      ...maintenance,
+      monitors: maintenance.monitors?.map(
+        (monitorId) => monitors.find((mon) => monitorId === mon.id)!
+      ),
+    }))
 
   return (
-    <>
-      <Container size="md" mt="xl">
-        <Center>{icon}</Center>
-        <Title mt="sm" style={{ textAlign: 'center' }} order={1}>
-          {statusString}
-        </Title>
-        <Title mt="sm" style={{ textAlign: 'center', color: '#70778c' }} order={5}>
-          Last updated on:{' '}
-          {`${new Date(state.lastUpdate * 1000).toLocaleString()} (${
-            currentTime - state.lastUpdate
-          } sec ago)`}
-        </Title>
-        {filteredMaintenances &&
-          filteredMaintenances.map((maintenance, idx) => (
-            <Alert
-              key={idx}
-              icon={<IconAlertTriangle />}
-              title={maintenance.title}
-              color={maintenance.color || 'primary'}
-              mt="md"
-              ml="md"
-              mr="md"
-              withCloseButton={false}
-              style={{ maxWidth: '865px', margin: '0 auto' }}
-            >
-              <Text>
-                {maintenance.start && (
-                  <>
-                    <b>From:</b> {maintenance.start.toLocaleString()}
-                    <br />
-                  </>
-                )}
-                {maintenance.end && (
-                  <>
-                    <b>To:</b> {maintenance.end.toLocaleString()}
-                  </>
-                )}
-              </Text>
-              {maintenance.body && <Text mt="xs">{maintenance.body}</Text>}
-              {maintenance.monitors && maintenance.monitors.length > 0 && (
-                <>
-                  <Text mt="xs">
-                    <b>Affected components:</b>
-                  </Text>
-                  <List size="sm" withPadding>
-                    {maintenance.monitors.map((comp, compIdx) => (
-                      <List.Item key={compIdx}>{comp.name}</List.Item>
-                    ))}
-                  </List>
-                </>
-              )}
-            </Alert>
-          ))}
-      </Container>
-    </>
+    <Container size="md" mt="xl">
+      <Center>{icon}</Center>
+      <Title mt="sm" style={{ textAlign: 'center' }} order={1}>
+        {statusString}
+      </Title>
+      <Title mt="sm" style={{ textAlign: 'center', color: '#70778c' }} order={5}>
+        Last updated on:{' '}
+        {`${new Date(state.lastUpdate * 1000).toLocaleString()} (${
+          currentTime - state.lastUpdate
+        } sec ago)`}
+      </Title>
+
+      {filteredMaintenances.map((maintenance, idx) => (
+        <MaintenanceAlert groupedMonitor={groupedMonitor} key={idx} maintenance={maintenance} />
+      ))}
+    </Container>
   )
 }
