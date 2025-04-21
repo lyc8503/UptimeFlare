@@ -1,6 +1,6 @@
 import { Maintenances, Monitor } from '@/types/config'
-import { Alert, Card, Center, Container, List, ListItem, Text, Title } from '@mantine/core'
-import { IconCircleCheck, IconAlertCircle, IconInfoCircle } from '@tabler/icons-react'
+import { Alert, Center, Container, List, Text, Title } from '@mantine/core'
+import { IconCircleCheck, IconAlertCircle, IconAlertTriangle } from '@tabler/icons-react'
 import { useEffect, useState } from 'react'
 
 function useWindowVisibility() {
@@ -82,7 +82,7 @@ export default function OverallStatus({
 
   return (
     <>
-      <Container size="md" mt="xl" style={{ width: '897px' }}>
+      <Container size="md" mt="xl">
         <Center>{icon}</Center>
         <Title mt="sm" style={{ textAlign: 'center' }} order={1}>
           {statusString}
@@ -97,11 +97,14 @@ export default function OverallStatus({
           filteredMaintenances.map((maintenance, idx) => (
             <Alert
               key={idx}
-              icon={<IconInfoCircle />}
+              icon={<IconAlertTriangle />}
               title={maintenance.title}
               color={maintenance.color || 'primary'}
               mt="md"
+              ml="md"
+              mr="md"
               withCloseButton={false}
+              style={{ maxWidth: '865px', margin: '0 auto' }}
             >
               <Text>
                 {maintenance.start && (

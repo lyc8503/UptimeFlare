@@ -102,8 +102,8 @@ export default function MonitorList({
         shadow="sm"
         padding="lg"
         radius="md"
-        ml="xl"
-        mr="xl"
+        ml="md"
+        mr="md"
         mt="xl"
         withBorder={!groupedMonitor}
         style={{ width: groupedMonitor ? '897px' : '865px' }}
