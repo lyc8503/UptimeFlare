@@ -1,6 +1,6 @@
 import { workerConfig, maintenances } from '../../uptime.config'
 import { formatStatusChangeNotification, getWorkerLocation, notifyWithApprise } from './util'
-import { MonitorState, MonitorTarget } from '../../types/uptime.types'
+import { MonitorState, MonitorTarget } from '../../types/config'
 import { getStatus } from './monitor'
 import { DurableObject } from 'cloudflare:workers'
 
@@ -22,20 +22,27 @@ const Worker = {
       timeNow: number,
       reason: string
     ) => {
-      const skipList: Set<string> = new Set(workerConfig.notification?.skipNotificationIds)
-      const now = new Date()
-      // build list of ids that are currently in maintenance (based on start & end OR if they are missing) and merge with the skipList setting
-      maintenances
-        .filter((m) => (!m.start && !m.end) || (m.start && m.end && now >= m.start && now <= m.end))
-        .map((e) => e.monitors || [])
-        .flat()
-        .map((monitor) => skipList.add(monitor))
-
       // Skip notification if monitor is in the skip list
-      if (skipList && skipList.has(monitor.id)) {
+      const skipList = workerConfig.notification?.skipNotificationIds
+      if (skipList && skipList.includes(monitor.id)) {
         console.log(
           `Skipping notification for ${monitor.name} (${monitor.id} in skipNotificationIds)`
         )
+        return
+      }
+
+      // Skip notification if monitor is in maintenance
+      const maintenanceList = maintenances
+        .filter(
+          (m) =>
+            new Date(timeNow * 1000) >= new Date(m.start) &&
+            (!m.end || new Date(timeNow * 1000) <= new Date(m.end))
+        )
+        .map((e) => e.monitors)
+        .flat()
+
+      if (maintenanceList.includes(monitor.id)) {
+        console.log(`Skipping notification for ${monitor.name} (in maintenance)`)
         return
       }
 

@@ -1,4 +1,4 @@
-import { MonitorState, MonitorTarget } from '@/types/uptime.types'
+import { MonitorState, MonitorTarget } from '@/types/config'
 import { Accordion, Card, Center, Text } from '@mantine/core'
 import MonitorDetail from './MonitorDetail'
 import { pageConfig } from '@/uptime.config'

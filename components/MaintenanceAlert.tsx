@@ -1,55 +1,42 @@
 import { Alert, List, Text } from '@mantine/core'
 import { IconAlertTriangle } from '@tabler/icons-react'
-import { Maintenances, Monitor } from '@/types/config'
-import { pageConfig } from '@/uptime.config'
+import { MaintenanceConfig, MonitorTarget } from '@/types/config'
 
 export default function MaintenanceAlert({
   maintenance,
-  groupedMonitor,
+  style,
 }: {
-  maintenance: Omit<Maintenances, 'monitors'> & { monitors: Monitor[] | undefined }
-  groupedMonitor: boolean
+  maintenance: Omit<MaintenanceConfig, 'monitors'> & { monitors: MonitorTarget[] }
+  style?: React.CSSProperties
 }) {
   return (
     <Alert
       icon={<IconAlertTriangle />}
-      title={maintenance.title}
-      color={maintenance.color || 'primary'}
-      mt="md"
-      ml="md"
-      mr="md"
+      title={maintenance.title || 'Scheduled Maintenance'}
+      color={maintenance.color || 'yellow'}
       withCloseButton={false}
-      style={{ maxWidth: groupedMonitor ? '897px' : '865px', position: 'relative' }}
+      style={{ position: 'relative', margin: '16px auto 0 auto', ...style }}
     >
       {/* Date range in top right */}
-      {(maintenance.start || maintenance.end) && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 10,
-            right: 10,
-            fontSize: '0.85rem',
-            textAlign: 'right',
-            padding: '2px 8px',
-            borderRadius: 6,
-          }}
-        >
-          {maintenance.start && (
-            <>
-              <b>From:</b> {maintenance.start.toLocaleString()}
-              <br />
-            </>
-          )}
-          {maintenance.end && (
-            <>
-              <b>To:</b> {maintenance.end.toLocaleString()}
-            </>
-          )}
-        </div>
-      )}
+      <div
+        style={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          fontSize: '0.85rem',
+          textAlign: 'right',
+          padding: '2px 8px',
+          borderRadius: 6,
+        }}
+      >
+        <b>From:</b> {new Date(maintenance.start).toLocaleString()}
+        <br />
+        <b>To:</b>{' '}
+        {maintenance.end ? new Date(maintenance.end).toLocaleString() : 'Until further notice'}
+      </div>
 
-      {maintenance.body && <Text mt="xs">{maintenance.body}</Text>}
-      {maintenance.monitors && maintenance.monitors.length > 0 && (
+      <Text>{maintenance.body}</Text>
+      {maintenance.monitors.length > 0 && (
         <>
           <Text mt="xs">
             <b>Affected components:</b>

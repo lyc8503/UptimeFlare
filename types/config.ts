@@ -4,18 +4,12 @@ export type PageConfig = {
   group?: PageConfigGroup
 }
 
-export type Maintenances = {
-  // title to display
-  title: string
-  // array of monitor ids
-  monitors?: string[]
-  // body message
-  body?: string
-  // start date
-  start?: Date
-  // end Date
-  end?: Date
-  // display color
+export type MaintenanceConfig = {
+  monitors: string[]
+  title?: string
+  body: string
+  start: number | string
+  end?: number | string
   color?: string
 }
 
@@ -27,17 +21,10 @@ export type PageConfigLink = {
   highlight?: boolean
 }
 
-export type WorkerConfig = {
-  kvWriteCooldownMinutes: number
-  monitors: Monitor[]
-  notification?: Notification
-  callbacks?: Callbacks
-}
-
-export type Monitor = {
+export type MonitorTarget = {
   id: string
   name: string
-  method: 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'TCP_PING'
+  method: string
   target: string
   tooltip?: string
   statusPageLink?: string
@@ -50,6 +37,13 @@ export type Monitor = {
   responseForbiddenKeyword?: string
   checkProxy?: string
   checkProxyFallback?: boolean
+}
+
+export type WorkerConfig = {
+  kvWriteCooldownMinutes: number
+  monitors: MonitorTarget[]
+  notification?: Notification
+  callbacks?: Callbacks
 }
 
 export type Notification = {
@@ -76,4 +70,34 @@ export type Callbacks = {
     timeNow: number,
     reason: string
   ) => Promise<any>
+}
+
+export type MonitorState = {
+  lastUpdate: number
+  overallUp: number
+  overallDown: number
+  incident: Record<
+    string,
+    {
+      start: number[]
+      end: number | undefined // undefined if it's still open
+      error: string[]
+    }[]
+  >
+
+  latency: Record<
+    string,
+    {
+      recent: {
+        loc: string
+        ping: number
+        time: number
+      }[] // recent 12 hour data, 2 min interval
+      all: {
+        loc: string
+        ping: number
+        time: number
+      }[] // all data in 90 days, 1 hour interval
+    }
+  >
 }

@@ -1,7 +1,7 @@
 import Head from 'next/head'
 
 import { Inter } from 'next/font/google'
-import { MonitorState, MonitorTarget } from '@/types/uptime.types'
+import { MonitorState, MonitorTarget } from '@/types/config'
 import { KVNamespace } from '@cloudflare/workers-types'
 import { maintenances, pageConfig, workerConfig } from '@/uptime.config'
 import OverallStatus from '@/components/OverallStatus'

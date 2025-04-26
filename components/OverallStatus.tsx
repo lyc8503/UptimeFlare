@@ -1,4 +1,4 @@
-import { Maintenances, Monitor } from '@/types/config'
+import { MaintenanceConfig, MonitorTarget } from '@/types/config'
 import { Center, Container, Title } from '@mantine/core'
 import { IconCircleCheck, IconAlertCircle } from '@tabler/icons-react'
 import { useEffect, useState } from 'react'
@@ -21,8 +21,8 @@ export default function OverallStatus({
   monitors,
 }: {
   state: { overallUp: number; overallDown: number; lastUpdate: number }
-  maintenances: Maintenances[]
-  monitors: Monitor[]
+  maintenances: MaintenanceConfig[]
+  monitors: MonitorTarget[]
 }) {
   let group = pageConfig.group
   let groupedMonitor = (group && Object.keys(group).length > 0) || false
@@ -58,16 +58,15 @@ export default function OverallStatus({
   })
 
   const now = new Date()
-  let filteredMaintenances: (Omit<Maintenances, 'monitors'> & {
-    monitors: Monitor[] | undefined
-  })[] = (maintenances || [])
-    .filter((m) => (!m.start && !m.end) || (m.start && m.end && now >= m.start && now <= m.end))
-    .map((maintenance) => ({
-      ...maintenance,
-      monitors: maintenance.monitors?.map(
-        (monitorId) => monitors.find((mon) => monitorId === mon.id)!
-      ),
-    }))
+  let filteredMaintenances: (Omit<MaintenanceConfig, 'monitors'> & { monitors: MonitorTarget[] })[] =
+    maintenances
+      .filter((m) => now >= new Date(m.start) && (!m.end || now <= new Date(m.end)))
+      .map((maintenance) => ({
+        ...maintenance,
+        monitors: maintenance.monitors?.map(
+          (monitorId) => monitors.find((mon) => monitorId === mon.id)!
+        ),
+      }))
 
   return (
     <Container size="md" mt="xl">
@@ -83,7 +82,11 @@ export default function OverallStatus({
       </Title>
 
       {filteredMaintenances.map((maintenance, idx) => (
-        <MaintenanceAlert groupedMonitor={groupedMonitor} key={idx} maintenance={maintenance} />
+        <MaintenanceAlert
+          key={idx}
+          maintenance={maintenance}
+          style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
+        />
       ))}
     </Container>
   )

@@ -1,5 +1,5 @@
 import { Text, Tooltip } from '@mantine/core'
-import { MonitorState, MonitorTarget } from '@/types/uptime.types'
+import { MonitorState, MonitorTarget } from '@/types/config'
 import { IconAlertCircle, IconAlertTriangle, IconCircleCheck } from '@tabler/icons-react'
 import DetailChart from './DetailChart'
 import DetailBar from './DetailBar'
@@ -39,8 +39,8 @@ export default function MonitorDetail({
 
   // Hide real status icon if monitor is in maintenance
   const now = new Date()
-  const hasMaintenance = (maintenances || [])
-    .filter((m) => (!m.start && !m.end) || (m.start && m.end && now >= m.start && now <= m.end))
+  const hasMaintenance = maintenances
+    .filter((m) => now >= new Date(m.start) && (!m.end || now <= new Date(m.end)))
     .find((maintenance) => maintenance.monitors?.includes(monitor.id))
   if (hasMaintenance)
     statusIcon = (

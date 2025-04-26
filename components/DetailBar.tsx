@@ -1,4 +1,4 @@
-import { MonitorState, MonitorTarget } from '@/types/uptime.types'
+import { MonitorState, MonitorTarget } from '@/types/config'
 import { getColor } from '@/util/color'
 import { Box, Tooltip, Modal } from '@mantine/core'
 import { useResizeObserver } from '@mantine/hooks'
