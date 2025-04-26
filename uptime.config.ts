@@ -1,4 +1,4 @@
-import { Maintenances, PageConfig, WorkerConfig } from './types/config'
+import { MaintenanceConfig, PageConfig, WorkerConfig } from './types/config'
 
 const pageConfig: PageConfig = {
   // Title for your status page
@@ -119,7 +119,23 @@ const workerConfig: WorkerConfig = {
   },
 }
 
-const maintenances: Maintenances[] = []
+const maintenances: MaintenanceConfig[] = [
+  {
+    // Monitor IDs to be affected by this maintenance
+    monitors: ['foo_monitor', 'bar_monitor'],
+    // [Optional] default to "Scheduled Maintenance" if not specified
+    title: 'Test Maintenance',
+    // Description of the maintenance, will be shown at status page
+    body: 'This is a test maintenance, server software upgrade',
+    // Start time of the maintenance, in UNIX timestamp or ISO 8601 format
+    start: '2025-04-27T00:00:00+08:00',
+    // [Optional] end time of the maintenance, in UNIX timestamp or ISO 8601 format
+    // if not specified, the maintenance will be considered as on-going
+    end: '2025-04-30T00:00:00+08:00',
+    // [Optional] color of the maintenance alert at status page, default to "yellow"
+    color: 'blue',
+  },
+]
 
 // Don't forget this, otherwise compilation fails.
 export { pageConfig, workerConfig, maintenances }
