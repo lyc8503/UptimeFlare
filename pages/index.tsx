@@ -51,7 +51,7 @@ export default function Home({
       <main className={inter.className}>
         <Header />
 
-        {state === undefined ? (
+        {state == undefined ? (
           <Center>
             <Text fw={700}>
               Monitor State is not defined now, please check your worker&apos;s status and KV
