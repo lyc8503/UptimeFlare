@@ -11,7 +11,7 @@ import {
   TimeScale,
 } from 'chart.js'
 import 'chartjs-adapter-moment'
-import { MonitorState, MonitorTarget } from '@/uptime.types'
+import { MonitorState, MonitorTarget } from '@/types/config'
 import { iataToCountry } from '@/util/iata'
 
 ChartJS.register(

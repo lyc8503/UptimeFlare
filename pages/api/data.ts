@@ -1,5 +1,5 @@
 import { workerConfig } from '@/uptime.config'
-import { MonitorState } from '@/uptime.types'
+import { MonitorState } from '@/types/config'
 import { NextRequest } from 'next/server'
 
 export const runtime = 'edge'
