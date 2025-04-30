@@ -56,6 +56,7 @@ Please refer to [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
 - [x] Groups
 - [x] Remove old incidents
 - [x] ~~Known issue~~: `fetch` doesn't support non-standard port (resolved after CF update)
-- [ ] Compatibility date update
-- [ ] Update wiki and add docs for dev
+- [x] Compatibility date update
+- [x] Scheduled Maintenance 
+- [ ] Update wiki/README and add docs for dev
 - [ ] Cloudflare D1 database
