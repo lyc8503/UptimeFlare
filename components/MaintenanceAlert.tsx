@@ -6,7 +6,7 @@ export default function MaintenanceAlert({
   maintenance,
   style,
 }: {
-  maintenance: Omit<MaintenanceConfig, 'monitors'> & { monitors: MonitorTarget[] }
+  maintenance: Omit<MaintenanceConfig, 'monitors'> & { monitors?: MonitorTarget[] }
   style?: React.CSSProperties
 }) {
   return (
@@ -36,7 +36,7 @@ export default function MaintenanceAlert({
       </div>
 
       <Text>{maintenance.body}</Text>
-      {maintenance.monitors.length > 0 && (
+      {maintenance.monitors && maintenance.monitors.length > 0 && (
         <>
           <Text mt="xs">
             <b>Affected components:</b>

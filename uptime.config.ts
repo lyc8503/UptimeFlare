@@ -126,7 +126,7 @@ const workerConfig: WorkerConfig = {
 // const maintenances: MaintenanceConfig[] = []
 const maintenances: MaintenanceConfig[] = [
   {
-    // Monitor IDs to be affected by this maintenance
+    // [Optional] Monitor IDs to be affected by this maintenance
     monitors: ['foo_monitor', 'bar_monitor'],
     // [Optional] default to "Scheduled Maintenance" if not specified
     title: 'Test Maintenance',

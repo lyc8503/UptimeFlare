@@ -5,7 +5,7 @@ export type PageConfig = {
 }
 
 export type MaintenanceConfig = {
-  monitors: string[]
+  monitors?: string[]
   title?: string
   body: string
   start: number | string
