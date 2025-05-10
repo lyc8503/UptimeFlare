@@ -76,7 +76,11 @@ export default function MonitorList({
                 .map((monitor) => (
                   <div key={monitor.id}>
                     <Card.Section ml="xs" mr="xs">
-                      <MonitorDetail monitor={monitor} state={state} />
+                      <MonitorDetail
+                        link={`/monitor/${monitor.id}`}
+                        monitor={monitor}
+                        state={state}
+                      />
                     </Card.Section>
                   </div>
                 ))}
