@@ -5,13 +5,16 @@ import DetailChart from './DetailChart'
 import DetailBar from './DetailBar'
 import { getColor } from '@/util/color'
 import { maintenances } from '@/uptime.config'
+import Link from 'next/link'
 
 export default function MonitorDetail({
   monitor,
   state,
+  link,
 }: {
   monitor: MonitorTarget
   state: MonitorState
+  link?: string
 }) {
   if (!state.latency[monitor.id])
     return (
@@ -65,10 +68,10 @@ export default function MonitorDetail({
   // Conditionally render monitor name with or without hyperlink based on monitor.url presence
   const monitorNameElement = (
     <Text mt="sm" fw={700} style={{ display: 'inline-flex', alignItems: 'center' }}>
-      {monitor.statusPageLink ? (
+      {link ? (
         <a
-          href={monitor.statusPageLink}
-          target="_blank"
+          href={link}
+          target={link.startsWith('/') ? '_self' : '_blank'}
           style={{ display: 'inline-flex', alignItems: 'center', color: 'inherit' }}
         >
           {statusIcon} {monitor.name}
