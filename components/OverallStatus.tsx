@@ -58,18 +58,19 @@ export default function OverallStatus({
   })
 
   const now = new Date()
-  let filteredMaintenances: (Omit<MaintenanceConfig, 'monitors'> & { monitors?: MonitorTarget[] })[] =
-    maintenances
-      .filter((m) => now >= new Date(m.start) && (!m.end || now <= new Date(m.end)))
-      .map((maintenance) => ({
-        ...maintenance,
-        monitors: maintenance.monitors?.map(
-          (monitorId) => monitors.find((mon) => monitorId === mon.id)!
-        ),
-      }))
+  let filteredMaintenances: (Omit<MaintenanceConfig, 'monitors'> & {
+    monitors?: MonitorTarget[]
+  })[] = maintenances
+    .filter((m) => now >= new Date(m.start) && (!m.end || now <= new Date(m.end)))
+    .map((maintenance) => ({
+      ...maintenance,
+      monitors: maintenance.monitors?.map(
+        (monitorId) => monitors.find((mon) => monitorId === mon.id)!
+      ),
+    }))
 
   return (
-    <Container size="md" mt="xl">
+    <>
       <Center>{icon}</Center>
       <Title mt="sm" style={{ textAlign: 'center' }} order={1}>
         {statusString}
@@ -88,6 +89,6 @@ export default function OverallStatus({
           style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
         />
       ))}
-    </Container>
+    </>
   )
 }
