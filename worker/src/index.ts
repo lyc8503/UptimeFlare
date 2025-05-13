@@ -94,6 +94,12 @@ export default {
               locationHint: doLoc as DurableObjectLocationHint,
             })
             resp = await doStub.getLocationAndStatus(monitor)
+            try {
+              // Kill the DO instance after use, to avoid extra resource usage
+              await doStub.kill()
+            } catch (err) {
+              // An error here is expected, ignore it
+            }
           } else {
             resp = await (
               await fetch(monitor.checkProxy, {
@@ -338,5 +344,13 @@ export class RemoteChecker extends DurableObject {
       location: colo,
       status: status,
     }
+  }
+
+  async kill() {
+    // Throwing an error in `blockConcurrencyWhile` will terminate the Durable Object instance
+    // https://developers.cloudflare.com/durable-objects/api/state/#blockconcurrencywhile
+    this.ctx.blockConcurrencyWhile(async () => {
+      throw 'killed'
+    })
   }
 }
