@@ -1,4 +1,4 @@
-import { MonitorState, MonitorTarget } from '@/uptime.types'
+import { MonitorState, MonitorTarget } from '@/types/config'
 import { Accordion, Card, Center, Text } from '@mantine/core'
 import MonitorDetail from './MonitorDetail'
 import { pageConfig } from '@/uptime.config'
@@ -102,8 +102,8 @@ export default function MonitorList({
         shadow="sm"
         padding="lg"
         radius="md"
-        ml="xl"
-        mr="xl"
+        ml="md"
+        mr="md"
         mt="xl"
         withBorder={!groupedMonitor}
         style={{ width: groupedMonitor ? '897px' : '865px' }}
