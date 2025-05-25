@@ -4,10 +4,10 @@ import { pageConfig } from '@/uptime.config'
 import { PageConfigLink } from '@/types/config'
 
 export default function Header() {
-  const linkToElement = (link: PageConfigLink) => {
+  const linkToElement = (link: PageConfigLink, i: number) => {
     return (
       <a
-        key={link.label}
+        key={i}
         href={link.link}
         target="_blank"
         className={classes.link}
@@ -17,6 +17,8 @@ export default function Header() {
       </a>
     )
   }
+
+  const links = [{ label: 'Incident History', link: '/incidents' }, ...(pageConfig.links || [])]
 
   return (
     <header className={classes.header}>
@@ -39,11 +41,11 @@ export default function Header() {
         </div>
 
         <Group gap={5} visibleFrom="sm">
-          {pageConfig.links?.map(linkToElement)}
+          {links?.map(linkToElement)}
         </Group>
 
         <Group gap={5} hiddenFrom="sm">
-          {pageConfig.links?.filter((link) => link.highlight).map(linkToElement)}
+          {links?.filter((link) => link.highlight).map(linkToElement)}
         </Group>
       </Container>
     </header>
