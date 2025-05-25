@@ -40,6 +40,7 @@ function filterIncidentsByMonth(
       ...e,
       monitors: (e.monitors || []).map((e) => workerConfig.monitors.find((mon) => mon.id === e)!),
     }))
+    .sort((a, b) => (new Date(a.start) > new Date(b.start) ? 1 : -1))
 }
 
 function getPrevNextMonth(monthStr: string) {
