@@ -41,6 +41,7 @@ export type MonitorTarget = {
 
 export type WorkerConfig = {
   kvWriteCooldownMinutes: number
+  passwordProtection?: string
   monitors: MonitorTarget[]
   notification?: Notification
   callbacks?: Callbacks

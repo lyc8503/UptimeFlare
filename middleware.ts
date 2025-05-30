@@ -3,7 +3,6 @@ import type { NextRequest } from 'next/server'
 import { workerConfig } from './uptime.config'
 
 export async function middleware(request: NextRequest) {
-  // @ts-ignore
   const passwordProtection = workerConfig.passwordProtection
   if (passwordProtection) {
     const authHeader = request.headers.get('Authorization')
