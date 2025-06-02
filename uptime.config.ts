@@ -3,7 +3,7 @@ import { MaintenanceConfig, PageConfig, WorkerConfig } from './types/config'
 const pageConfig: PageConfig = {
   // Title for your status page
   title: "lyc8503's Status Page",
-  header-icon: "🕒",
+  headericon: "🕒",
   header: "UptimeFlare",
   // Links shown at the header of your status page, could set `highlight` to `true`
   links: [
