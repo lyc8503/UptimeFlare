@@ -24,7 +24,7 @@ export default function Header() {
         <div>
           <a href="https://github.com/lyc8503/UptimeFlare" target="_blank">
             <Text size="xl" span>
-              {pageConfig.header-icon}
+              {pageConfig.headericon}
             </Text>
             <Text
               size="xl"
