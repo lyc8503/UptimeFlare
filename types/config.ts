@@ -1,5 +1,7 @@
 export type PageConfig = {
   title?: string
+  headericon?: string
+  header?: string
   links?: PageConfigLink[]
   group?: PageConfigGroup
 }
