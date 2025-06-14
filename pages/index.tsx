@@ -7,8 +7,9 @@ import { maintenances, pageConfig, workerConfig } from '@/uptime.config'
 import OverallStatus from '@/components/OverallStatus'
 import Header from '@/components/Header'
 import MonitorList from '@/components/MonitorList'
-import { Center, Divider, Text } from '@mantine/core'
+import { Center, Text } from '@mantine/core'
 import MonitorDetail from '@/components/MonitorDetail'
+import Footer from '@/components/Footer'
 
 export const runtime = 'experimental-edge'
 const inter = Inter({ subsets: ['latin'] })
@@ -65,29 +66,7 @@ export default function Home({
           </div>
         )}
 
-        <Divider mt="lg" />
-        <Text
-          size="xs"
-          mt="xs"
-          mb="xs"
-          style={{
-            textAlign: 'center',
-          }}
-        >
-          Open-source monitoring and status page powered by{' '}
-          <a href="https://github.com/lyc8503/UptimeFlare" target="_blank">
-            Uptimeflare
-          </a>{' '}
-          and{' '}
-          <a href="https://www.cloudflare.com/" target="_blank">
-            Cloudflare
-          </a>
-          , made with ❤ by{' '}
-          <a href="https://github.com/lyc8503" target="_blank">
-            lyc8503
-          </a>
-          .
-        </Text>
+        <Footer />
       </main>
     </>
   )
