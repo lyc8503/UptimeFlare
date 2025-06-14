@@ -23,7 +23,17 @@ function getSelectedMonth() {
     const now = new Date()
     return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0')
   }
-  return hash
+  return hash.split('-').splice(0, 2).join('-')
+}
+
+function getIncidentHash() {
+  const hash = window.location.hash.replace('#', '')
+  const splitted = hash?.split('-')
+  if (hash && splitted.length >= 3) {
+    return splitted[2]
+  }
+
+  return null
 }
 
 function filterIncidentsByMonth(
@@ -107,7 +117,15 @@ export default function IncidentsPage() {
                 <NoIncidentsAlert />
               ) : (
                 monitorFilteredIncidents.map((incident, i) => (
-                  <MaintenanceAlert key={i} maintenance={incident} />
+                  <MaintenanceAlert
+                    key={i}
+                    hash={[
+                      new Date(incident.start).getFullYear(),
+                      String(new Date(incident.start).getMonth() + 1).padStart(2, '0'),
+                      monitorFilteredIncidents.length - i,
+                    ].join('-')}
+                    maintenance={incident}
+                  />
                 ))
               )}
             </Box>
