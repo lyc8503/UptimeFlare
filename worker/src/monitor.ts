@@ -1,4 +1,4 @@
-import { MonitorTarget } from '../../uptime.types'
+import { MonitorTarget } from '../../types/config'
 import { withTimeout, fetchTimeout } from './util'
 
 export async function getStatus(
