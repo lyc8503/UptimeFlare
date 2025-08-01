@@ -16,7 +16,7 @@ const pageConfig: PageConfig = {
     '🌐 企业服务集群': ['xinnew.top', 'mail.sec.hn.cn'],
     '🔐 合作业务集群': ['ms.sec.hn.cn','htc-ms.xinnew.top','chats.sec.hn.cn','zcz.xinnew.top','doraemon.xinnew.top'],
     '🛡️ 公共服务资源': ['gemini-sg.xinnew.top','gemini.xinnew.top','new-xl.xinnew.top','xl-d0h-server.xinnew.top'],
-    '🌐 数据跨境': ['csblog.xinnew.top','csblog.xinnew.top','passport-us.sec.hn.cn', 'passport-sg.sec.hn.cn', '69yun69.com'],
+    '🌐 数据跨境': ['swftwaf-ecs.xinnew.top','csblog.xinnew.top','passport-us.sec.hn.cn', 'passport-sg.sec.hn.cn', '69yun69.com'],
   },
 }
 
