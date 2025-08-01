@@ -39,18 +39,18 @@ const workerConfig: WorkerConfig = {
       id: 'gemini-sg.xinnew.top',
       name: 'GeminiAPI网关1',
       // `method` should be `TCP_PING` for tcp monitors
-      method: 'GET',
+      method: 'TCP_PING',
       // `target` should be `host:port` for tcp monitors
-      target: 'https://gemini-sg.xinnew.top/',
+      target: 'gemini-sg.xinnew.top:443',
       timeout: 10000,
     },
     {
       id: 'gemini.xinnew.top',
       name: 'GeminiAPI网关2',
       // `method` should be `TCP_PING` for tcp monitors
-      method: 'GET',
+      method: 'TCP_PING',
       // `target` should be `host:port` for tcp monitors
-      target: 'https://gemini.xinnew.top',
+      target: 'gemini.xinnew.top:443',
       timeout: 10000,
     },
     {
@@ -84,7 +84,7 @@ const workerConfig: WorkerConfig = {
       id: 'xl-d0h-server.xinnew.top',
       name: '加密DOH解析服务',
       // `method` should be `TCP_PING` for tcp monitors
-      method: 'TCP_PING',
+      method: 'GET',
       // `target` should be `host:port` for tcp monitors
       target: 'https://xl-d0h-server.xinnew.top/',
       timeout: 10000,
