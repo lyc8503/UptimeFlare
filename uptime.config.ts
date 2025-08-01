@@ -26,44 +26,7 @@ const workerConfig: WorkerConfig = {
   // Define all your monitors here
   monitors: [
     // Example HTTP Monitor
-  //  {
-      // `id` should be unique, history will be kept if the `id` remains constant
-   //   id: 'foo_monitor',
-      // `name` is used at status page and callback message
-  //    name: 'My API Monitor',
-      // `method` should be a valid HTTP Method
- //     method: 'POST',
-      // `target` is a valid URL
-  //    target: 'https://example.com',
-      // [OPTIONAL] `tooltip` is ONLY used at status page to show a tooltip
-  //    tooltip: 'This is a tooltip for this monitor',
-      // [OPTIONAL] `statusPageLink` is ONLY used for clickable link at status page
-   //   statusPageLink: 'https://example.com',
-      // [OPTIONAL] `hideLatencyChart` will hide status page latency chart if set to true
- //     hideLatencyChart: false,
-      // [OPTIONAL] `expectedCodes` is an array of acceptable HTTP response codes, if not specified, default to 2xx
-  //    expectedCodes: [200],
-      // [OPTIONAL] `timeout` in millisecond, if not specified, default to 10000
-    //  timeout: 10000,
-      // [OPTIONAL] headers to be sent
-    //  headers: {
-  //      'User-Agent': 'Uptimeflare',
- //       Authorization: 'Bearer YOUR_TOKEN_HERE',
- //     },
-      // [OPTIONAL] body to be sent
-//      body: 'Hello, world!',
-      // [OPTIONAL] if specified, the response must contains the keyword to be considered as operational.
-//      responseKeyword: 'success',
-      // [OPTIONAL] if specified, the response must NOT contains the keyword to be considered as operational.
-//      responseForbiddenKeyword: 'bad gateway',
-      // [OPTIONAL] if specified, will call the check proxy to check the monitor, mainly for geo-specific checks
-      // refer to docs https://github.com/lyc8503/UptimeFlare/wiki/Check-proxy-setup before setting this value
-      // currently supports `worker://` and `http(s)://` proxies
- //     checkProxy: 'https://xxx.example.com OR worker://weur',
-      // [OPTIONAL] if true, the check will fallback to local if the specified proxy is down
-  //    checkProxyFallback: true,
-//    },
-    // Example TCP Monitor
+  
     {
       id: 'xinnew.top',
       name: '企业全球门户',
