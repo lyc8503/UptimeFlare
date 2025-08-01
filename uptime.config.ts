@@ -13,8 +13,9 @@ const pageConfig: PageConfig = {
   // If not specified, all monitors will be shown in a single list
   // If specified, monitors will be grouped and ordered, not-listed monitors will be invisble (but still monitored)
   group: {
-    '🌐 Public (example group name)': ['foo_monitor', 'bar_monitor', 'more monitor ids...'],
-    '🔐 Private': ['test_tcp_monitor'],
+    '🌐 企业服务集群': ['xinnew.top', 'bar_monitor', 'more monitor ids...'],
+    '🔐 合作业务集群': ['ms.sec.hn.cn','htc-ms.xinnew.top'],
+    '🛡️ 公共服务资源': ['gemini-sg.xinnew.top','gemini.xinnew.top','new-xl.xinnew.top','xl-d0h-server.xinnew.top'],
   },
 }
 
@@ -27,11 +28,11 @@ const workerConfig: WorkerConfig = {
   monitors: [
     {
       id: 'xinnew.top',
-      name: '企业全球门户',
+      name: '全球门户网站',
       // `method` should be `TCP_PING` for tcp monitors
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
-      target: 'https://xinnew.top',
+      target: 'https://xinnew.top/',
       timeout: 10000,
     },
     {
@@ -40,16 +41,52 @@ const workerConfig: WorkerConfig = {
       // `method` should be `TCP_PING` for tcp monitors
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
-      target: 'https://gemini-sg.xinnew.top',
+      target: 'https://gemini-sg.xinnew.top/',
       timeout: 10000,
     },
     {
       id: 'gemini.xinnew.top',
       name: 'GeminiAPI网关2',
       // `method` should be `TCP_PING` for tcp monitors
-      method: 'TCP_PING',
+      method: 'GET',
       // `target` should be `host:port` for tcp monitors
       target: 'https://gemini.xinnew.top',
+      timeout: 10000,
+    },
+    {
+      id: 'ms.sec.hn.cn',
+      name: '海口旅游职业学院iHAIKOU中国大陆站',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://ms.sec.hn.cn',
+      timeout: 10000,
+    },
+    {
+      id: 'htc-ms.xinnew.top',
+      name: '海口旅游职业学院iHAIKOU国际站',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://htc-ms.xinnew.top',
+      timeout: 10000,
+    },
+    {
+      id: 'new-xl.xinnew.top',
+      name: '新闻聚合服务',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://new-xl.xinnew.top/',
+      timeout: 10000,
+    },
+    {
+      id: 'xl-d0h-server.xinnew.top',
+      name: '加密DOH解析服务',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'TCP_PING',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://xl-d0h-server.xinnew.top/',
       timeout: 10000,
     },
   ],
