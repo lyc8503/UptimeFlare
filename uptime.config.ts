@@ -2,7 +2,7 @@ import { MaintenanceConfig, PageConfig, WorkerConfig } from './types/config'
 
 const pageConfig: PageConfig = {
   // Title for your status page
-  title: "lyc8503's Status Page",
+  title: "海口希灵赛斯企业资源监控",
   // Links shown at the header of your status page, could set `highlight` to `true`
   links: [
     { link: 'https://xinnew.top', label: '企业门户' },
