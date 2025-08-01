@@ -13,9 +13,10 @@ const pageConfig: PageConfig = {
   // If not specified, all monitors will be shown in a single list
   // If specified, monitors will be grouped and ordered, not-listed monitors will be invisble (but still monitored)
   group: {
-    '🌐 企业服务集群': ['xinnew.top', 'bar_monitor', 'more monitor ids...'],
-    '🔐 合作业务集群': ['ms.sec.hn.cn','htc-ms.xinnew.top'],
+    '🌐 企业服务集群': ['xinnew.top', 'mail.sec.hn.cn'],
+    '🔐 合作业务集群': ['ms.sec.hn.cn','htc-ms.xinnew.top','chats.sec.hn.cn','zcz.xinnew.top','doraemon.xinnew.top'],
     '🛡️ 公共服务资源': ['gemini-sg.xinnew.top','gemini.xinnew.top','new-xl.xinnew.top','xl-d0h-server.xinnew.top'],
+    '🌐 数据跨境': ['csblog.xinnew.top','csblog.xinnew.top','passport-us.sec.hn.cn', 'passport-sg.sec.hn.cn', '69yun69.com'],
   },
 }
 
@@ -39,18 +40,18 @@ const workerConfig: WorkerConfig = {
       id: 'gemini-sg.xinnew.top',
       name: 'GeminiAPI网关1',
       // `method` should be `TCP_PING` for tcp monitors
-      method: 'TCP_PING',
+      method: 'GET',
       // `target` should be `host:port` for tcp monitors
-      target: 'gemini-sg.xinnew.top:443',
+      target: 'https://gemini-sg.xinnew.top/',
       timeout: 10000,
     },
     {
       id: 'gemini.xinnew.top',
       name: 'GeminiAPI网关2',
       // `method` should be `TCP_PING` for tcp monitors
-      method: 'TCP_PING',
+      method: 'GET',
       // `target` should be `host:port` for tcp monitors
-      target: 'gemini.xinnew.top:443',
+      target: 'https://gemini.xinnew.top/',
       timeout: 10000,
     },
     {
@@ -87,6 +88,87 @@ const workerConfig: WorkerConfig = {
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
       target: 'https://xl-d0h-server.xinnew.top/',
+      timeout: 10000,
+    },
+    {
+      id: 'zcz.xinnew.top',
+      name: 'ZCZ博客访问监测',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://zcz.xinnew.top/',
+      timeout: 10000,
+    },
+    {
+      id: 'chats.sec.hn.cn',
+      name: '海口旅游职业学院AI智慧推荐官可用性监测',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://chats.sec.hn.cn:29467/ui/chat/7c45cd0ede07f829',
+      timeout: 10000,
+    },
+    {
+      id: 'passport-us.sec.hn.cn',
+      name: '美国线路',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://passport-us.sec.hn.cn/#/login?redirect=/info/account',
+      timeout: 10000,
+    },
+    {
+      id: 'passport-sg.sec.hn.cn',
+      name: '新加坡线路',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://passport-sg.sec.hn.cn/',
+      timeout: 10000,
+    },
+    {
+      id: '69yun69.com',
+      name: '供应商监测',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://69yun69.com/auth/login',
+      timeout: 10000,
+    },
+    {
+      id: 'mail.sec.hn.cn',
+      name: '企业邮箱服务',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://mail.sec.hn.cn/',
+      timeout: 10000,
+    },
+    {
+      id: 'doraemon.xinnew.top',
+      name: 'CSY博客301网关',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://doraemon.xinnew.top',
+      timeout: 10000,
+    },
+    {
+      id: 'swftwaf-ecs.xinnew.top',
+      name: '数据处理网关1',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://swftwaf-ecs.xinnew.top/',
+      timeout: 10000,
+    },
+    {
+      id: 'csblog.xinnew.top',
+      name: '数据处理网关2',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://csblog.xinnew.top',
       timeout: 10000,
     },
   ],
