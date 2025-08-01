@@ -7,7 +7,7 @@ const pageConfig: PageConfig = {
   links: [
     { link: 'https://xinnew.top', label: '企业门户' },
     { link: 'https://blog.csdn.net/qq_73252299?spm=1011.2124.3001.5343', label: '技术博客' },
-    { link: 'mailto:me@lyc8503.net', label: 'Email Me', highlight: true },
+    { link: 'https://work.weixin.qq.com/kfid/kfc5c60f929a2e703af', label: '获取定制方案', highlight: true },
   ],
   // [OPTIONAL] Group your monitors
   // If not specified, all monitors will be shown in a single list
@@ -32,7 +32,7 @@ const workerConfig: WorkerConfig = {
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
       target: 'https://xinnew.top',
-      timeout: 5000,
+      timeout: 10000,
     },
     {
       id: 'gemini-sg.xinnew.top',
@@ -41,7 +41,7 @@ const workerConfig: WorkerConfig = {
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
       target: 'https://gemini-sg.xinnew.top',
-      timeout: 5000,
+      timeout: 10000,
     },
     {
       id: 'gemini.xinnew.top',
@@ -50,7 +50,7 @@ const workerConfig: WorkerConfig = {
       method: 'TCP_PING',
       // `target` should be `host:port` for tcp monitors
       target: 'https://gemini.xinnew.top',
-      timeout: 5000,
+      timeout: 10000,
     },
   ],
   notification: {
