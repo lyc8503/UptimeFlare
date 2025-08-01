@@ -38,7 +38,7 @@ const workerConfig: WorkerConfig = {
     },
     {
       id: 'gemini-sg.xinnew.top',
-      name: 'GeminiAPI网关1',
+      name: 'GeminiAPI网关1（GET方式监测，0可用性属于正常现象，下方有数值曲线即表示正常）',
       // `method` should be `TCP_PING` for tcp monitors
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
@@ -47,7 +47,7 @@ const workerConfig: WorkerConfig = {
     },
     {
       id: 'gemini.xinnew.top',
-      name: 'GeminiAPI网关2',
+      name: 'GeminiAPI网关2（GET方式监测，0可用性属于正常现象，下方有数值曲线即表示正常）',
       // `method` should be `TCP_PING` for tcp monitors
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
