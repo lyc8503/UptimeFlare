@@ -5,8 +5,8 @@ const pageConfig: PageConfig = {
   title: "lyc8503's Status Page",
   // Links shown at the header of your status page, could set `highlight` to `true`
   links: [
-    { link: 'https://github.com/lyc8503', label: 'GitHub' },
-    { link: 'https://blog.lyc8503.net/', label: 'Blog' },
+    { link: 'https://xinnew.top', label: '企业门户' },
+    { link: 'https://blog.csdn.net/qq_73252299?spm=1011.2124.3001.5343', label: '技术博客' },
     { link: 'mailto:me@lyc8503.net', label: 'Email Me', highlight: true },
   ],
   // [OPTIONAL] Group your monitors
