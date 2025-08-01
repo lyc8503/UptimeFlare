@@ -25,15 +25,13 @@ const workerConfig: WorkerConfig = {
   // passwordProtection: 'username:password',
   // Define all your monitors here
   monitors: [
-    // Example HTTP Monitor
-  
     {
       id: 'xinnew.top',
       name: '企业全球门户',
       // `method` should be `TCP_PING` for tcp monitors
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
-      statusPageLink: 'https://xinnew.top',
+      target: 'https://xinnew.top',
       timeout: 5000,
     },
     {
@@ -42,7 +40,7 @@ const workerConfig: WorkerConfig = {
       // `method` should be `TCP_PING` for tcp monitors
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
-      statusPageLink: 'https://gemini-sg.xinnew.top',
+      target: 'https://gemini-sg.xinnew.top',
       timeout: 5000,
     },
     {
@@ -51,7 +49,7 @@ const workerConfig: WorkerConfig = {
       // `method` should be `TCP_PING` for tcp monitors
       method: 'TCP_PING',
       // `target` should be `host:port` for tcp monitors
-      statusPageLink: 'https://gemini.xinnew.top',
+      target: 'https://gemini.xinnew.top',
       timeout: 5000,
     },
   ],
