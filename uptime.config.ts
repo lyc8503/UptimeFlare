@@ -42,7 +42,7 @@ const workerConfig: WorkerConfig = {
       // `method` should be `TCP_PING` for tcp monitors
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
-      target: 'https://gemini-sg.xinnew.top/',
+      target: 'https://www.microsoft.com/zh-cn',
       timeout: 10000,
     },
     {
@@ -51,7 +51,7 @@ const workerConfig: WorkerConfig = {
       // `method` should be `TCP_PING` for tcp monitors
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
-      target: 'https://gemini.xinnew.top/',
+      target: 'https://www.apple.com/',
       timeout: 10000,
     },
     {
@@ -141,7 +141,7 @@ const workerConfig: WorkerConfig = {
       // `method` should be `TCP_PING` for tcp monitors
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
-      target: 'https://mail.sec.hn.cn/',
+      target: 'https://www.apple.com/hk/',
       timeout: 10000,
     },
     {
