@@ -179,7 +179,7 @@ const Worker = {
             }
 
             console.log('Calling config onStatusChange callback...')
-            await workerConfig.callbacks?.onStatusChange(
+            await workerConfig.callbacks?.onStatusChange?.(
               env,
               monitor,
               true,
@@ -250,7 +250,7 @@ const Worker = {
 
           if (monitorStatusChanged) {
             console.log('Calling config onStatusChange callback...')
-            await workerConfig.callbacks?.onStatusChange(
+            await workerConfig.callbacks?.onStatusChange?.(
               env,
               monitor,
               false,
@@ -266,7 +266,7 @@ const Worker = {
 
         try {
           console.log('Calling config onIncident callback...')
-          await workerConfig.callbacks?.onIncident(
+          await workerConfig.callbacks?.onIncident?.(
             env,
             monitor,
             currentIncident.start[0],
