@@ -63,14 +63,14 @@ export type Callbacks = {
     timeIncidentStart: number,
     timeNow: number,
     reason: string
-  ) => Promise<any>
+  ) => Promise<any> | any
   onIncident?: (
     env: any,
     monitor: any,
     timeIncidentStart: number,
     timeNow: number,
     reason: string
-  ) => Promise<any>
+  ) => Promise<any> | any
 }
 
 export type MonitorState = {
