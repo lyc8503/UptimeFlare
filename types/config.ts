@@ -1,3 +1,5 @@
+import type { Env } from '../worker/src'
+
 export type PageConfig = {
   title?: string
   links?: PageConfigLink[]
@@ -39,12 +41,12 @@ export type MonitorTarget = {
   checkProxyFallback?: boolean
 }
 
-export type WorkerConfig = {
+export type WorkerConfig<TEnv = Env> = {
   kvWriteCooldownMinutes: number
   passwordProtection?: string
   monitors: MonitorTarget[]
   notification?: Notification
-  callbacks?: Callbacks
+  callbacks?: Callbacks<TEnv>
 }
 
 export type Notification = {
@@ -55,9 +57,9 @@ export type Notification = {
   skipNotificationIds?: string[]
 }
 
-export type Callbacks = {
+export type Callbacks<TEnv = Env> = {
   onStatusChange?: (
-    env: any,
+    env: TEnv,
     monitor: MonitorTarget,
     isUp: boolean,
     timeIncidentStart: number,
@@ -65,7 +67,7 @@ export type Callbacks = {
     reason: string
   ) => Promise<any> | any
   onIncident?: (
-    env: any,
+    env: TEnv,
     monitor: MonitorTarget,
     timeIncidentStart: number,
     timeNow: number,
