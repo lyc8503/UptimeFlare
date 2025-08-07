@@ -56,7 +56,7 @@ export type Notification = {
 }
 
 export type Callbacks = {
-  onStatusChange: (
+  onStatusChange?: (
     env: any,
     monitor: any,
     isUp: boolean,
@@ -64,7 +64,7 @@ export type Callbacks = {
     timeNow: number,
     reason: string
   ) => Promise<any>
-  onIncident: (
+  onIncident?: (
     env: any,
     monitor: any,
     timeIncidentStart: number,
