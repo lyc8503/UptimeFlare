@@ -16,7 +16,7 @@ const pageConfig: PageConfig = {
     '🌐 企业服务集群': ['xinnew.top', 'mail.sec.hn.cn'],
     '🔐 合作业务集群': ['ms.sec.hn.cn','htc-ms.xinnew.top','chats.sec.hn.cn','zcz.xinnew.top','doraemon.xinnew.top'],
     '🛡️ 公共服务资源': ['gemini-sg.xinnew.top','gemini.xinnew.top','new-xl.xinnew.top','xl-d0h-server.xinnew.top'],
-    '🌐 数据跨境': ['swftwaf-ecs.xinnew.top','csblog.xinnew.top','passport-us.sec.hn.cn', 'passport-sg.sec.hn.cn', '69yun69.com'],
+    '🌐 数据跨境': ['passport.xinnew.top','69yun69.com','passport-us.sec.hn.cn', 'passport-sg.sec.hn.cn'],
   },
 }
 
@@ -154,21 +154,12 @@ const workerConfig: WorkerConfig = {
       timeout: 10000,
     },
     {
-      id: 'swftwaf-ecs.xinnew.top',
-      name: '数据处理网关1',
+      id: 'passport.xinnew.top',
+      name: '数据跨境安全审查网关',
       // `method` should be `TCP_PING` for tcp monitors
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
-      target: 'https://swftwaf-ecs.xinnew.top/',
-      timeout: 10000,
-    },
-    {
-      id: 'csblog.xinnew.top',
-      name: '数据处理网关2',
-      // `method` should be `TCP_PING` for tcp monitors
-      method: 'GET',
-      // `target` should be `host:port` for tcp monitors
-      target: 'https://csblog.xinnew.top',
+      target: 'https://passport.xinnew.top/',
       timeout: 10000,
     },
   ],
