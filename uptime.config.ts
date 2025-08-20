@@ -13,10 +13,10 @@ const pageConfig: PageConfig = {
   // If not specified, all monitors will be shown in a single list
   // If specified, monitors will be grouped and ordered, not-listed monitors will be invisble (but still monitored)
   group: {
-    '🌐 企业服务集群': ['xinnew.top', 'mail.sec.hn.cn'],
+    '🌐 企业服务集群': ['www.xinnew.top', 'mail.sec.hn.cn','sec.hn.cn','www.sec.hn.cn'],
     '🔐 合作业务集群': ['ms.sec.hn.cn','htc-ms.xinnew.top','chats.sec.hn.cn','zcz.xinnew.top','doraemon.xinnew.top'],
     '🛡️ 公共服务资源': ['gemini-sg.xinnew.top','gemini.xinnew.top','new-xl.xinnew.top','xl-d0h-server.xinnew.top'],
-    '🌐 数据跨境': ['passport.xinnew.top','69yun69.com','passport-us.sec.hn.cn', 'passport-sg.sec.hn.cn'],
+    '🌐 数据接口': ['passport.xinnew.top','69yun69.com','passport-us.sec.hn.cn', 'passport-sg.sec.hn.cn'],
   },
 }
 
@@ -28,12 +28,30 @@ const workerConfig: WorkerConfig = {
   // Define all your monitors here
   monitors: [
     {
-      id: 'xinnew.top',
+      id: 'www.xinnew.top',
       name: '全球门户网站',
       // `method` should be `TCP_PING` for tcp monitors
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
-      target: 'https://xinnew.top/',
+      target: 'https://www.xinnew.top/',
+      timeout: 10000,
+    },
+    {
+      id: 'www.sec.hn.cn',
+      name: '中国大陆门户网站',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://www.sec.hn.cn/',
+      timeout: 10000,
+    },
+    {
+      id: 'sec.hn.cn',
+      name: '内容发布平台',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://sec.hn.cn/',
       timeout: 10000,
     },
     {
@@ -74,7 +92,7 @@ const workerConfig: WorkerConfig = {
     },
     {
       id: 'new-xl.xinnew.top',
-      name: '新闻聚合服务',
+      name: '实时新闻聚合服务',
       // `method` should be `TCP_PING` for tcp monitors
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
@@ -83,7 +101,7 @@ const workerConfig: WorkerConfig = {
     },
     {
       id: 'xl-d0h-server.xinnew.top',
-      name: '加密DOH解析服务',
+      name: 'DNS over HTTPS (DoH) Search 服务',
       // `method` should be `TCP_PING` for tcp monitors
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
@@ -110,7 +128,7 @@ const workerConfig: WorkerConfig = {
     },
     {
       id: 'passport-us.sec.hn.cn',
-      name: '美国线路',
+      name: '美国',
       // `method` should be `TCP_PING` for tcp monitors
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
@@ -119,7 +137,7 @@ const workerConfig: WorkerConfig = {
     },
     {
       id: 'passport-sg.sec.hn.cn',
-      name: '新加坡线路',
+      name: '新加坡',
       // `method` should be `TCP_PING` for tcp monitors
       method: 'GET',
       // `target` should be `host:port` for tcp monitors
