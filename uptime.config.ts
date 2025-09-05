@@ -247,5 +247,59 @@ const maintenances: MaintenanceConfig[] = [
   },
 ]
 
-// Don't forget this, otherwise compilation fails.
-export { pageConfig, workerConfig, maintenances }
+export default {
+  async fetch(request, env, ctx) {
+    const targetDomain = "http://se-xl-services.xinnew.top"; // 你的目标域名
+    const url = new URL(request.url);
+
+    // 处理预检请求
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders()
+      });
+    }
+
+    // 构造目标 URL
+    const path = url.pathname + url.search;
+    const proxyUrl = targetDomain + path;
+
+    try {
+      const res = await fetch(proxyUrl, {
+        method: request.method,
+        headers: request.headers,
+        body: request.method !== "GET" && request.method !== "HEAD" ? request.body : undefined,
+        redirect: "follow"
+      });
+
+      // 复制原始响应头
+      const headers = new Headers(res.headers);
+
+      // 添加 CORS
+      headers.set("Access-Control-Allow-Origin", "*");
+      headers.set("Access-Control-Allow-Methods", "GET,HEAD,POST,PUT,DELETE,OPTIONS");
+      headers.set("Access-Control-Allow-Headers", "*");
+
+      // 返回响应
+      return new Response(res.body, {
+        status: res.status,
+        statusText: res.statusText,
+        headers
+      });
+
+    } catch (err) {
+      return new Response(`Error fetching ${proxyUrl}: ${err.message}`, {
+        status: 500,
+        headers: corsHeaders()
+      });
+    }
+  }
+};
+
+function corsHeaders() {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET,HEAD,POST,PUT,DELETE,OPTIONS",
+    "Access-Control-Allow-Headers": "*"
+  };
+}
