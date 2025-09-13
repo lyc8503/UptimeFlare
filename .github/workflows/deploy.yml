@@ -16,10 +16,10 @@ jobs:
         with:
           terraform_version: 1.6.4
 
-      - name: Use Node.js 18.x
+      - name: Use Node.js 22.x
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: 22.x
           cache: 'npm'
 
       # Automatically get an account id via the API Token
@@ -41,13 +41,13 @@ jobs:
 
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      
+
       # This is a temporary workaround to fix issue #13
       # On a new Cloudflare account, the terraform apply will fail with `workers.api.error.subdomain_required`
       # This may be due to the account not having a worker subdomain yet, so we create a dummy worker and then delete it.
       # Cloudflare should allocate a worker subdomain after this.
       # https://github.com/cloudflare/terraform-provider-cloudflare/issues/3304
-      - name: Create worker subdomain
+      - name: Create worker subdomain (temporary workaround)
         id: create_dummy_worker
         run: |
           curl --request PUT --fail-with-body \
@@ -55,7 +55,7 @@ jobs:
                --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
                --header 'Content-Type: application/javascript' \
                --data 'addEventListener('\''fetch'\'', (event) => event.respondWith(new Response('\''OK'\'')))'\
-          
+
           curl --request DELETE --fail-with-body \
                --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/dummy-ib4db6ntj5csdef3 \
                --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
@@ -79,23 +79,77 @@ jobs:
         run: |
           npx @cloudflare/next-on-pages
 
-      - name: Deploy using Terraform
-        # We're using terraform for first-time setup here,
-        # since we didn't setup a remote backend to store state,
-        # following runs will fail with name conflict, which is normal.
+      - name: Remove durable objects bindings (temporary workaround)
         continue-on-error: true
+        # This is a workaround to fix Cloudflare provider 4.x import crash when there's a durable object binding.
+        run: |
+          # Get bindings without durable objects
+          NEW_BINDINGS=$(curl --request GET --fail-with-body \
+               --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/settings \
+               --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
+               --header 'Content-Type: application/json' | jq '.result.bindings | map(select(.type != "durable_object_namespace"))' -jc)
+          echo "New bindings: $NEW_BINDINGS"
 
+          # Remove durable objects bindings
+          curl --request PATCH --fail-with-body \
+               --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/settings \
+               --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
+               -F 'settings={"bindings":'$NEW_BINDINGS'}'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}
+
+      - name: Deploy using Terraform
+        # As we don't save terraform state somewhere, we need to import the existing resources
         run: |
           terraform init
+
+          KV_ID=$(curl https://api.cloudflare.com/client/v4/accounts/$TF_VAR_CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces\?per_page\=100 --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN | jq -r '.result[] | select(.title == "uptimeflare_kv") | .id')
+          if [ -n "$KV_ID" ]; then
+            echo "Importing existing resources..."
+            terraform import cloudflare_workers_kv_namespace.uptimeflare_kv "$TF_VAR_CLOUDFLARE_ACCOUNT_ID/$KV_ID"
+            terraform import cloudflare_worker_script.uptimeflare "$TF_VAR_CLOUDFLARE_ACCOUNT_ID/uptimeflare_worker"
+            terraform import cloudflare_worker_cron_trigger.uptimeflare_worker_cron "$TF_VAR_CLOUDFLARE_ACCOUNT_ID/uptimeflare_worker"
+            terraform import cloudflare_pages_project.uptimeflare "$TF_VAR_CLOUDFLARE_ACCOUNT_ID/uptimeflare"
+          else
+            echo "KV namespace not found, first-time setup."
+          fi
+
           terraform apply -auto-approve -input=false
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           TF_VAR_CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}
 
-      # Still need to upload worker to keep it up-to-date (Terraform will fail after first-time setup)
-      - name: Upload worker
+      # Terraform Cloudflare provider 4.x doesn't support durable objects, provider 5.x has unresolved issues blocking the deployment. (cloudflare/terraform-provider-cloudflare#5412)
+      # So I have to manually add durable objects bindings here.
+      - name: Add durable objects bindings
         run: |
-          curl --fail-with-body -X PUT https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/content --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN -F 'index.js=@worker/dist/index.js;type=application/javascript+module' -F 'metadata={"main_module": "index.js"}'
+          # Get current bindings
+          CURRENT_BINDINGS=$(curl --request GET --fail-with-body \
+               --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/settings \
+               --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
+               --header 'Content-Type: application/json' | jq '.result.bindings' -jc)
+          CURRENT_BINDINGS="${CURRENT_BINDINGS:1:-1}"
+          echo "Current bindings: $CURRENT_BINDINGS"
+
+          # Try migration first (required for the new durable object class, ignore failures)
+          curl --request PATCH \
+               --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/settings \
+               --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
+               -F 'settings={"bindings":[{"type":"durable_object_namespace","name":"REMOTE_CHECKER_DO","class_name":"RemoteChecker"},'$CURRENT_BINDINGS'],"migrations":{"new_sqlite_classes":["RemoteChecker"],"new_tag":"v1"}}'
+
+          # Actually add the binding
+          curl --request PATCH --fail-with-body \
+               --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/settings \
+               --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
+               -F 'settings={"bindings":[{"type":"durable_object_namespace","name":"REMOTE_CHECKER_DO","class_name":"RemoteChecker"},'$CURRENT_BINDINGS']}'
+
+          # By the ways enable logs
+          curl --request PATCH \
+               --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/uptimeflare_worker/script-settings \
+               --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
+               --header 'Content-Type: application/json' \
+               -d '{"observability":{"enabled":true}}'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}

@@ -1,9 +1,10 @@
 import { Text, Tooltip } from '@mantine/core'
-import { MonitorState, MonitorTarget } from '@/uptime.types'
-import { IconAlertCircle, IconCircleCheck } from '@tabler/icons-react'
+import { MonitorState, MonitorTarget } from '@/types/config'
+import { IconAlertCircle, IconAlertTriangle, IconCircleCheck } from '@tabler/icons-react'
 import DetailChart from './DetailChart'
 import DetailBar from './DetailBar'
 import { getColor } from '@/util/color'
+import { maintenances } from '@/uptime.config'
 
 export default function MonitorDetail({
   monitor,
@@ -24,11 +25,32 @@ export default function MonitorDetail({
       </>
     )
 
-  const statusIcon =
+  let statusIcon =
     state.incident[monitor.id].slice(-1)[0].end === undefined ? (
-      <IconAlertCircle style={{ width: '1.25em', height: '1.25em', color: '#b91c1c' }} />
+      <IconAlertCircle
+        style={{ width: '1.25em', height: '1.25em', color: '#b91c1c', marginRight: '3px' }}
+      />
     ) : (
-      <IconCircleCheck style={{ width: '1.25em', height: '1.25em', color: '#059669' }} />
+      <IconCircleCheck
+        style={{ width: '1.25em', height: '1.25em', color: '#059669', marginRight: '3px' }}
+      />
+    )
+
+  // Hide real status icon if monitor is in maintenance
+  const now = new Date()
+  const hasMaintenance = maintenances
+    .filter((m) => now >= new Date(m.start) && (!m.end || now <= new Date(m.end)))
+    .find((maintenance) => maintenance.monitors?.includes(monitor.id))
+  if (hasMaintenance)
+    statusIcon = (
+      <IconAlertTriangle
+        style={{
+          width: '1.25em',
+          height: '1.25em',
+          color: '#fab005',
+          marginRight: '3px',
+        }}
+      />
     )
 
   let totalTime = Date.now() / 1000 - state.incident[monitor.id][0].start[0]
@@ -43,7 +65,11 @@ export default function MonitorDetail({
   const monitorNameElement = (
     <Text mt="sm" fw={700} style={{ display: 'inline-flex', alignItems: 'center' }}>
       {monitor.statusPageLink ? (
-        <a href={monitor.statusPageLink} target="_blank" style={{ display: 'inline-flex', alignItems: 'center', color: 'inherit' }}>
+        <a
+          href={monitor.statusPageLink}
+          target="_blank"
+          style={{ display: 'inline-flex', alignItems: 'center', color: 'inherit' }}
+        >
           {statusIcon} {monitor.name}
         </a>
       ) : (
@@ -69,7 +95,7 @@ export default function MonitorDetail({
       </div>
 
       <DetailBar monitor={monitor} state={state} />
-      <DetailChart monitor={monitor} state={state} />
+      {!monitor.hideLatencyChart && <DetailChart monitor={monitor} state={state} />}
     </>
   )
 }

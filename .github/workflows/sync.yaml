@@ -37,7 +37,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
+
           # Fetch latest code
           git clone https://github.com/lyc8503/UptimeFlare /tmp/latest
           rm -rf /tmp/latest/.git
@@ -49,7 +49,7 @@ jobs:
           git add .
           git commit -m "Sync latest code from upstream"
           git push
-      
+
       - name: Trigger deployment
         uses: benc-uk/workflow-dispatch@v1
         with:

@@ -1,9 +1,9 @@
 declare global {
-	namespace NodeJS {
-		interface ProcessEnv {
-			UPTIMEFLARE_STATE: KVNamespace;
-		}
-	}
+  namespace NodeJS {
+    interface ProcessEnv {
+      UPTIMEFLARE_STATE: KVNamespace
+    }
+  }
 }
 
-export {};
+export {}

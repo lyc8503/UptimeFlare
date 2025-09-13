@@ -1,9 +1,30 @@
-import { MonitorTarget } from '../../types/config'
-import { withTimeout, fetchTimeout } from './util'
+// This is a Node.js implementation of status monitoring
 
-export async function getStatus(
-  monitor: MonitorTarget
-): Promise<{ ping: number; up: boolean; err: string }> {
+const location = ''
+const defaultTimeout = 5000 // 5 seconds, a lower default for deployments on platforms like Vercel
+
+const express = require('express')
+const net = require('net')
+const app = express()
+const port = 3000
+
+async function getWorkerLocation() {
+  const res = await fetch('https://cloudflare.com/cdn-cgi/trace')
+  const text = await res.text()
+
+  const colo = /^colo=(.*)$/m.exec(text)?.[1]
+  return colo
+}
+
+const fetchTimeout = (url, ms, options = {}) => {
+  const controller = new AbortController()
+  const promise = fetch(url, { signal: controller.signal, ...options })
+  const timeout = setTimeout(() => controller.abort(), ms)
+  return promise.finally(() => clearTimeout(timeout))
+}
+
+// TODO: More code reuse here
+async function getStatus(monitor) {
   let status = {
     ping: 0,
     up: false,
@@ -14,43 +35,51 @@ export async function getStatus(
 
   if (monitor.method === 'TCP_PING') {
     // TCP port endpoint monitor
+    let host, port
     try {
-      const connect = await import(/* webpackIgnore: true */ 'cloudflare:sockets').then(
-        (sockets) => sockets.connect
-      )
       // This is not a real https connection, but we need to add a dummy `https://` to parse the hostname & port
+      // TODO: ipv6 buggy
       const parsed = new URL('https://' + monitor.target)
-      const socket = connect({ hostname: parsed.hostname, port: Number(parsed.port) })
+      host = parsed.hostname
+      port = parsed.port
 
-      // Now we have an `opened` promise!
-      await withTimeout(monitor.timeout || 10000, socket.opened)
-      await socket.close()
+      await new Promise((resolve, reject) => {
+        const socket = net.createConnection({ host: host, port: Number(port) })
 
-      console.log(`${monitor.name} connected to ${monitor.target}`)
+        const timer = setTimeout(() => {
+          socket.destroy()
+          reject(new Error(`Timeout after ${monitor.timeout || defaultTimeout}ms`))
+        }, monitor.timeout || defaultTimeout)
 
-      status.ping = Date.now() - startTime
+        socket.on('connect', () => {
+          clearTimeout(timer)
+          socket.end()
+          resolve(null)
+        })
+
+        socket.on('error', (err) => {
+          clearTimeout(timer)
+          socket.destroy()
+          reject(err)
+        })
+      })
+
       status.up = true
       status.err = ''
-    } catch (e: Error | any) {
+      status.ping = Date.now() - startTime
+    } catch (e) {
       console.log(`${monitor.name} errored with ${e.name}: ${e.message}`)
-      if (e.message.includes('timed out')) {
-        status.ping = monitor.timeout || 10000
-      }
       status.up = false
-      status.err = e.name + ': ' + e.message
+      status.err = e.name + ': ' + e.message.replace(host, '<redacted>').replace(port, '<redacted>')
+      status.ping = Date.now() - startTime
     }
   } else {
     // HTTP endpoint monitor
     try {
-      const response = await fetchTimeout(monitor.target, monitor.timeout || 10000, {
+      const response = await fetchTimeout(monitor.target, monitor.timeout || defaultTimeout, {
         method: monitor.method,
-        headers: monitor.headers as any,
+        headers: monitor.headers,
         body: monitor.body,
-        cf: {
-          cacheTtlByStatus: {
-            '100-599': -1, // Don't cache any status code, from https://developers.cloudflare.com/workers/runtime-apis/request/#requestinitcfproperties
-          },
-        },
       })
 
       console.log(`${monitor.name} responded with ${response.status}`)
@@ -108,10 +137,10 @@ export async function getStatus(
 
       status.up = true
       status.err = ''
-    } catch (e: any) {
+    } catch (e) {
       console.log(`${monitor.name} errored with ${e.name}: ${e.message}`)
       if (e.name === 'AbortError') {
-        status.ping = monitor.timeout || 10000
+        status.ping = monitor.timeout || defaultTimeout
         status.up = false
         status.err = `Timeout after ${status.ping}ms`
       } else {
@@ -123,3 +152,18 @@ export async function getStatus(
 
   return status
 }
+
+app.use(express.json())
+
+app.post('/', async (req, res) => {
+  res.json({
+    location: await getWorkerLocation(),
+    status: await getStatus(req.body),
+  })
+})
+
+app.listen(port, () => {
+  console.log(`App listening on port ${port}`)
+})
+
+module.exports = app

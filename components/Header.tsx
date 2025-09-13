@@ -1,9 +1,10 @@
 import { Container, Group, Text } from '@mantine/core'
 import classes from '@/styles/Header.module.css'
 import { pageConfig } from '@/uptime.config'
+import { PageConfigLink } from '@/types/config'
 
 export default function Header() {
-  const linkToElement = (link: { label: string; link: string; highlight?: boolean }) => {
+  const linkToElement = (link: PageConfigLink) => {
     return (
       <a
         key={link.label}
@@ -35,11 +36,11 @@ export default function Header() {
         </div>
 
         <Group gap={5} visibleFrom="sm">
-          {pageConfig.links.map(linkToElement)}
+          {pageConfig.links?.map(linkToElement)}
         </Group>
 
         <Group gap={5} hiddenFrom="sm">
-          {pageConfig.links.filter((link) => (link as any).highlight).map(linkToElement)}
+          {pageConfig.links?.filter((link) => link.highlight).map(linkToElement)}
         </Group>
       </Container>
     </header>

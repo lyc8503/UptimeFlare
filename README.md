@@ -8,6 +8,7 @@
 A more advanced, serverless, and free uptime monitoring & status page solution, powered by Cloudflare Workers, complete with a user-friendly interface.
 
 ## ⭐Features
+
 - Open-source, easy to deploy (in under 10 minutes, no local tools required), and free
 - Monitoring capabilities
   - Up to 50 checks at 1-minute intervals
@@ -49,8 +50,14 @@ Please refer to [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
 - [x] Improve docs by providing simple examples
 - [x] Notification grace period
 - [ ] SSL certificate checks
-- [ ] Self-host Dockerfile
-- [ ] Incident timeline
-- [ ] Improve `checkLocationWorkerRoute` and fix possible `proxy failed`
-- [ ] Groups 
+- [x] ~~Self-host Dockerfile~~
+- [x] Incident history
+- [x] Improve `checkLocationWorkerRoute` and fix possible `proxy failed`
+- [x] Groups
 - [x] Remove old incidents
+- [x] ~~Known issue~~: `fetch` doesn't support non-standard port (resolved after CF update)
+- [x] Compatibility date update
+- [x] Scheduled Maintenance 
+- [ ] Update wiki/README and add docs for dev
+- [ ] Migration to Terraform Cloudflare provider version 5.x
+- [ ] Cloudflare D1 database

@@ -11,8 +11,8 @@ if (process.env.NODE_ENV === 'development') {
     bindings: {
       UPTIMEFLARE_STATE: {
         type: 'kv',
-        id: 'UPTIMEFLARE_STATE'
-      }
-    }
+        id: 'UPTIMEFLARE_STATE',
+      },
+    },
   })
 }

@@ -1,55 +1,51 @@
-import { workerConfig } from '../../uptime.config'
+import { workerConfig, maintenances } from '../../uptime.config'
 import { formatStatusChangeNotification, getWorkerLocation, notifyWithApprise } from './util'
-import { MonitorState } from '../../uptime.types'
+import { MonitorState, MonitorTarget } from '../../types/config'
 import { getStatus } from './monitor'
+import { DurableObject } from 'cloudflare:workers'
 
 export interface Env {
   UPTIMEFLARE_STATE: KVNamespace
+  REMOTE_CHECKER_DO: DurableObjectNamespace<RemoteChecker>
 }
 
-export default {
-  async fetch(request: Request): Promise<Response> {
-    const workerLocation = request.cf?.colo
-    console.log(`Handling request event at ${workerLocation}...`)
-
-    if (request.method !== 'POST') {
-      return new Response('Remote worker is working...', { status: 405 })
-    }
-
-    const targetId = (await request.json<{ target: string }>())['target']
-    const target = workerConfig.monitors.find((m) => m.id === targetId)
-
-    if (target === undefined) {
-      return new Response('Target Not Found', { status: 404 })
-    }
-
-    const status = await getStatus(target)
-
-    return new Response(
-      JSON.stringify({
-        location: workerLocation,
-        status: status,
-      }),
-      {
-        headers: {
-          'content-type': 'application/json;charset=UTF-8',
-        },
-      }
-    )
-  },
-
+const Worker = {
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
     const workerLocation = (await getWorkerLocation()) || 'ERROR'
     console.log(`Running scheduled event on ${workerLocation}...`)
 
     // Auxiliary function to format notification and send it via apprise
     let formatAndNotify = async (
-      monitor: any,
+      monitor: MonitorTarget,
       isUp: boolean,
       timeIncidentStart: number,
       timeNow: number,
       reason: string
     ) => {
+      // Skip notification if monitor is in the skip list
+      const skipList = workerConfig.notification?.skipNotificationIds
+      if (skipList && skipList.includes(monitor.id)) {
+        console.log(
+          `Skipping notification for ${monitor.name} (${monitor.id} in skipNotificationIds)`
+        )
+        return
+      }
+
+      // Skip notification if monitor is in maintenance
+      const maintenanceList = maintenances
+        .filter(
+          (m) =>
+            new Date(timeNow * 1000) >= new Date(m.start) &&
+            (!m.end || new Date(timeNow * 1000) <= new Date(m.end))
+        )
+        .map((e) => (e.monitors || []))
+        .flat()
+
+      if (maintenanceList.includes(monitor.id)) {
+        console.log(`Skipping notification for ${monitor.name} (in maintenance)`)
+        return
+      }
+
       if (workerConfig.notification?.appriseApiServer && workerConfig.notification?.recipientUrl) {
         const notification = formatStatusChangeNotification(
           monitor,
@@ -66,7 +62,9 @@ export default {
           notification.body
         )
       } else {
-        console.log(`Apprise API server or recipient URL not set, skipping apprise notification for ${monitor.name}`)
+        console.log(
+          `Apprise API server or recipient URL not set, skipping apprise notification for ${monitor.name}`
+        )
       }
     }
 
@@ -98,23 +96,43 @@ export default {
       let checkLocation = workerLocation
       let status
 
-      if (monitor.checkLocationWorkerRoute) {
-        // Initiate a check from a different location
+      if (monitor.checkProxy) {
+        // Initiate a check using proxy (Geo-specific monitoring)
         try {
-          console.log('Calling worker: ' + monitor.checkLocationWorkerRoute)
-          const resp = await (
-            await fetch(monitor.checkLocationWorkerRoute, {
-              method: 'POST',
-              body: JSON.stringify({
-                target: monitor.id,
-              }),
+          console.log('Calling check proxy: ' + monitor.checkProxy)
+          let resp
+          if (monitor.checkProxy.startsWith('worker://')) {
+            const doLoc = monitor.checkProxy.replace('worker://', '')
+            const doId = env.REMOTE_CHECKER_DO.idFromName(doLoc)
+            const doStub = env.REMOTE_CHECKER_DO.get(doId, {
+              locationHint: doLoc as DurableObjectLocationHint,
             })
-          ).json<{ location: string; status: { ping: number; up: boolean; err: string } }>()
+            resp = await doStub.getLocationAndStatus(monitor)
+            try {
+              // Kill the DO instance after use, to avoid extra resource usage
+              await doStub.kill()
+            } catch (err) {
+              // An error here is expected, ignore it
+            }
+          } else {
+            resp = await (
+              await fetch(monitor.checkProxy, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(monitor),
+              })
+            ).json<{ location: string; status: { ping: number; up: boolean; err: string } }>()
+          }
           checkLocation = resp.location
           status = resp.status
         } catch (err) {
-          console.log('Error calling worker: ' + err)
-          status = { ping: 0, up: false, err: 'Error initiating check from remote worker' }
+          console.log('Error calling proxy: ' + err)
+          if (monitor.checkProxyFallback) {
+            console.log('Falling back to local check...')
+            status = await getStatus(monitor)
+          } else {
+            status = { ping: 0, up: false, err: 'Error initiating check from remote worker' }
+          }
         }
       } else {
         // Initiate a check from the current location
@@ -150,21 +168,18 @@ export default {
               // grace period not set OR ...
               workerConfig.notification?.gracePeriod === undefined ||
               // only when we have sent a notification for DOWN status, we will send a notification for UP status (within 30 seconds of possible drift)
-              currentTimeSecond - lastIncident.start[0] >= (workerConfig.notification.gracePeriod + 1) * 60 - 30
+              currentTimeSecond - lastIncident.start[0] >=
+                (workerConfig.notification.gracePeriod + 1) * 60 - 30
             ) {
-              await formatAndNotify(
-                monitor,
-                true,
-                lastIncident.start[0],
-                currentTimeSecond,
-                'OK'
-              )
+              await formatAndNotify(monitor, true, lastIncident.start[0], currentTimeSecond, 'OK')
             } else {
-              console.log(`grace period (${workerConfig.notification?.gracePeriod}m) not met, skipping apprise UP notification for ${monitor.name}`)
+              console.log(
+                `grace period (${workerConfig.notification?.gracePeriod}m) not met, skipping apprise UP notification for ${monitor.name}`
+              )
             }
 
             console.log('Calling config onStatusChange callback...')
-            await workerConfig.callbacks.onStatusChange(
+            await workerConfig.callbacks?.onStatusChange?.(
               env,
               monitor,
               true,
@@ -201,22 +216,20 @@ export default {
         try {
           if (
             // monitor status changed AND...
-            (monitorStatusChanged && (
+            (monitorStatusChanged &&
               // grace period not set OR ...
-              workerConfig.notification?.gracePeriod === undefined ||
-              // have sent a notification for DOWN status
-              currentTimeSecond - currentIncident.start[0] >= (workerConfig.notification.gracePeriod + 1) * 60 - 30
-            ))
-            ||
-            (
-              // grace period is set AND...
-              workerConfig.notification?.gracePeriod !== undefined &&
-              (
-                // grace period is met
-                currentTimeSecond - currentIncident.start[0] >= workerConfig.notification.gracePeriod * 60 - 30 &&
-                currentTimeSecond - currentIncident.start[0] < workerConfig.notification.gracePeriod * 60 + 30
-              )
-            )) {
+              (workerConfig.notification?.gracePeriod === undefined ||
+                // have sent a notification for DOWN status
+                currentTimeSecond - currentIncident.start[0] >=
+                  (workerConfig.notification.gracePeriod + 1) * 60 - 30)) ||
+            // grace period is set AND...
+            (workerConfig.notification?.gracePeriod !== undefined &&
+              // grace period is met
+              currentTimeSecond - currentIncident.start[0] >=
+                workerConfig.notification.gracePeriod * 60 - 30 &&
+              currentTimeSecond - currentIncident.start[0] <
+                workerConfig.notification.gracePeriod * 60 + 30)
+          ) {
             await formatAndNotify(
               monitor,
               false,
@@ -225,12 +238,19 @@ export default {
               status.err
             )
           } else {
-            console.log(`Grace period (${workerConfig.notification?.gracePeriod}m) not met (currently down for ${currentTimeSecond - currentIncident.start[0]}s, changed ${monitorStatusChanged}), skipping apprise DOWN notification for ${monitor.name}`)
+            console.log(
+              `Grace period (${workerConfig.notification
+                ?.gracePeriod}m) not met (currently down for ${
+                currentTimeSecond - currentIncident.start[0]
+              }s, changed ${monitorStatusChanged}), skipping apprise DOWN notification for ${
+                monitor.name
+              }`
+            )
           }
 
           if (monitorStatusChanged) {
             console.log('Calling config onStatusChange callback...')
-            await workerConfig.callbacks.onStatusChange(
+            await workerConfig.callbacks?.onStatusChange?.(
               env,
               monitor,
               false,
@@ -246,7 +266,7 @@ export default {
 
         try {
           console.log('Calling config onIncident callback...')
-          await workerConfig.callbacks.onIncident(
+          await workerConfig.callbacks?.onIncident?.(
             env,
             monitor,
             currentIncident.start[0],
@@ -262,8 +282,8 @@ export default {
       // append to latency data
       let latencyLists = state.latency[monitor.id] || {
         recent: [],
-        all: [],
       }
+      latencyLists.all = []
 
       const record = {
         loc: checkLocation,
@@ -271,55 +291,82 @@ export default {
         time: currentTimeSecond,
       }
       latencyLists.recent.push(record)
-      if (latencyLists.all.length === 0 || currentTimeSecond - latencyLists.all.slice(-1)[0].time > 60 * 60) {
-        latencyLists.all.push(record)
-      }
 
       // discard old data
       while (latencyLists.recent[0]?.time < currentTimeSecond - 12 * 60 * 60) {
         latencyLists.recent.shift()
       }
-      while (latencyLists.all[0]?.time < currentTimeSecond - 90 * 24 * 60 * 60) {
-        latencyLists.all.shift()
-      }
       state.latency[monitor.id] = latencyLists
 
       // discard old incidents
       let incidentList = state.incident[monitor.id]
-      while (incidentList.length > 0 && incidentList[0].end && incidentList[0].end < currentTimeSecond - 90 * 24 * 60 * 60) {
+      while (
+        incidentList.length > 0 &&
+        incidentList[0].end &&
+        incidentList[0].end < currentTimeSecond - 90 * 24 * 60 * 60
+      ) {
         incidentList.shift()
       }
 
-      if (incidentList.length == 0 || (
-        incidentList[0].start[0] > currentTimeSecond - 90 * 24 * 60 * 60 &&
-        incidentList[0].error[0] != 'dummy'
-      )) {
+      if (
+        incidentList.length == 0 ||
+        (incidentList[0].start[0] > currentTimeSecond - 90 * 24 * 60 * 60 &&
+          incidentList[0].error[0] != 'dummy')
+      ) {
         // put the dummy incident back
-        incidentList.unshift(
-          {
-            start: [currentTimeSecond - 90 * 24 * 60 * 60],
-            end: currentTimeSecond - 90 * 24 * 60 * 60,
-            error: ['dummy'],
-          }
-        )
+        incidentList.unshift({
+          start: [currentTimeSecond - 90 * 24 * 60 * 60],
+          end: currentTimeSecond - 90 * 24 * 60 * 60,
+          error: ['dummy'],
+        })
       }
       state.incident[monitor.id] = incidentList
 
       statusChanged ||= monitorStatusChanged
     }
 
-    console.log(`statusChanged: ${statusChanged}, lastUpdate: ${state.lastUpdate}, currentTime: ${currentTimeSecond}`)
+    console.log(
+      `statusChanged: ${statusChanged}, lastUpdate: ${state.lastUpdate}, currentTime: ${currentTimeSecond}`
+    )
     // Update state
     // Allow for a cooldown period before writing to KV
     if (
       statusChanged ||
-      currentTimeSecond - state.lastUpdate >= workerConfig.kvWriteCooldownMinutes * 60 - 10  // Allow for 10 seconds of clock drift
+      currentTimeSecond - state.lastUpdate >= workerConfig.kvWriteCooldownMinutes * 60 - 10 // Allow for 10 seconds of clock drift
     ) {
-      console.log("Updating state...")
+      console.log('Updating state...')
       state.lastUpdate = currentTimeSecond
       await env.UPTIMEFLARE_STATE.put('state', JSON.stringify(state))
     } else {
-      console.log("Skipping state update due to cooldown period.")
+      console.log('Skipping state update due to cooldown period.')
     }
   },
+}
+
+export default Worker
+
+export class RemoteChecker extends DurableObject {
+  constructor(ctx: DurableObjectState, env: Env) {
+    super(ctx, env)
+  }
+
+  async getLocationAndStatus(
+    monitor: MonitorTarget
+  ): Promise<{ location: string; status: { ping: number; up: boolean; err: string } }> {
+    const colo = (await getWorkerLocation()) as string
+    console.log(`Running remote checker (DurableObject) at ${colo}...`)
+    const status = await getStatus(monitor)
+    return {
+      location: colo,
+      status: status,
+    }
+  }
+
+  async kill() {
+    // Throwing an error in `blockConcurrencyWhile` will terminate the Durable Object instance
+    // https://developers.cloudflare.com/durable-objects/api/state/#blockconcurrencywhile
+    this.ctx.blockConcurrencyWhile(async () => {
+      throw 'killed'
+    })
+  }
 }
