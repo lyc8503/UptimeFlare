@@ -1,4 +1,4 @@
-import { Alert, List, Text } from '@mantine/core'
+import { Alert, List, Text, Group, Box } from '@mantine/core'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { MaintenanceConfig, MonitorTarget } from '@/types/config'
 
@@ -21,53 +21,64 @@ export default function MaintenanceAlert({
       }
       color={upcoming ? 'gray' : maintenance.color || '#f29030'}
       withCloseButton={false}
-      style={{ position: 'relative', margin: '16px auto 0 auto', ...style }}
+      style={{ margin: '16px auto', ...style }}
     >
-      {/* Date range in top right */}
-      <div
+      {/* Body and dates in a responsive flex layout */}
+      <Group
+        align="flex-start"
         style={{
-          position: 'absolute',
-          top: 10,
-          right: 10,
-          fontSize: '0.85rem',
-          textAlign: 'right',
-          padding: '2px 8px',
-          borderRadius: 6,
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+          gap: 16,
+          [`@media (max-width: 600px)`]: { gap: 8 },
         }}
       >
-        {upcoming ? (
-          <>
-            <b>Scheduled for:</b> {new Date(maintenance.start).toLocaleString()}
-            <br />
-            <b>Expected end:</b>{' '}
-            {maintenance.end ? new Date(maintenance.end).toLocaleString() : 'Until further notice'}
-          </>
-        ) : (
-          <>
-            <b>From:</b> {new Date(maintenance.start).toLocaleString()}
-            <br />
-            <b>To:</b>{' '}
-            {maintenance.end ? new Date(maintenance.end).toLocaleString() : 'Until further notice'}
-          </>
-        )}
-      </div>
+      {/* Maintenance description and affected components */}
+        <Box style={{ flex: '1 1 300px', minWidth: 200 }}>
+          <Text style={{ whiteSpace: 'pre-line' }}>{maintenance.body}</Text>
 
-      {/* Maintenance description */}
-      <Text style={{ whiteSpace: 'pre-line' }}>{maintenance.body}</Text>
+          {maintenance.monitors && maintenance.monitors.length > 0 && (
+            <>
+              <Text mt="xs"><b>Affected components:</b></Text>
+              <List size="sm" withPadding>
+                {maintenance.monitors.map((comp, idx) => (
+                  <List.Item key={idx}>{comp.name}</List.Item>
+                ))}
+              </List>
+            </>
+          )}
+        </Box>
 
-      {/* Affected components */}
-      {maintenance.monitors && maintenance.monitors.length > 0 && (
-        <>
-          <Text mt="xs">
-            <b>Affected components:</b>
-          </Text>
-          <List size="sm" withPadding>
-            {maintenance.monitors.map((comp, compIdx) => (
-              <List.Item key={compIdx}>{comp.name}</List.Item>
-            ))}
-          </List>
-        </>
-      )}
+        {/* Date range */}
+        <Box
+          style={{
+            flex: '0 0 auto',
+            fontSize: '0.85rem',
+            textAlign: 'right',
+            minWidth: 120,
+          }}
+        >
+          {upcoming ? (
+            <>
+              <b>Scheduled for:</b> {new Date(maintenance.start).toLocaleString()}
+              <br />
+              <b>Expected end:</b>{' '}
+              {maintenance.end
+                ? new Date(maintenance.end).toLocaleString()
+                : 'Until further notice'}
+            </>
+          ) : (
+            <>
+              <b>From:</b> {new Date(maintenance.start).toLocaleString()}
+              <br />
+              <b>To:</b>{' '}
+              {maintenance.end
+                ? new Date(maintenance.end).toLocaleString()
+                : 'Until further notice'}
+            </>
+          )}
+        </Box>
+      </Group>
     </Alert>
   )
 }
