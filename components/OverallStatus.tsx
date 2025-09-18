@@ -1,6 +1,6 @@
 import { MaintenanceConfig, MonitorTarget } from '@/types/config'
-import { Center, Container, Title } from '@mantine/core'
-import { IconCircleCheck, IconAlertCircle } from '@tabler/icons-react'
+import { Center, Container, Title, Collapse, Button, Box } from '@mantine/core'
+import { IconCircleCheck, IconAlertCircle, IconPlus, IconMinus } from '@tabler/icons-react'
 import { useEffect, useState } from 'react'
 import MaintenanceAlert from './MaintenanceAlert'
 import { pageConfig } from '@/uptime.config'
@@ -58,15 +58,26 @@ export default function OverallStatus({
   })
 
   const now = new Date()
-  let filteredMaintenances: (Omit<MaintenanceConfig, 'monitors'> & { monitors?: MonitorTarget[] })[] =
-    maintenances
-      .filter((m) => now >= new Date(m.start) && (!m.end || now <= new Date(m.end)))
-      .map((maintenance) => ({
-        ...maintenance,
-        monitors: maintenance.monitors?.map(
-          (monitorId) => monitors.find((mon) => monitorId === mon.id)!
-        ),
-      }))
+  const activeMaintenances = maintenances
+    .filter((m) => now >= new Date(m.start) && (!m.end || now <= new Date(m.end)))
+    .map((maintenance) => ({
+      ...maintenance,
+      monitors: maintenance.monitors?.map(
+        (monitorId) => monitors.find((mon) => monitorId === mon.id)!
+      ),
+    }))
+
+  const upcomingMaintenances = maintenances
+    .filter((m) => now < new Date(m.start))
+    .map((maintenance) => ({
+      ...maintenance,
+      monitors: maintenance.monitors?.map(
+        (monitorId) => monitors.find((mon) => monitorId === mon.id)!
+      ),
+    }))
+
+  const [activeOpen, setActiveOpen] = useState(true)
+  const [upcomingOpen, setUpcomingOpen] = useState(false)
 
   return (
     <Container size="md" mt="xl">
@@ -81,13 +92,52 @@ export default function OverallStatus({
         } sec ago)`}
       </Title>
 
-      {filteredMaintenances.map((maintenance, idx) => (
-        <MaintenanceAlert
-          key={idx}
-          maintenance={maintenance}
-          style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
-        />
-      ))}
+      {/* Active Maintenance */}
+      {activeMaintenances.length > 0 && (
+        <>
+          <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: '1rem' }}>
+            <Title order={3} style={{ color: '#f29030' }}>
+              Ongoing Maintenance
+            </Title>
+            <Button variant="subtle" size="xs" onClick={() => setActiveOpen((o) => !o)}>
+              {activeOpen ? <IconMinus size={16} /> : <IconPlus size={16} />}
+            </Button>
+          </Box>
+          <Collapse in={activeOpen}>
+            {activeMaintenances.map((maintenance, idx) => (
+              <MaintenanceAlert
+                key={`active-${idx}`}
+                maintenance={maintenance}
+                style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
+              />
+            ))}
+          </Collapse>
+        </>
+      )}
+
+      {/* Upcoming Maintenance */}
+      {upcomingMaintenances.length > 0 && (
+        <>
+          <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: '1rem' }}>
+            <Title order={3} style={{ color: 'gray' }}>
+              Upcoming Maintenance
+            </Title>
+            <Button variant="subtle" size="xs" onClick={() => setUpcomingOpen((o) => !o)}>
+              {upcomingOpen ? <IconMinus size={16} /> : <IconPlus size={16} />}
+            </Button>
+          </Box>
+          <Collapse in={upcomingOpen}>
+            {upcomingMaintenances.map((maintenance, idx) => (
+              <MaintenanceAlert
+                key={`upcoming-${idx}`}
+                maintenance={maintenance}
+                style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
+                upcoming
+              />
+            ))}
+          </Collapse>
+        </>
+      )}
     </Container>
   )
 }
