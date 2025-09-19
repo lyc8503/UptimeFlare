@@ -16,6 +16,12 @@ const pageConfig: PageConfig = {
     '🌐 Public (example group name)': ['foo_monitor', 'bar_monitor', 'more monitor ids...'],
     '🔐 Private': ['test_tcp_monitor'],
   },
+  // [OPTIONAL] Maintenance style
+  maintenances: {
+    // If not specified all upcoming maintenance alerts will default to "gray",
+    // when they are active they will use the color specified in the `MaintenanceConfig[]`
+    upcomingColor: "gray"
+  }
 }
 
 const workerConfig: WorkerConfig = {

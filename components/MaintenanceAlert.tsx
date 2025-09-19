@@ -1,6 +1,7 @@
 import { Alert, List, Text, Group, Box } from '@mantine/core'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { MaintenanceConfig, MonitorTarget } from '@/types/config'
+import { pageConfig } from '@/uptime.config'
 
 export default function MaintenanceAlert({
   maintenance,
@@ -19,7 +20,7 @@ export default function MaintenanceAlert({
           ? `Upcoming Maintenance: ${maintenance.title || 'Scheduled Maintenance'}`
           : maintenance.title || 'Scheduled Maintenance'
       }
-      color={upcoming ? 'gray' : maintenance.color || '#f29030'}
+      color={upcoming ? (pageConfig.maintenances?.upcomingColor ?? 'gray') : maintenance.color || '#f29030'}
       withCloseButton={false}
       style={{ margin: '16px auto', ...style }}
     >
@@ -58,7 +59,6 @@ export default function MaintenanceAlert({
             minWidth: 120,
           }}
         >
-          
               <b>{upcoming ? 'Scheduled for' : 'From'}:</b> {new Date(maintenance.start).toLocaleString()}
               <br />
               <b>{upcoming ? 'Expected end' : 'To'}:</b>{' '}
