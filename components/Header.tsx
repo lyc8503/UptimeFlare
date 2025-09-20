@@ -9,7 +9,7 @@ export default function Header() {
       <a
         key={i}
         href={link.link}
-        target="_blank"
+        target={link.link.startsWith('/') ? undefined : '_blank'}
         className={classes.link}
         data-active={link.highlight}
       >
@@ -24,7 +24,10 @@ export default function Header() {
     <header className={classes.header}>
       <Container size="md" className={classes.inner}>
         <div>
-          <a href="https://github.com/lyc8503/UptimeFlare" target="_blank">
+          <a
+            href={location.pathname == '/' ? 'https://github.com/lyc8503/UptimeFlare' : '/'}
+            target={location.pathname == '/' ? '_blank' : undefined}
+          >
             <Text size="xl" span>
               🕒
             </Text>
@@ -45,7 +48,7 @@ export default function Header() {
         </Group>
 
         <Group gap={5} hiddenFrom="sm">
-          {links?.filter((link) => link.highlight).map(linkToElement)}
+          {links?.filter((link) => (link.highlight || link.link.startsWith('/'))).map(linkToElement)}
         </Group>
       </Container>
     </header>
