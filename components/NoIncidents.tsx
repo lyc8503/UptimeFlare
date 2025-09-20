@@ -5,7 +5,16 @@ export default function NoIncidentsAlert({ style }: { style?: React.CSSPropertie
   return (
     <Alert
       icon={<IconInfoCircle />}
-      title="No Incidents in this month"
+      title={
+        <span
+          style={{
+            fontSize: '1rem',
+            fontWeight: 700,
+          }}
+        >
+          {'No incidents in this month'}
+        </span>
+      }
       color="gray"
       withCloseButton={false}
       style={{
@@ -14,18 +23,6 @@ export default function NoIncidentsAlert({ style }: { style?: React.CSSPropertie
         ...style,
       }}
     >
-      <div
-        style={{
-          position: 'absolute',
-          top: 10,
-          right: 10,
-          fontSize: '0.85rem',
-          textAlign: 'right',
-          padding: '2px 8px',
-          borderRadius: 6,
-          color: '#888',
-        }}
-      ></div>
       <Text>There are no incidents for this month.</Text>
     </Alert>
   )

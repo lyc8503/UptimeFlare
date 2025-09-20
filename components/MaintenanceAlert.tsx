@@ -1,4 +1,5 @@
-import { Alert, List, Text } from '@mantine/core'
+import { Alert, List, Text, useMantineTheme } from '@mantine/core'
+import { useMediaQuery } from '@mantine/hooks'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { MaintenanceConfig, MonitorTarget } from '@/types/config'
 
@@ -9,32 +10,42 @@ export default function MaintenanceAlert({
   maintenance: Omit<MaintenanceConfig, 'monitors'> & { monitors?: MonitorTarget[] }
   style?: React.CSSProperties
 }) {
-  const titleStyle: React.CSSProperties = {}
+  const theme = useMantineTheme()
+  const isDesktop = useMediaQuery(`(min-width: ${theme.breakpoints.sm})`)
 
   return (
     <Alert
       icon={<IconAlertTriangle />}
       title={
-        (
-          <span style={titleStyle}>
-            {maintenance.title || 'Scheduled Maintenance'}
-          </span>
-        )
+        <span
+          style={{
+            fontSize: '1rem',
+            fontWeight: 700,
+          }}
+        >
+          {maintenance.title || 'Scheduled Maintenance'}
+        </span>
       }
       color={maintenance.color || 'yellow'}
       withCloseButton={false}
       style={{ position: 'relative', margin: '16px auto 0 auto', ...style }}
     >
-      {/* Date range in top right */}
+      {/* Date range in top right (desktop) or inline (mobile) */}
       <div
         style={{
-          position: 'absolute',
-          top: 10,
-          right: 10,
-          fontSize: '0.85rem',
-          textAlign: 'right',
-          padding: '2px 8px',
-          borderRadius: 6,
+          ...{
+            top: 10,
+            fontSize: '0.85rem',
+            borderRadius: 6,
+          },
+          ...(isDesktop
+            ? {
+                position: 'absolute',
+                right: 10,
+                padding: '2px 8px',
+                textAlign: 'right',
+              }
+            : {}),
         }}
       >
         <b>From:</b> {new Date(maintenance.start).toLocaleString()}
@@ -43,7 +54,7 @@ export default function MaintenanceAlert({
         {maintenance.end ? new Date(maintenance.end).toLocaleString() : 'Until further notice'}
       </div>
 
-      <Text>{maintenance.body}</Text>
+      <Text style={{ paddingTop: '3px' }}>{maintenance.body}</Text>
       {maintenance.monitors && maintenance.monitors.length > 0 && (
         <>
           <Text mt="xs">
