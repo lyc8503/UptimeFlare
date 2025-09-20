@@ -119,11 +119,6 @@ export default function IncidentsPage() {
                 monitorFilteredIncidents.map((incident, i) => (
                   <MaintenanceAlert
                     key={i}
-                    hash={[
-                      new Date(incident.start).getFullYear(),
-                      String(new Date(incident.start).getMonth() + 1).padStart(2, '0'),
-                      monitorFilteredIncidents.length - i,
-                    ].join('-')}
                     maintenance={incident}
                   />
                 ))
