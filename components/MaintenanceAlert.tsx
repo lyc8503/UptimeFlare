@@ -29,9 +29,9 @@ export default function MaintenanceAlert({
         title={
           (
             <span style={titleStyle} onClick={updateHash}>
-              {maintenance.title}
+              {maintenance.title || 'Scheduled Maintenance'}
             </span>
-          ) || 'Scheduled Maintenance'
+          )
         }
         color={maintenance.color || 'yellow'}
         withCloseButton={false}
