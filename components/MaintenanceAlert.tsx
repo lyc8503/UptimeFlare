@@ -1,4 +1,5 @@
-import { Alert, List, Text, Group, Box } from '@mantine/core'
+import { Alert, List, Text, Group, Box, useMantineTheme } from '@mantine/core'
+import { useMediaQuery } from '@mantine/hooks'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { MaintenanceConfig, MonitorTarget } from '@/types/config'
 import { pageConfig } from '@/uptime.config'
@@ -12,6 +13,9 @@ export default function MaintenanceAlert({
   style?: React.CSSProperties
   upcoming?: boolean
 }) {
+  const theme = useMantineTheme()
+  const isDesktop = useMediaQuery(`(min-width: ${theme.breakpoints.sm})`)
+
   return (
     <Alert
       icon={<IconAlertTriangle />}
@@ -20,7 +24,7 @@ export default function MaintenanceAlert({
           ? `Upcoming Maintenance: ${maintenance.title || 'Scheduled Maintenance'}`
           : maintenance.title || 'Scheduled Maintenance'
       }
-      color={upcoming ? (pageConfig.maintenances?.upcomingColor ?? 'gray') : maintenance.color || '#f29030'}
+      color={upcoming ? (pageConfig.maintenances?.upcomingColor ?? "gray") : maintenance.color || '#f29030'}
       withCloseButton={false}
       style={{ margin: '16px auto', ...style }}
     >
@@ -34,7 +38,7 @@ export default function MaintenanceAlert({
           [`@media (max-width: 600px)`]: { gap: 8 },
         }}
       >
-      {/* Maintenance description and affected components */}
+        {/* Maintenance description and affected components */}
         <Box style={{ flex: '1 1 300px', minWidth: 200 }}>
           <Text style={{ whiteSpace: 'pre-line' }}>{maintenance.body}</Text>
 
@@ -55,16 +59,16 @@ export default function MaintenanceAlert({
           style={{
             flex: '0 0 auto',
             fontSize: '0.85rem',
-            textAlign: 'right',
+            textAlign: isDesktop ? 'right' : 'left',
             minWidth: 120,
           }}
         >
-              <b>{upcoming ? 'Scheduled for' : 'From'}:</b> {new Date(maintenance.start).toLocaleString()}
-              <br />
-              <b>{upcoming ? 'Expected end' : 'To'}:</b>{' '}
-              {maintenance.end
-                ? new Date(maintenance.end).toLocaleString()
-                : 'Until further notice'}
+          <b>{upcoming ? 'Scheduled for' : 'From'}:</b>{' '}{new Date(maintenance.start).toLocaleString()}
+          <br />
+          <b>{upcoming ? 'Expected end' : 'To'}:</b>{' '}
+          {maintenance.end
+            ? new Date(maintenance.end).toLocaleString()
+            : 'Until further notice'}
         </Box>
       </Group>
     </Alert>

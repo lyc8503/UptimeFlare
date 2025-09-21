@@ -58,6 +58,7 @@ export default function OverallStatus({
   })
 
   const now = new Date()
+
   const activeMaintenances: (Omit<MaintenanceConfig, 'monitors'> & { monitors?: MonitorTarget[] })[] = maintenances
     .filter((m) => now >= new Date(m.start) && (!m.end || now <= new Date(m.end)))
     .map((maintenance) => ({

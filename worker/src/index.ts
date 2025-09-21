@@ -38,7 +38,7 @@ const Worker = {
             new Date(timeNow * 1000) >= new Date(m.start) &&
             (!m.end || new Date(timeNow * 1000) <= new Date(m.end))
         )
-        .map((e) => (e.monitors || []))
+        .map((e) => e.monitors || [])
         .flat()
 
       if (maintenanceList.includes(monitor.id)) {
