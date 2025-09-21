@@ -77,9 +77,6 @@ export default function OverallStatus({
       ),
     }))
 
-  const [activeOpen, setActiveOpen] = useState(true)
-  const [upcomingOpen, setUpcomingOpen] = useState(false)
-
   return (
     <Container size="md" mt="xl">
       <Center>{icon}</Center>
@@ -96,47 +93,27 @@ export default function OverallStatus({
       {/* Active Maintenance */}
       {activeMaintenances.length > 0 && (
         <>
-          <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: '1rem' }}>
-            <Title order={3} style={{ color: '#f29030' }}>
-              Ongoing Maintenance
-            </Title>
-            <Button variant="subtle" size="xs" onClick={() => setActiveOpen((o) => !o)}>
-              {activeOpen ? <IconMinus size={16} /> : <IconPlus size={16} />}
-            </Button>
-          </Box>
-          <Collapse in={activeOpen}>
-            {activeMaintenances.map((maintenance, idx) => (
-              <MaintenanceAlert
-                key={`active-${idx}`}
-                maintenance={maintenance}
-                style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
-              />
-            ))}
-          </Collapse>
+          {activeMaintenances.map((maintenance, idx) => (
+            <MaintenanceAlert
+              key={`active-${idx}`}
+              maintenance={maintenance}
+              style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
+            />
+          ))}
         </>
       )}
 
       {/* Upcoming Maintenance */}
       {upcomingMaintenances.length > 0 && (
         <>
-          <Box style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: '1rem' }}>
-            <Title order={3} style={{ color: 'gray' }}>
-              Upcoming Maintenance
-            </Title>
-            <Button variant="subtle" size="xs" onClick={() => setUpcomingOpen((o) => !o)}>
-              {upcomingOpen ? <IconMinus size={16} /> : <IconPlus size={16} />}
-            </Button>
-          </Box>
-          <Collapse in={upcomingOpen}>
-            {upcomingMaintenances.map((maintenance, idx) => (
-              <MaintenanceAlert
-                key={`upcoming-${idx}`}
-                maintenance={maintenance}
-                style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
-                upcoming
-              />
-            ))}
-          </Collapse>
+          {upcomingMaintenances.map((maintenance, idx) => (
+            <MaintenanceAlert
+              key={`upcoming-${idx}`}
+              maintenance={maintenance}
+              style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
+              upcoming
+            />
+          ))}
         </>
       )}
     </Container>
