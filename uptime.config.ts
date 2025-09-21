@@ -16,6 +16,8 @@ const pageConfig: PageConfig = {
     '🌐 Public (example group name)': ['foo_monitor', 'bar_monitor', 'more monitor ids...'],
     '🔐 Private': ['test_tcp_monitor'],
   },
+  // Set the path to your favicon, default to '/favicon.ico' if not specified
+  favicon: '/favicon.ico',
   // [OPTIONAL] Maintenance style
   maintenances: {
     // If not specified all upcoming maintenance alerts will default to "gray",
