@@ -85,7 +85,11 @@ export default function IncidentsPage() {
       </Head>
 
       <main className={inter.className}>
-        <Header />
+        <Header
+          style={{
+            marginBottom: '40px',
+          }}
+        />
         <Center>
           <Container size="md" style={{ width: '100%' }}>
             <Group justify="end" mb="md">
@@ -103,10 +107,7 @@ export default function IncidentsPage() {
                 <NoIncidentsAlert />
               ) : (
                 monitorFilteredIncidents.map((incident, i) => (
-                  <MaintenanceAlert
-                    key={i}
-                    maintenance={incident}
-                  />
+                  <MaintenanceAlert key={i} maintenance={incident} />
                 ))
               )}
             </Box>

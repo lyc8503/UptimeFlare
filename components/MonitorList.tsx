@@ -42,7 +42,9 @@ export default function MonitorList({
 
   // Load expanded groups from localStorage
   const savedExpandedGroups = localStorage.getItem('expandedGroups')
-  const expandedInitial = savedExpandedGroups ? JSON.parse(savedExpandedGroups) : Object.keys(group || {})
+  const expandedInitial = savedExpandedGroups
+    ? JSON.parse(savedExpandedGroups)
+    : Object.keys(group || {})
   const [expandedGroups, setExpandedGroups] = useState<string[]>(expandedInitial)
   useEffect(() => {
     localStorage.setItem('expandedGroups', JSON.stringify(expandedGroups))

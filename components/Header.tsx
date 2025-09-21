@@ -3,7 +3,7 @@ import classes from '@/styles/Header.module.css'
 import { pageConfig } from '@/uptime.config'
 import { PageConfigLink } from '@/types/config'
 
-export default function Header() {
+export default function Header({ style }: { style?: React.CSSProperties }) {
   const linkToElement = (link: PageConfigLink, i: number) => {
     return (
       <a
@@ -21,7 +21,7 @@ export default function Header() {
   const links = [{ label: 'Incident History', link: '/incidents' }, ...(pageConfig.links || [])]
 
   return (
-    <header className={classes.header}>
+    <header className={classes.header} style={style}>
       <Container size="md" className={classes.inner}>
         <div>
           <a
@@ -48,7 +48,7 @@ export default function Header() {
         </Group>
 
         <Group gap={5} hiddenFrom="sm">
-          {links?.filter((link) => (link.highlight || link.link.startsWith('/'))).map(linkToElement)}
+          {links?.filter((link) => link.highlight || link.link.startsWith('/')).map(linkToElement)}
         </Group>
       </Container>
     </header>
