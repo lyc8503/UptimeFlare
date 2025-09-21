@@ -1,14 +1,10 @@
 import Head from 'next/head'
 
 import { Inter } from 'next/font/google'
-import { MaintenanceConfig, MonitorState, MonitorTarget } from '@/types/config'
-import { KVNamespace } from '@cloudflare/workers-types'
+import { MaintenanceConfig, MonitorTarget } from '@/types/config'
 import { maintenances, pageConfig, workerConfig } from '@/uptime.config'
-import OverallStatus from '@/components/OverallStatus'
 import Header from '@/components/Header'
-import MonitorList from '@/components/MonitorList'
-import { Box, Button, Center, Container, Divider, Group, Select, Text } from '@mantine/core'
-import MonitorDetail from '@/components/MonitorDetail'
+import { Box, Button, Center, Container, Group, Select } from '@mantine/core'
 import Footer from '@/components/Footer'
 import { useEffect, useState } from 'react'
 import MaintenanceAlert from '@/components/MaintenanceAlert'
@@ -24,16 +20,6 @@ function getSelectedMonth() {
     return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0')
   }
   return hash.split('-').splice(0, 2).join('-')
-}
-
-function getIncidentHash() {
-  const hash = window.location.hash.replace('#', '')
-  const splitted = hash?.split('-')
-  if (hash && splitted.length >= 3) {
-    return splitted[2]
-  }
-
-  return null
 }
 
 function filterIncidentsByMonth(
