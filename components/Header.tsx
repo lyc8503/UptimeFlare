@@ -4,12 +4,12 @@ import { pageConfig } from '@/uptime.config'
 import { PageConfigLink } from '@/types/config'
 
 export default function Header() {
-  const linkToElement = (link: PageConfigLink) => {
+  const linkToElement = (link: PageConfigLink, i: number) => {
     return (
       <a
-        key={link.label}
+        key={i}
         href={link.link}
-        target="_blank"
+        target={link.link.startsWith('/') ? undefined : '_blank'}
         className={classes.link}
         data-active={link.highlight}
       >
@@ -18,11 +18,16 @@ export default function Header() {
     )
   }
 
+  const links = [{ label: 'Incident History', link: '/incidents' }, ...(pageConfig.links || [])]
+
   return (
     <header className={classes.header}>
       <Container size="md" className={classes.inner}>
         <div>
-          <a href="https://github.com/lyc8503/UptimeFlare" target="_blank">
+          <a
+            href={location.pathname == '/' ? 'https://github.com/lyc8503/UptimeFlare' : '/'}
+            target={location.pathname == '/' ? '_blank' : undefined}
+          >
             <Text size="xl" span>
               🕒
             </Text>
@@ -39,11 +44,11 @@ export default function Header() {
         </div>
 
         <Group gap={5} visibleFrom="sm">
-          {pageConfig.links?.map(linkToElement)}
+          {links?.map(linkToElement)}
         </Group>
 
         <Group gap={5} hiddenFrom="sm">
-          {pageConfig.links?.filter((link) => link.highlight).map(linkToElement)}
+          {links?.filter((link) => (link.highlight || link.link.startsWith('/'))).map(linkToElement)}
         </Group>
       </Container>
     </header>
