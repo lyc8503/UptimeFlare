@@ -53,10 +53,26 @@ export default function MaintenanceAlert({
             : { marginBottom: 8 }),
         }}
       >
-        <b>{upcoming ? 'Scheduled for' : 'From'}:</b> {new Date(maintenance.start).toLocaleString()}
-        <br />
-        <b>{upcoming ? 'Expected end' : 'To'}:</b>{' '}
-        {maintenance.end ? new Date(maintenance.end).toLocaleString() : 'Until further notice'}
+        <div 
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'auto 1fr',
+            gridColumnGap: '3px',
+          }}
+        >
+          <div style={{ textAlign: 'right', fontWeight: 'bold' }}>
+            {upcoming ? 'Scheduled for:' : 'From:'}
+          </div>
+          <div>
+            {new Date(maintenance.start).toLocaleString()}
+          </div>
+          <div style={{ textAlign: 'right', fontWeight: 'bold' }}>
+            {upcoming ? 'Expected end:' : 'To:'}
+          </div>
+          <div>
+            {maintenance.end ? new Date(maintenance.end).toLocaleString() : 'Until further notice'}
+          </div>
+        </div>
       </div>
 
       <Text style={{ paddingTop: '3px', whiteSpace: 'pre-line' }}>{maintenance.body}</Text>
