@@ -26,12 +26,12 @@ export default function MaintenanceAlert({
             fontWeight: 700,
           }}
         >
-          {upcoming
-            ? `Upcoming Maintenance: ${maintenance.title || 'Scheduled Maintenance'}`
-            : maintenance.title || 'Scheduled Maintenance'}
+          {(upcoming ? '[Upcoming] ' : '') + (maintenance.title || 'Scheduled Maintenance')}
         </span>
       }
-      color={upcoming ? (pageConfig.maintenances?.upcomingColor ?? 'gray') : maintenance.color || 'yellow'}
+      color={
+        upcoming ? pageConfig.maintenances?.upcomingColor ?? 'gray' : maintenance.color || 'yellow'
+      }
       withCloseButton={false}
       style={{ margin: '16px auto', ...style }}
     >
@@ -56,9 +56,7 @@ export default function MaintenanceAlert({
         <b>{upcoming ? 'Scheduled for' : 'From'}:</b> {new Date(maintenance.start).toLocaleString()}
         <br />
         <b>{upcoming ? 'Expected end' : 'To'}:</b>{' '}
-        {maintenance.end
-          ? new Date(maintenance.end).toLocaleString()
-          : 'Until further notice'}
+        {maintenance.end ? new Date(maintenance.end).toLocaleString() : 'Until further notice'}
       </div>
 
       <Text style={{ paddingTop: '3px', whiteSpace: 'pre-line' }}>{maintenance.body}</Text>

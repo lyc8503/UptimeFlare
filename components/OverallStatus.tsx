@@ -45,6 +45,7 @@ export default function OverallStatus({
   const [openTime] = useState(Math.round(Date.now() / 1000))
   const [currentTime, setCurrentTime] = useState(Math.round(Date.now() / 1000))
   const isWindowVisible = useWindowVisibility()
+  const [expandUpcoming, setExpandUpcoming] = useState(false)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -59,7 +60,9 @@ export default function OverallStatus({
 
   const now = new Date()
 
-  const activeMaintenances: (Omit<MaintenanceConfig, 'monitors'> & { monitors?: MonitorTarget[] })[] = maintenances
+  const activeMaintenances: (Omit<MaintenanceConfig, 'monitors'> & {
+    monitors?: MonitorTarget[]
+  })[] = maintenances
     .filter((m) => now >= new Date(m.start) && (!m.end || now <= new Date(m.end)))
     .map((maintenance) => ({
       ...maintenance,
@@ -68,7 +71,9 @@ export default function OverallStatus({
       ),
     }))
 
-  const upcomingMaintenances: (Omit<MaintenanceConfig, 'monitors'> & { monitors?: MonitorTarget[] })[] = maintenances
+  const upcomingMaintenances: (Omit<MaintenanceConfig, 'monitors'> & {
+    monitors?: MonitorTarget[]
+  })[] = maintenances
     .filter((m) => now < new Date(m.start))
     .map((maintenance) => ({
       ...maintenance,
@@ -90,32 +95,40 @@ export default function OverallStatus({
         } sec ago)`}
       </Title>
 
-      {/* Active Maintenance */}
-      {activeMaintenances.length > 0 && (
-        <>
-          {activeMaintenances.map((maintenance, idx) => (
-            <MaintenanceAlert
-              key={`active-${idx}`}
-              maintenance={maintenance}
-              style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
-            />
-          ))}
-        </>
-      )}
-
       {/* Upcoming Maintenance */}
       {upcomingMaintenances.length > 0 && (
         <>
-          {upcomingMaintenances.map((maintenance, idx) => (
-            <MaintenanceAlert
-              key={`upcoming-${idx}`}
-              maintenance={maintenance}
-              style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
-              upcoming
-            />
-          ))}
+          <Title mt="4px" style={{ textAlign: 'center', color: '#70778c' }} order={5}>
+            {`${upcomingMaintenances.length} upcoming maintenances`}{' '}
+            <span
+              style={{ textDecoration: 'underline' }}
+              onClick={() => setExpandUpcoming(!expandUpcoming)}
+            >
+              {expandUpcoming ? '[HIDE]' : '[SHOW]'}
+            </span>
+          </Title>
+
+          <Collapse in={expandUpcoming}>
+            {upcomingMaintenances.map((maintenance, idx) => (
+              <MaintenanceAlert
+                key={`upcoming-${idx}`}
+                maintenance={maintenance}
+                style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
+                upcoming
+              />
+            ))}
+          </Collapse>
         </>
       )}
+
+      {/* Active Maintenance */}
+      {activeMaintenances.map((maintenance, idx) => (
+        <MaintenanceAlert
+          key={`active-${idx}`}
+          maintenance={maintenance}
+          style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
+        />
+      ))}
     </Container>
   )
 }
