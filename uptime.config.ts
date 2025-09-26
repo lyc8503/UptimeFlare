@@ -91,6 +91,21 @@ const workerConfig: WorkerConfig = {
     gracePeriod: 5,
     // [Optional] disable notification for monitors with specified ids
     skipNotificationIds: ['foo_monitor', 'bar_monitor'],
+    /* [Optional] use webhook configuration instead of apprise configuration (appriseApiServer & recipientUrl)
+    webhook: {
+      // [Required] webhook URL
+      url: 'https://hooks.zapier.com/hooks/catch/123456/abcdef/',
+      // [Optional] HTTP method, default to "POST"
+      method: 'POST',
+      // [Optional] headers to be sent
+      headers: {
+        // [Optional] header defaults to Content-Type: application/json, additional properties will be merged, example of authorization header below
+        'Authorization': 'Bearer YOUR_TOKEN_HERE',
+      },
+      // [Optional] timeout in millisecond, defaults to 30000
+      timeout: 30000,
+    },
+    */
   },
   callbacks: {
     onStatusChange: async (
@@ -143,4 +158,5 @@ const maintenances: MaintenanceConfig[] = [
 ]
 
 // Don't forget this, otherwise compilation fails.
-export { pageConfig, workerConfig, maintenances }
+export { maintenances, pageConfig, workerConfig }
+
