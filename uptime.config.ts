@@ -102,6 +102,19 @@ const workerConfig: WorkerConfig = {
         // [Optional] header defaults to Content-Type: application/json, additional properties will be merged, example of authorization header below
         'Authorization': 'Bearer YOUR_TOKEN_HERE',
       },
+      // [Optional] body to be sent, could be an object or a string
+      // if it's an object, it will be sent as JSON
+      // if it's a string, it will be sent as-is
+      body: (env, monitor, isUp, timeIncidentStart, timeNow, reason) => {
+        return {
+          event: 'status_change',
+          monitor,
+          isUp,
+          timeIncidentStart,
+          timeNow,
+          reason,
+        }
+      },
       // [Optional] timeout in millisecond, defaults to 30000
       timeout: 30000,
     },

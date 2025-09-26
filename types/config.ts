@@ -58,11 +58,19 @@ export type Notification = {
   webhook?: Webhook
 }
 
-export type Webhook = {
+export type Webhook<TEnv = Env> = {
   url: string
   method?: 'POST' | 'GET'
   headers?: { [key: string]: string | number }
   timeout?: number
+  body?: (
+    env: TEnv,
+    monitor: MonitorTarget,
+    isUp: boolean,
+    timeIncidentStart: number,
+    timeNow: number,
+    reason: string
+  ) => { [key: string]: any } | string
 }
 
 export type Callbacks<TEnv = Env> = {

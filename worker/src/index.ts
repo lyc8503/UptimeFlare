@@ -50,6 +50,25 @@ const Worker = {
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), workerConfig.notification.webhook.timeout ?? 30000) // 30 second default timeout
         const headers = { 'Content-Type': 'application/json' }
+        let body: { [key: string]: any } | string
+        if(workerConfig.notification.webhook.body) {
+          body = workerConfig.notification.webhook.body(
+            env,
+            monitor,
+            isUp,
+            timeIncidentStart,
+            timeNow,
+            reason
+          )
+        } else {
+          body = {
+            monitor,
+            isUp,
+            timeIncidentStart,
+            timeNow,
+            reason,
+          }
+        }
         if(workerConfig.notification.webhook.headers) {
           Object.assign(headers, workerConfig.notification.webhook.headers)
         }
@@ -57,14 +76,7 @@ const Worker = {
           await fetch(workerConfig.notification.webhook.url, {
             method: workerConfig.notification.webhook.method ?? 'POST',
             headers,
-            body: JSON.stringify({
-              event: 'status_change',
-              monitor,
-              isUp,
-              timeIncidentStart,
-              timeNow,
-              reason,
-            }),
+            body: typeof body === 'object' ? JSON.stringify(body) : body,
             signal: controller.signal,
           })
         } finally {
