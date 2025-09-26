@@ -54,14 +54,14 @@ export type Notification = {
   recipientUrl?: string
   timeZone?: string
   gracePeriod?: number
-  skipNotificationIds?: string[],
+  skipNotificationIds?: string[]
   webhook?: Webhook
 }
 
 export type Webhook = {
-  url: string,
-  method?: 'POST' | 'GET',
-  headers?: { [key: string]: string | number },
+  url: string
+  method?: 'POST' | 'GET'
+  headers?: { [key: string]: string | number }
   timeout?: number
 }
 
