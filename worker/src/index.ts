@@ -1,8 +1,8 @@
-import { workerConfig, maintenances } from '../../uptime.config'
-import { formatStatusChangeNotification, getWorkerLocation, notifyWithApprise } from './util'
-import { MonitorState, MonitorTarget } from '../../types/config'
-import { getStatus } from './monitor'
 import { DurableObject } from 'cloudflare:workers'
+import { MonitorState, MonitorTarget } from '../../types/config'
+import { maintenances, workerConfig } from '../../uptime.config'
+import { getStatus } from './monitor'
+import { formatStatusChangeNotification, getWorkerLocation, notifyWithApprise } from './util'
 
 export interface Env {
   UPTIMEFLARE_STATE: KVNamespace
@@ -46,25 +46,51 @@ const Worker = {
         return
       }
 
-      if (workerConfig.notification?.appriseApiServer && workerConfig.notification?.recipientUrl) {
-        const notification = formatStatusChangeNotification(
-          monitor,
-          isUp,
-          timeIncidentStart,
-          timeNow,
-          reason,
-          workerConfig.notification?.timeZone ?? 'Etc/GMT'
-        )
-        await notifyWithApprise(
-          workerConfig.notification.appriseApiServer,
-          workerConfig.notification.recipientUrl,
-          notification.title,
-          notification.body
-        )
+      if(workerConfig.notification?.webhook?.url) {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), workerConfig.notification.webhook.timeout ?? 30000) // 30 second default timeout
+        const headers = { 'Content-Type': 'application/json' }
+        if(workerConfig.notification.webhook.headers) {
+          Object.assign(headers, workerConfig.notification.webhook.headers)
+        }
+        try {
+          await fetch(workerConfig.notification.webhook.url, {
+            method: workerConfig.notification.webhook.method ?? 'POST',
+            headers,
+            body: JSON.stringify({
+              event: 'status_change',
+              monitor,
+              isUp,
+              timeIncidentStart,
+              timeNow,
+              reason,
+            }),
+            signal: controller.signal,
+          })
+        } finally {
+          clearTimeout(timeoutId)
+        }
       } else {
-        console.log(
-          `Apprise API server or recipient URL not set, skipping apprise notification for ${monitor.name}`
-        )
+        if (workerConfig.notification?.appriseApiServer && workerConfig.notification?.recipientUrl) {
+          const notification = formatStatusChangeNotification(
+            monitor,
+            isUp,
+            timeIncidentStart,
+            timeNow,
+            reason,
+            workerConfig.notification?.timeZone ?? 'Etc/GMT'
+          )
+          await notifyWithApprise(
+            workerConfig.notification.appriseApiServer,
+            workerConfig.notification.recipientUrl,
+            notification.title,
+            notification.body
+          )
+        } else {
+          console.log(
+            `Apprise API server or recipient URL not set, skipping apprise notification for ${monitor.name}`
+          )
+        }
       }
     }
 
