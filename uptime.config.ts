@@ -16,14 +16,14 @@ const pageConfig: PageConfig = {
     '🌐 Public (example group name)': ['foo_monitor', 'bar_monitor', 'more monitor ids...'],
     '🔐 Private': ['test_tcp_monitor'],
   },
-  // Set the path to your favicon, default to '/favicon.ico' if not specified
+  // [OPTIONAL] Set the path to your favicon, default to '/favicon.ico' if not specified
   favicon: '/favicon.ico',
-  // [OPTIONAL] Maintenance style
+  // [OPTIONAL] Maintenance related settings
   maintenances: {
-    // If not specified all upcoming maintenance alerts will default to "gray",
-    // when they are active they will use the color specified in the `MaintenanceConfig[]`
-    upcomingColor: "gray"
-  }
+    // [OPTIONAL] The color of upcoming maintenance alerts, default to 'gray'
+    // Active alerts will always use the color specified in the MaintenanceConfig
+    upcomingColor: 'gray',
+  },
 }
 
 const workerConfig: WorkerConfig = {

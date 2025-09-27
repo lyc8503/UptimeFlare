@@ -33,7 +33,7 @@ export default function MaintenanceAlert({
         upcoming ? pageConfig.maintenances?.upcomingColor ?? 'gray' : maintenance.color || 'yellow'
       }
       withCloseButton={false}
-      style={{ margin: '16px auto', ...style }}
+      style={{ margin: '16px auto 0 auto', ...style }}
     >
       {/* Date range in top right (desktop) or inline (mobile) */}
       <div
@@ -50,10 +50,10 @@ export default function MaintenanceAlert({
                 padding: '2px 8px',
                 textAlign: 'right',
               }
-            : { marginBottom: 8 }),
+            : { marginBottom: 4 }),
         }}
       >
-        <div 
+        <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'auto 1fr',
@@ -63,9 +63,7 @@ export default function MaintenanceAlert({
           <div style={{ textAlign: 'right', fontWeight: 'bold' }}>
             {upcoming ? 'Scheduled for:' : 'From:'}
           </div>
-          <div>
-            {new Date(maintenance.start).toLocaleString()}
-          </div>
+          <div>{new Date(maintenance.start).toLocaleString()}</div>
           <div style={{ textAlign: 'right', fontWeight: 'bold' }}>
             {upcoming ? 'Expected end:' : 'To:'}
           </div>
