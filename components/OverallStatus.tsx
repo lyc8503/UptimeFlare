@@ -1,6 +1,6 @@
 import { MaintenanceConfig, MonitorTarget } from '@/types/config'
-import { Center, Container, Title } from '@mantine/core'
-import { IconCircleCheck, IconAlertCircle } from '@tabler/icons-react'
+import { Center, Container, Title, Collapse, Button, Box } from '@mantine/core'
+import { IconCircleCheck, IconAlertCircle, IconPlus, IconMinus } from '@tabler/icons-react'
 import { useEffect, useState } from 'react'
 import MaintenanceAlert from './MaintenanceAlert'
 import { pageConfig } from '@/uptime.config'
@@ -45,6 +45,7 @@ export default function OverallStatus({
   const [openTime] = useState(Math.round(Date.now() / 1000))
   const [currentTime, setCurrentTime] = useState(Math.round(Date.now() / 1000))
   const isWindowVisible = useWindowVisibility()
+  const [expandUpcoming, setExpandUpcoming] = useState(false)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -58,10 +59,22 @@ export default function OverallStatus({
   })
 
   const now = new Date()
-  let filteredMaintenances: (Omit<MaintenanceConfig, 'monitors'> & {
+
+  const activeMaintenances: (Omit<MaintenanceConfig, 'monitors'> & {
     monitors?: MonitorTarget[]
   })[] = maintenances
     .filter((m) => now >= new Date(m.start) && (!m.end || now <= new Date(m.end)))
+    .map((maintenance) => ({
+      ...maintenance,
+      monitors: maintenance.monitors?.map(
+        (monitorId) => monitors.find((mon) => monitorId === mon.id)!
+      ),
+    }))
+
+  const upcomingMaintenances: (Omit<MaintenanceConfig, 'monitors'> & {
+    monitors?: MonitorTarget[]
+  })[] = maintenances
+    .filter((m) => now < new Date(m.start))
     .map((maintenance) => ({
       ...maintenance,
       monitors: maintenance.monitors?.map(
@@ -82,9 +95,36 @@ export default function OverallStatus({
         } sec ago)`}
       </Title>
 
-      {filteredMaintenances.map((maintenance, idx) => (
+      {/* Upcoming Maintenance */}
+      {upcomingMaintenances.length > 0 && (
+        <>
+          <Title mt="4px" style={{ textAlign: 'center', color: '#70778c' }} order={5}>
+            {`${upcomingMaintenances.length} upcoming maintenances`}{' '}
+            <span
+              style={{ textDecoration: 'underline' }}
+              onClick={() => setExpandUpcoming(!expandUpcoming)}
+            >
+              {expandUpcoming ? '[HIDE]' : '[SHOW]'}
+            </span>
+          </Title>
+
+          <Collapse in={expandUpcoming}>
+            {upcomingMaintenances.map((maintenance, idx) => (
+              <MaintenanceAlert
+                key={`upcoming-${idx}`}
+                maintenance={maintenance}
+                style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
+                upcoming
+              />
+            ))}
+          </Collapse>
+        </>
+      )}
+
+      {/* Active Maintenance */}
+      {activeMaintenances.map((maintenance, idx) => (
         <MaintenanceAlert
-          key={idx}
+          key={`active-${idx}`}
           maintenance={maintenance}
           style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
         />
