@@ -61,3 +61,7 @@ Please refer to [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
 - [ ] Update wiki/README and add docs for dev
 - [ ] Migration to Terraform Cloudflare provider version 5.x
 - [ ] Cloudflare D1 database
+- [x] Scheduled maintenances (via IIFE)
+- [ ] Simpler config example
+- [ ] Upcoming maintenances
+- [ ] Universal Webhook upgrade
