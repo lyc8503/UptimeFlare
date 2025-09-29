@@ -54,27 +54,19 @@ export type WorkerConfig<TEnv = Env> = {
 }
 
 export type Notification = {
-  appriseApiServer?: string
-  recipientUrl?: string
+  webhook?: WebhookConfig
   timeZone?: string
   gracePeriod?: number
   skipNotificationIds?: string[]
-  webhook?: Webhook
 }
 
-export type Webhook<TEnv = Env> = {
+export type WebhookConfig = {
   url: string
-  method?: 'POST' | 'GET'
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH'
   headers?: { [key: string]: string | number }
+  payloadType: 'param' | 'json' | 'x-www-form-urlencoded'
+  payload: { [key: string]: string | number }
   timeout?: number
-  body?: (
-    env: TEnv,
-    monitor: MonitorTarget,
-    isUp: boolean,
-    timeIncidentStart: number,
-    timeNow: number,
-    reason: string
-  ) => { [key: string]: any } | string
 }
 
 export type Callbacks<TEnv = Env> = {

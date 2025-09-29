@@ -63,5 +63,5 @@ Please refer to [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
 - [ ] Cloudflare D1 database
 - [x] Scheduled maintenances (via IIFE)
 - [ ] Simpler config example
-- [ ] Upcoming maintenances
-- [ ] Universal Webhook upgrade
+- [x] Upcoming maintenances
+- [x] Universal Webhook upgrade

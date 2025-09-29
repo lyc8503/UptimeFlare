@@ -84,13 +84,34 @@ const workerConfig: WorkerConfig = {
       timeout: 5000,
     },
   ],
+  // [Optional] Notification settings
   notification: {
-    // [Optional] apprise API server URL
-    // if not specified, no notification will be sent
-    appriseApiServer: 'https://apprise.example.com/notify',
-    // [Optional] recipient URL for apprise, refer to https://github.com/caronc/apprise
-    // if not specified, no notification will be sent
-    recipientUrl: 'tgram://bottoken/ChatID',
+    // [Optional] Notification webhook settings, if not specified, no notification will be sent
+    // Wiki: TODO
+    webhook: {
+      // [Required] webhook URL (example: Telegram Bot API)
+      url: 'https://api.telegram.org/bot123456:ABCDEF/sendMessage',
+      // [Optional] HTTP method, default to 'GET' for payloadType=param, 'POST' otherwise
+      method: 'POST',
+      // [Optional] headers to be sent
+      headers: {
+        foo: 'bar',
+      },
+      // [Required] Specify how to encode the payload
+      // Should be one of 'param', 'json' or 'x-www-form-urlencoded'
+      // 'param': append url-encoded payload to URL search parameters
+      // 'json': POST json payload as body, set content-type header to 'application/json'
+      // 'x-www-form-urlencoded': POST url-encoded payload as body, set content-type header to 'x-www-form-urlencoded'
+      payloadType: 'x-www-form-urlencoded',
+      // [Required] payload to be sent
+      // $MSG will be replaced with the human-readable notification message
+      payload: {
+        chat_id: 12345678,
+        text: '$MSG',
+      },
+      // [Optional] timeout calling this webhook, in millisecond, default to 5000
+      timeout: 10000,
+    },
     // [Optional] timezone used in notification messages, default to "Etc/GMT"
     timeZone: 'Asia/Shanghai',
     // [Optional] grace period in minutes before sending a notification
@@ -99,34 +120,6 @@ const workerConfig: WorkerConfig = {
     gracePeriod: 5,
     // [Optional] disable notification for monitors with specified ids
     skipNotificationIds: ['foo_monitor', 'bar_monitor'],
-    /* [Optional] use webhook configuration instead of apprise configuration (appriseApiServer & recipientUrl)
-    webhook: {
-      // [Required] webhook URL
-      url: 'https://hooks.zapier.com/hooks/catch/123456/abcdef/',
-      // [Optional] HTTP method, default to "POST"
-      method: 'POST',
-      // [Optional] headers to be sent
-      headers: {
-        // [Optional] header defaults to Content-Type: application/json, additional properties will be merged, example of authorization header below
-        'Authorization': 'Bearer YOUR_TOKEN_HERE',
-      },
-      // [Optional] body to be sent, could be an object or a string
-      // if it's an object, it will be sent as JSON
-      // if it's a string, it will be sent as-is
-      body: (env, monitor, isUp, timeIncidentStart, timeNow, reason) => {
-        return {
-          event: 'status_change',
-          monitor,
-          isUp,
-          timeIncidentStart,
-          timeNow,
-          reason,
-        }
-      },
-      // [Optional] timeout in millisecond, defaults to 30000
-      timeout: 30000,
-    },
-    */
   },
   callbacks: {
     onStatusChange: async (
@@ -181,15 +174,15 @@ const maintenances: MaintenanceConfig[] = [
   // This COULD BE DANGEROUS, as generating too many maintenance entries can lead to performance problems
   // Undeterministic outputs may also lead to bugs or unexpected behavior
   // If you don't know how to DEBUG, use this approach WITH CAUTION
-  ...(function (){
-    const schedules = [];
-    const today = new Date();
+  ...(function () {
+    const schedules = []
+    const today = new Date()
 
     for (let i = -1; i <= 1; i++) {
       // JavaScript's Date object will automatically handle year rollovers
-      const date = new Date(today.getFullYear(), today.getMonth() + i, 15); 
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const date = new Date(today.getFullYear(), today.getMonth() + i, 15)
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
 
       schedules.push({
         title: `${year}/${parseInt(month)} - Test scheduled maintenance`,
@@ -197,12 +190,11 @@ const maintenances: MaintenanceConfig[] = [
         body: 'Monthly scheduled maintenance',
         start: `${year}-${month}-15T02:00:00.000+08:00`,
         end: `${year}-${month}-15T04:00:00.000+08:00`,
-      });
+      })
     }
-    return schedules;
-  })()
+    return schedules
+  })(),
 ]
 
 // Don't forget this, otherwise compilation fails.
 export { maintenances, pageConfig, workerConfig }
-
