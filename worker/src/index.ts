@@ -1,8 +1,8 @@
-import { workerConfig, maintenances } from '../../uptime.config'
-import { formatStatusChangeNotification, getWorkerLocation, notifyWithApprise } from './util'
-import { MonitorState, MonitorTarget } from '../../types/config'
-import { getStatus } from './monitor'
 import { DurableObject } from 'cloudflare:workers'
+import { MonitorState, MonitorTarget } from '../../types/config'
+import { maintenances, workerConfig } from '../../uptime.config'
+import { getStatus } from './monitor'
+import { formatStatusChangeNotification, getWorkerLocation, webhookNotify } from './util'
 
 export interface Env {
   UPTIMEFLARE_STATE: KVNamespace
@@ -14,7 +14,7 @@ const Worker = {
     const workerLocation = (await getWorkerLocation()) || 'ERROR'
     console.log(`Running scheduled event on ${workerLocation}...`)
 
-    // Auxiliary function to format notification and send it via apprise
+    // Auxiliary function to format notification and send it via webhook
     let formatAndNotify = async (
       monitor: MonitorTarget,
       isUp: boolean,
@@ -46,7 +46,7 @@ const Worker = {
         return
       }
 
-      if (workerConfig.notification?.appriseApiServer && workerConfig.notification?.recipientUrl) {
+      if (workerConfig.notification?.webhook) {
         const notification = formatStatusChangeNotification(
           monitor,
           isUp,
@@ -55,16 +55,9 @@ const Worker = {
           reason,
           workerConfig.notification?.timeZone ?? 'Etc/GMT'
         )
-        await notifyWithApprise(
-          workerConfig.notification.appriseApiServer,
-          workerConfig.notification.recipientUrl,
-          notification.title,
-          notification.body
-        )
+        await webhookNotify(workerConfig.notification.webhook, notification)
       } else {
-        console.log(
-          `Apprise API server or recipient URL not set, skipping apprise notification for ${monitor.name}`
-        )
+        console.log(`Webhook not set, skipping notification for ${monitor.name}`)
       }
     }
 
@@ -174,7 +167,7 @@ const Worker = {
               await formatAndNotify(monitor, true, lastIncident.start[0], currentTimeSecond, 'OK')
             } else {
               console.log(
-                `grace period (${workerConfig.notification?.gracePeriod}m) not met, skipping apprise UP notification for ${monitor.name}`
+                `grace period (${workerConfig.notification?.gracePeriod}m) not met, skipping webhook UP notification for ${monitor.name}`
               )
             }
 
@@ -242,7 +235,7 @@ const Worker = {
               `Grace period (${workerConfig.notification
                 ?.gracePeriod}m) not met (currently down for ${
                 currentTimeSecond - currentIncident.start[0]
-              }s, changed ${monitorStatusChanged}), skipping apprise DOWN notification for ${
+              }s, changed ${monitorStatusChanged}), skipping webhook DOWN notification for ${
                 monitor.name
               }`
             )
