@@ -74,7 +74,7 @@ async function webhookNotify(webhook: WebhookConfig, message: string) {
     let url = webhook.url
     let method = webhook.method
     let headers = new Headers(webhook.headers as any)
-    let payloadTemplated = webhook.payload
+    let payloadTemplated: { [key: string]: string | number } = JSON.parse(JSON.stringify(webhook.payload))
     Object.keys(payloadTemplated).forEach((k) => {
       if (payloadTemplated[k] === '$MSG') {
         payloadTemplated[k] = message
