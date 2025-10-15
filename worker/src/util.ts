@@ -1,3 +1,5 @@
+import { WebhookConfig } from '../../types/config'
+
 async function getWorkerLocation() {
   const res = await fetch('https://cloudflare.com/cdn-cgi/trace')
   const text = await res.text()
@@ -48,65 +50,81 @@ function formatStatusChangeNotification(
   const timeIncidentStartFormatted = dateFormatter.format(new Date(timeIncidentStart * 1000))
 
   if (isUp) {
-    return {
-      title: `✅ ${monitor.name} is up!`,
-      body: `The service is up again after being down for ${downtimeDuration} minutes.`,
-    }
+    return `✅ ${monitor.name} is up! \nThe service is up again after being down for ${downtimeDuration} minutes.`
   } else if (timeNow == timeIncidentStart) {
-    return {
-      title: `🔴 ${monitor.name} is currently down.`,
-      body: `Service is unavailable at ${timeNowFormatted}. Issue: ${reason || 'unspecified'}`,
-    }
+    return `🔴 ${
+      monitor.name
+    } is currently down. \nService is unavailable at ${timeNowFormatted}. \nIssue: ${
+      reason || 'unspecified'
+    }`
   } else {
-    return {
-      title: `🔴 ${monitor.name} is still down.`,
-      body: `Service is unavailable since ${timeIncidentStartFormatted} (${downtimeDuration} minutes). Issue: ${
-        reason || 'unspecified'
-      }`,
-    }
+    return `🔴 ${
+      monitor.name
+    } is still down. \nService is unavailable since ${timeIncidentStartFormatted} (${downtimeDuration} minutes). \nIssue: ${
+      reason || 'unspecified'
+    }`
   }
 }
 
-async function notifyWithApprise(
-  appriseApiServer: string,
-  recipientUrl: string,
-  title: string,
-  body: string
-) {
+async function webhookNotify(webhook: WebhookConfig, message: string) {
   console.log(
-    'Sending Apprise notification: ' +
-      title +
-      '-' +
-      body +
-      ' to ' +
-      recipientUrl +
-      ' via ' +
-      appriseApiServer
+    'Sending webhook notification: ' + JSON.stringify(message) + ' to webhook ' + webhook.url
   )
   try {
-    const resp = await fetchTimeout(appriseApiServer, 5000, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        urls: recipientUrl,
-        title,
-        body,
-        type: 'warning',
-        format: 'text',
-      }),
+    let url = webhook.url
+    let method = webhook.method
+    let headers = new Headers(webhook.headers as any)
+    let payloadTemplated = webhook.payload
+    Object.keys(payloadTemplated).forEach((k) => {
+      if (payloadTemplated[k] === '$MSG') {
+        payloadTemplated[k] = message
+      }
     })
+    let body = undefined
+
+    switch (webhook.payloadType) {
+      case 'param':
+        method = method ?? 'GET'
+        const urlTmp = new URL(url)
+        for (const [k, v] of Object.entries(payloadTemplated)) {
+          urlTmp.searchParams.append(k, v.toString())
+        }
+        url = urlTmp.toString()
+        break
+      case 'json':
+        method = method ?? 'POST'
+        if (headers.get('content-type') === null) {
+          headers.set('content-type', 'application/json')
+        }
+        body = JSON.stringify(payloadTemplated)
+        break
+      case 'x-www-form-urlencoded':
+        method = method ?? 'POST'
+        if (headers.get('content-type') === null) {
+          headers.set('content-type', 'application/x-www-form-urlencoded')
+        }
+        body = new URLSearchParams(payloadTemplated as any).toString()
+        break
+      default:
+        throw 'Unrecognized payload type: ' + webhook.payloadType
+    }
+
+    console.log(
+      `Webhook finalized parameters: ${method} ${url}, headers ${JSON.stringify(
+        Object.fromEntries(headers.entries())
+      )}, body ${JSON.stringify(body)}`
+    )
+    const resp = await fetchTimeout(url, webhook.timeout ?? 5000, { method, headers, body })
 
     if (!resp.ok) {
       console.log(
-        'Error calling apprise server, code: ' + resp.status + ', response: ' + (await resp.text())
+        'Error calling webhook server, code: ' + resp.status + ', response: ' + (await resp.text())
       )
     } else {
-      console.log('Apprise notification sent successfully, code: ' + resp.status)
+      console.log('Webhook notification sent successfully, code: ' + resp.status)
     }
   } catch (e) {
-    console.log('Error calling apprise server: ' + e)
+    console.log('Error calling webhook server: ' + e)
   }
 }
 
@@ -114,6 +132,6 @@ export {
   getWorkerLocation,
   fetchTimeout,
   withTimeout,
-  notifyWithApprise,
+  webhookNotify,
   formatStatusChangeNotification,
 }

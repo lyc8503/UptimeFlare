@@ -69,7 +69,7 @@ Get the latest features right away with [simple upgrade process](https://github.
 - [x] Scheduled maintenances (via IIFE)
 - [ ] Simpler config example
 - [x] Upcoming maintenances
-- [ ] Universal Webhook upgrade
+- [x] Universal Webhook upgrade
 - [ ] i18n...? (maybe)
 - [ ] ICMP via proxy?
 - [ ] Add default UA
