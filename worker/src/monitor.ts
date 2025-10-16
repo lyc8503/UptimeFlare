@@ -5,12 +5,10 @@ import { withTimeout, fetchTimeout } from './util'
 async function httpResponseBasicCheck(monitor: MonitorTarget, code: number, bodyReader: () => Promise<string>): Promise<string | null> {
   if (monitor.expectedCodes) {
     if (!monitor.expectedCodes.includes(code)) {
-      console.log(`${monitor.name} expected ${monitor.expectedCodes}, got ${code}`)
       return `Expected codes: ${JSON.stringify(monitor.expectedCodes)}, Got: ${code}`
     }
   } else {
     if (code < 200 || code > 299) {
-      console.log(`${monitor.name} expected 2xx, got ${code}`)
       return `Expected codes: 2xx, Got: ${code}`
     }
   }
@@ -48,90 +46,111 @@ async function httpResponseBasicCheck(monitor: MonitorTarget, code: number, body
 
 
 export async function getStatusWithGlobalPing(monitor: MonitorTarget): Promise<{ location: string; status: { ping: number; up: boolean; err: string } }> {
-  if (monitor.checkProxy === undefined) {
-    throw 'empty check proxy for globalping, shouldn\'t call this method'
-  }
-  
-  const gpUrl = new URL(monitor.checkProxy)
-  if (gpUrl.protocol !== 'globalping:') {
-    throw 'incorrect check proxy protocol for globalping, got: ' + gpUrl.protocol
-  }
-
-  const token = gpUrl.hostname
-  let globalPingRequest = {}
-
-  if (monitor.method === 'TCP_PING') {
-
-  } else {
-    const targetUrl = new URL(monitor.target)
-    globalPingRequest = {
-      type: 'http',
-      target: targetUrl.hostname,
-      measurementOptions: {
-        request: {
-          method: monitor.method,
-          path: targetUrl.pathname,
-          query: targetUrl.search,
-          headers: monitor.headers
-        },
-        port: targetUrl.port
-      }
-    }
-  }
-
-  const startTime = Date.now()
-  console.log(`Requesting the Global Ping API, payload: ${globalPingRequest}`)
-  const measurement = await fetchTimeout('https://api.globalping.io/v1/measurements', 5000, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + token
-    },
-    body: JSON.stringify(globalPingRequest)
-  })
-  const measurementResponse = (await measurement.json() as any)
-
-  if (measurement.status !== 202) {
-    throw measurementResponse.error.message
-  }
-
-  const measurementId = measurementResponse.id
-  console.log(`Measurement created successfully, id: ${measurementId}, time elapsed: ${Date.now() - startTime}ms`)
-
-  const pollStart = Date.now()
-  let measurementResult: any
-  while (true) {
-    if (Date.now() - pollStart > (monitor.timeout ?? 10000) + 2000) {
-      throw 'api polling timeout'
-    }
-
-    measurementResult = await(await fetchTimeout(`https://api.globalping.io/v1/measurements/${measurementId}`, 5000)).json() as any
-    if (measurementResult.status !== 'in-progress') {
-      break
+  try {
+    if (monitor.checkProxy === undefined) {
+      throw 'empty check proxy for globalping, shouldn\'t call this method'
     }
     
-    await new Promise(resolve => setTimeout(resolve, 1000))
-  }
+    const gpUrl = new URL(monitor.checkProxy)
+    if (gpUrl.protocol !== 'globalping:') {
+      throw 'incorrect check proxy protocol for globalping, got: ' + gpUrl.protocol
+    }
 
-  console.log(`Measurement ${measurementId} finished with response: ${measurementResult}`)
+    const token = gpUrl.hostname
+    let globalPingRequest = {}
 
-  const time = measurementResult.results[0].result.timings.total
-  const code = measurementResult.results[0].result.statusCode
-  const body = measurementResult.results[0].result.rawBody
+    if (monitor.method === 'TCP_PING') {
 
-  const country = measurementResult.results[0].probe.country
+    } else {
+      const targetUrl = new URL(monitor.target)
+      globalPingRequest = {
+        type: 'http',
+        target: targetUrl.hostname,
+        measurementOptions: {
+          request: {
+            method: monitor.method,
+            path: targetUrl.pathname,
+            query: targetUrl.search,
+            headers: monitor.headers  // TODO: headers
+          },
+          port: targetUrl.port
+        }
+      }
+    }
 
-  const err = await httpResponseBasicCheck(monitor, code, () => body)
-  if (err !== null) {
-    console.log(`${monitor.name} didn't pass response check: ${err}`)
-  }
-  // TODO: missing headers
-  return {
-    location: country,
-    status: {  // TODO TLS err
-      ping: time,
-      up: err === null,
-      err: err ?? ''
+    const startTime = Date.now()
+    console.log(`Requesting the Global Ping API, payload: ${globalPingRequest}`)
+    const measurement = await fetchTimeout('https://api.globalping.io/v1/measurements', 5000, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify(globalPingRequest)
+    })
+    const measurementResponse = (await measurement.json() as any)
+
+    if (measurement.status !== 202) {
+      throw measurementResponse.error.message
+    }
+
+    const measurementId = measurementResponse.id
+    console.log(`Measurement created successfully, id: ${measurementId}, time elapsed: ${Date.now() - startTime}ms`)
+
+    const pollStart = Date.now()
+    let measurementResult: any
+    while (true) {
+      if (Date.now() - pollStart > (monitor.timeout ?? 10000) + 2000) {
+        throw 'api polling timeout'
+      }
+
+      measurementResult = await(await fetchTimeout(`https://api.globalping.io/v1/measurements/${measurementId}`, 5000)).json() as any
+      if (measurementResult.status !== 'in-progress') {
+        break
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
+
+    console.log(`Measurement ${measurementId} finished with response: ${measurementResult}`)
+
+    if (measurementResult.status !== 'finished') {
+      throw `measurement failed with status: ${measurementResult.status}`
+    }
+
+    const time = measurementResult.results[0].result.timings.total
+    const code = measurementResult.results[0].result.statusCode
+    const body = measurementResult.results[0].result.rawBody
+
+    const country = measurementResult.results[0].probe.country
+
+    let err = await httpResponseBasicCheck(monitor, code, () => body)
+    if (err !== null) {
+      console.log(`${monitor.name} didn't pass response check: ${err}`)
+    }
+
+    if (!measurementResponse.results[0].result.tls.authorized) {
+      console.log(`${monitor.name} TLS certificate not trusted`)
+      err = 'TLS certificate not trusted'
+    }
+
+    return {
+      location: country,
+      status: {
+        ping: time,
+        up: err === null,
+        err: err ?? ''
+      }
+    }
+  } catch (e: any) {
+    console.log(`Globalping ${monitor.name} errored with ${e}`)
+    return {
+      location: 'ERROR',
+      status: {
+        ping: 0,
+        up: false,
+        err: 'Globalping error: ' + e.toString()
+      }
     }
   }
 }
