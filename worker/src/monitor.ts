@@ -60,7 +60,16 @@ export async function getStatusWithGlobalPing(monitor: MonitorTarget): Promise<{
     let globalPingRequest = {}
 
     if (monitor.method === 'TCP_PING') {
-
+      const targetUrl = new URL('https://' + monitor.target)  // dummy https:// to parse hostname & port
+      globalPingRequest = {
+        type: 'ping',
+        target: targetUrl.hostname,
+        measurementOptions: {
+          port: targetUrl.port,
+          packets: 1,
+          protocol: 'tcp'
+        }
+      }
     } else {
       const targetUrl = new URL(monitor.target)
       globalPingRequest = {
@@ -114,32 +123,44 @@ export async function getStatusWithGlobalPing(monitor: MonitorTarget): Promise<{
 
     console.log(`Measurement ${measurementId} finished with response: ${measurementResult}`)
 
-    if (measurementResult.status !== 'finished') {
-      throw `measurement failed with status: ${measurementResult.status}`
+    if (measurementResult.status !== 'finished' || measurementResult.results[0].status !== 'finished') {
+      throw `measurement failed with status: ${measurementResult.status}, result status: ${measurementResult.results[0].status}`
     }
-
-    const time = measurementResult.results[0].result.timings.total
-    const code = measurementResult.results[0].result.statusCode
-    const body = measurementResult.results[0].result.rawBody
-
+    
     const country = measurementResult.results[0].probe.country
 
-    let err = await httpResponseBasicCheck(monitor, code, () => body)
-    if (err !== null) {
-      console.log(`${monitor.name} didn't pass response check: ${err}`)
-    }
+    if (monitor.method === 'TCP_PING') {
+      const time = measurementResult.results[0].result.stats.avg
+      return {
+        location: country,
+        status: {
+          ping: time,
+          up: true,
+          err: ''
+        }
+      }
+    } else {
+      const time = measurementResult.results[0].result.timings.total
+      const code = measurementResult.results[0].result.statusCode
+      const body = measurementResult.results[0].result.rawBody
+      
+      let err = await httpResponseBasicCheck(monitor, code, () => body)
+      if (err !== null) {
+        console.log(`${monitor.name} didn't pass response check: ${err}`)
+      }
 
-    if (!measurementResponse.results[0].result.tls.authorized) {
-      console.log(`${monitor.name} TLS certificate not trusted`)
-      err = 'TLS certificate not trusted'
-    }
+      if (!measurementResponse.results[0].result.tls.authorized) {
+        console.log(`${monitor.name} TLS certificate not trusted`)
+        err = 'TLS certificate not trusted'
+      }
 
-    return {
-      location: country,
-      status: {
-        ping: time,
-        up: err === null,
-        err: err ?? ''
+      return {
+        location: country,
+        status: {
+          ping: time,
+          up: err === null,
+          err: err ?? ''
+        }
       }
     }
   } catch (e: any) {
