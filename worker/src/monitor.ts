@@ -72,6 +72,12 @@ export async function getStatusWithGlobalPing(monitor: MonitorTarget): Promise<{
       }
     } else {
       const targetUrl = new URL(monitor.target)
+      if (monitor.body !== undefined) {
+        throw 'custom body not supported'
+      }
+      if (monitor.method && !['GET', 'HEAD', 'OPTIONS'].includes(monitor.method.toUpperCase())) {
+        throw 'only GET, HEAD, OPTIONS methods are supported'
+      }
       globalPingRequest = {
         type: 'http',
         target: targetUrl.hostname,
@@ -79,16 +85,17 @@ export async function getStatusWithGlobalPing(monitor: MonitorTarget): Promise<{
           request: {
             method: monitor.method,
             path: targetUrl.pathname,
-            query: targetUrl.search,
-            headers: monitor.headers  // TODO: headers
+            query: targetUrl.search === '' ? undefined : targetUrl.search,
+            headers: Object.fromEntries(Object.entries(monitor.headers ?? {}).map(([key, value]) => [key, String(value)]))  // TODO: headers
           },
-          port: targetUrl.port
+          port: targetUrl.port === "" ? (targetUrl.protocol === 'http:' ? 80 : 443) : Number(targetUrl.port),
+          protocol: targetUrl.protocol.replace(':', '')
         }
       }
     }
 
     const startTime = Date.now()
-    console.log(`Requesting the Global Ping API, payload: ${globalPingRequest}`)
+    console.log(`Requesting the Global Ping API, payload: ${JSON.stringify(globalPingRequest)}`)
     const measurement = await fetchTimeout('https://api.globalping.io/v1/measurements', 5000, {
       method: 'POST',
       headers: {
@@ -109,7 +116,7 @@ export async function getStatusWithGlobalPing(monitor: MonitorTarget): Promise<{
     const pollStart = Date.now()
     let measurementResult: any
     while (true) {
-      if (Date.now() - pollStart > (monitor.timeout ?? 10000) + 2000) {
+      if (Date.now() - pollStart > (monitor.timeout ?? 10000) + 2000) {  // 2s extra buffer
         throw 'api polling timeout'
       }
 
@@ -121,16 +128,18 @@ export async function getStatusWithGlobalPing(monitor: MonitorTarget): Promise<{
       await new Promise(resolve => setTimeout(resolve, 1000))
     }
 
-    console.log(`Measurement ${measurementId} finished with response: ${measurementResult}`)
+    console.log(`Measurement ${measurementId} finished with response: ${JSON.stringify(measurementResult)}, time elapsed: ${Date.now() - pollStart}ms`)
 
-    if (measurementResult.status !== 'finished' || measurementResult.results[0].status !== 'finished') {
-      throw `measurement failed with status: ${measurementResult.status}, result status: ${measurementResult.results[0].status}`
+    if (measurementResult.status !== 'finished' || measurementResult.results[0].result.status !== 'finished') {
+      console.log(`measurement failed with status: ${measurementResult.status}, result status: ${measurementResult.results[0].result.status}`)
+      // Truncate raw output to avoid huge error messages
+      throw `status [${measurementResult.status}|${measurementResult.results[0].result.status}]: ${measurementResult.results?.[0].result?.rawOutput?.slice(0, 64)}`
     }
-    
+
     const country = measurementResult.results[0].probe.country
 
     if (monitor.method === 'TCP_PING') {
-      const time = measurementResult.results[0].result.stats.avg
+      const time = Math.round(measurementResult.results[0].result.stats.avg)
       return {
         location: country,
         status: {
@@ -149,7 +158,7 @@ export async function getStatusWithGlobalPing(monitor: MonitorTarget): Promise<{
         console.log(`${monitor.name} didn't pass response check: ${err}`)
       }
 
-      if (!measurementResponse.results[0].result.tls.authorized) {
+      if (monitor.target.toLowerCase().startsWith('https') && !measurementResult.results[0].result.tls.authorized) {
         console.log(`${monitor.name} TLS certificate not trusted`)
         err = 'TLS certificate not trusted'
       }
@@ -168,7 +177,7 @@ export async function getStatusWithGlobalPing(monitor: MonitorTarget): Promise<{
     return {
       location: 'ERROR',
       status: {
-        ping: 0,
+        ping: e.toString().toLowerCase().includes('timeout') ? monitor.timeout ?? 10000 : 0,
         up: false,
         err: 'Globalping error: ' + e.toString()
       }
