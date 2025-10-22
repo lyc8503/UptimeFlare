@@ -64,10 +64,14 @@ export async function getStatusWithGlobalPing(monitor: MonitorTarget): Promise<{
       globalPingRequest = {
         type: 'ping',
         target: targetUrl.hostname,
+        locations: [{
+          magic: gpUrl.searchParams.get('magic') || ''
+        }],
         measurementOptions: {
           port: targetUrl.port,
           packets: 1,
-          protocol: 'tcp'
+          protocol: 'tcp',
+          ipVersion: Number(gpUrl.searchParams.get('ipVersion') || 4)
         }
       }
     } else {
@@ -81,6 +85,9 @@ export async function getStatusWithGlobalPing(monitor: MonitorTarget): Promise<{
       globalPingRequest = {
         type: 'http',
         target: targetUrl.hostname,
+        locations: [{
+          magic: gpUrl.searchParams.get('magic') || ''
+        }],
         measurementOptions: {
           request: {
             method: monitor.method,
@@ -89,7 +96,8 @@ export async function getStatusWithGlobalPing(monitor: MonitorTarget): Promise<{
             headers: Object.fromEntries(Object.entries(monitor.headers ?? {}).map(([key, value]) => [key, String(value)]))  // TODO: headers
           },
           port: targetUrl.port === "" ? (targetUrl.protocol === 'http:' ? 80 : 443) : Number(targetUrl.port),
-          protocol: targetUrl.protocol.replace(':', '')
+          protocol: targetUrl.protocol.replace(':', ''),
+          ipVersion: Number(gpUrl.searchParams.get('ipVersion') || 4)
         }
       }
     }
@@ -159,8 +167,8 @@ export async function getStatusWithGlobalPing(monitor: MonitorTarget): Promise<{
       }
 
       if (monitor.target.toLowerCase().startsWith('https') && !measurementResult.results[0].result.tls.authorized) {
-        console.log(`${monitor.name} TLS certificate not trusted`)
-        err = 'TLS certificate not trusted'
+        console.log(`${monitor.name} TLS certificate not trusted: ${measurementResult.results[0].result.tls.error}`)
+        err = 'TLS certificate not trusted: ' + measurementResult.results[0].result.tls.error
       }
 
       return {
