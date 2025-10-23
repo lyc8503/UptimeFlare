@@ -12,7 +12,7 @@ import {
 } from 'chart.js'
 import 'chartjs-adapter-moment'
 import { MonitorState, MonitorTarget } from '@/types/config'
-import { iataToCountry } from '@/util/iata'
+import { codeToCountry } from '@/util/iata'
 
 ChartJS.register(
   CategoryScale,
@@ -66,7 +66,7 @@ export default function DetailChart({
         callbacks: {
           label: (item: any) => {
             if (item.parsed.y) {
-              return `${item.parsed.y}ms (${iataToCountry(item.raw.loc)})`
+              return `${item.parsed.y}ms (${codeToCountry(item.raw.loc)})`
             }
           },
         },
