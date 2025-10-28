@@ -46,6 +46,7 @@ async function httpResponseBasicCheck(monitor: MonitorTarget, code: number, body
 
 
 export async function getStatusWithGlobalPing(monitor: MonitorTarget): Promise<{ location: string; status: { ping: number; up: boolean; err: string } }> {
+  // TODO: should throw when there's error with globalping API
   try {
     if (monitor.checkProxy === undefined) {
       throw 'empty check proxy for globalping, shouldn\'t call this method'
