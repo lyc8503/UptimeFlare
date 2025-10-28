@@ -250,7 +250,7 @@ export async function getStatus(
       console.log(`${monitor.name} responded with ${response.status}`)
       status.ping = Date.now() - startTime
 
-      const err = await httpResponseBasicCheck(monitor, response.status, response.text)
+      const err = await httpResponseBasicCheck(monitor, response.status, response.text.bind(response))
       if (err !== null) {
         console.log(`${monitor.name} didn't pass response check: ${err}`)
       }
