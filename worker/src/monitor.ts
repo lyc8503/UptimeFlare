@@ -190,7 +190,7 @@ export async function getStatusWithGlobalPing(
     if (monitor.method === 'TCP_PING') {
       const time = Math.round(measurementResult.results[0].result.stats.avg)
       return {
-        location: country,
+        location: country + '/' + city,
         status: {
           ping: time,
           up: true,
