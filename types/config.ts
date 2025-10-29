@@ -65,7 +65,7 @@ export type WebhookConfig = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH'
   headers?: { [key: string]: string | number }
   payloadType: 'param' | 'json' | 'x-www-form-urlencoded'
-  payload: { [key: string]: string | number }
+  payload: any
   timeout?: number
 }
 

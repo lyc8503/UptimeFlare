@@ -66,6 +66,18 @@ function formatStatusChangeNotification(
   }
 }
 
+function templateWebhookPlayload(payload: any, message: string) {
+  for (const key in payload) {
+    if (Object.prototype.hasOwnProperty.call(payload, key)) {      
+      if (payload[key] === '$MSG') {
+        payload[key] = message
+      } else if (typeof payload[key] === 'object' && payload[key] !== null) {
+        templateWebhookPlayload(payload[key], message)
+      }
+    }
+  }
+}
+
 async function webhookNotify(webhook: WebhookConfig, message: string) {
   console.log(
     'Sending webhook notification: ' + JSON.stringify(message) + ' to webhook ' + webhook.url
@@ -74,14 +86,8 @@ async function webhookNotify(webhook: WebhookConfig, message: string) {
     let url = webhook.url
     let method = webhook.method
     let headers = new Headers(webhook.headers as any)
-    let payloadTemplated: { [key: string]: string | number } = JSON.parse(
-      JSON.stringify(webhook.payload)
-    )
-    Object.keys(payloadTemplated).forEach((k) => {
-      if (payloadTemplated[k] === '$MSG') {
-        payloadTemplated[k] = message
-      }
-    })
+    let payloadTemplated: { [key: string]: string | number } = JSON.parse(JSON.stringify(webhook.payload))
+    templateWebhookPlayload(payloadTemplated, message)
     let body = undefined
 
     switch (webhook.payloadType) {
