@@ -66,7 +66,7 @@ const workerConfig: WorkerConfig = {
       responseForbiddenKeyword: 'bad gateway',
       // [OPTIONAL] if specified, will call the check proxy to check the monitor, mainly for geo-specific checks
       // refer to docs https://github.com/lyc8503/UptimeFlare/wiki/Check-proxy-setup before setting this value
-      // currently supports `worker://` and `http(s)://` proxies
+      // currently supports `worker://`, `globalping://` and `http(s)://` proxies
       checkProxy: 'https://xxx.example.com OR worker://weur',
       // [OPTIONAL] if true, the check will fallback to local if the specified proxy is down
       checkProxyFallback: true,
