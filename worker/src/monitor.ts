@@ -69,15 +69,18 @@ export async function getStatusWithGlobalPing(
       globalPingRequest = {
         type: 'ping',
         target: targetUrl.hostname,
-        locations: [
-          {
-            magic: gpUrl.searchParams.get('magic') || '',
-          },
-        ],
+        locations:
+          gpUrl.searchParams.get('magic') !== null
+            ? [
+                {
+                  magic: gpUrl.searchParams.get('magic'),
+                },
+              ]
+            : undefined,
         measurementOptions: {
           port: targetUrl.port,
           packets: 1,
-          protocol: 'tcp',
+          protocol: 'tcp', // TODO: icmp?
           ipVersion: Number(gpUrl.searchParams.get('ipVersion') || 4),
         },
       }
@@ -92,11 +95,14 @@ export async function getStatusWithGlobalPing(
       globalPingRequest = {
         type: 'http',
         target: targetUrl.hostname,
-        locations: [
-          {
-            magic: gpUrl.searchParams.get('magic') || '',
-          },
-        ],
+        locations:
+          gpUrl.searchParams.get('magic') !== null
+            ? [
+                {
+                  magic: gpUrl.searchParams.get('magic'),
+                },
+              ]
+            : undefined,
         measurementOptions: {
           request: {
             method: monitor.method,
@@ -104,7 +110,7 @@ export async function getStatusWithGlobalPing(
             query: targetUrl.search === '' ? undefined : targetUrl.search,
             headers: Object.fromEntries(
               Object.entries(monitor.headers ?? {}).map(([key, value]) => [key, String(value)])
-            ), // TODO: headers
+            ), // TODO: host header?
           },
           port:
             targetUrl.port === ''
