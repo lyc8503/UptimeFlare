@@ -146,6 +146,7 @@ export async function getStatusWithGlobalPing(monitor: MonitorTarget): Promise<{
     }
 
     const country = measurementResult.results[0].probe.country
+    const city = measurementResult.results[0].probe.city
 
     if (monitor.method === 'TCP_PING') {
       const time = Math.round(measurementResult.results[0].result.stats.avg)
@@ -173,7 +174,7 @@ export async function getStatusWithGlobalPing(monitor: MonitorTarget): Promise<{
       }
 
       return {
-        location: country,
+        location: country + '/' + city,
         status: {
           ping: time,
           up: err === null,
