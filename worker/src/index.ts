@@ -1,7 +1,7 @@
 import { DurableObject } from 'cloudflare:workers'
 import { MonitorState, MonitorTarget } from '../../types/config'
 import { maintenances, workerConfig } from '../../uptime.config'
-import { getStatus } from './monitor'
+import { getStatus, getStatusWithGlobalPing } from './monitor'
 import { formatStatusChangeNotification, getWorkerLocation, webhookNotify } from './util'
 
 export interface Env {
@@ -107,6 +107,8 @@ const Worker = {
             } catch (err) {
               // An error here is expected, ignore it
             }
+          } else if (monitor.checkProxy.startsWith('globalping://')) {
+            resp = await getStatusWithGlobalPing(monitor)
           } else {
             resp = await (
               await fetch(monitor.checkProxy, {
@@ -124,7 +126,7 @@ const Worker = {
             console.log('Falling back to local check...')
             status = await getStatus(monitor)
           } else {
-            status = { ping: 0, up: false, err: 'Error initiating check from remote worker' }
+            status = { ping: 0, up: false, err: 'Unknown check proxy error' }
           }
         }
       } else {

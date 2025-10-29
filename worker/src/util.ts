@@ -68,7 +68,7 @@ function formatStatusChangeNotification(
 
 function templateWebhookPlayload(payload: any, message: string) {
   for (const key in payload) {
-    if (Object.prototype.hasOwnProperty.call(payload, key)) {      
+    if (Object.prototype.hasOwnProperty.call(payload, key)) {
       if (payload[key] === '$MSG') {
         payload[key] = message
       } else if (typeof payload[key] === 'object' && payload[key] !== null) {
@@ -86,7 +86,9 @@ async function webhookNotify(webhook: WebhookConfig, message: string) {
     let url = webhook.url
     let method = webhook.method
     let headers = new Headers(webhook.headers as any)
-    let payloadTemplated: { [key: string]: string | number } = JSON.parse(JSON.stringify(webhook.payload))
+    let payloadTemplated: { [key: string]: string | number } = JSON.parse(
+      JSON.stringify(webhook.payload)
+    )
     templateWebhookPlayload(payloadTemplated, message)
     let body = undefined
 
