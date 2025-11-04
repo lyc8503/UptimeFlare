@@ -46,7 +46,7 @@ export default function Home({
     <>
       <Head>
         <title>{pageConfig.title}</title>
-        <link rel="icon" href={pageConfig.favicon ?? '/favicon.ico'} />
+        <link rel="icon" href={pageConfig.favicon ?? '/favicon.png'} />
       </Head>
 
       <main className={inter.className}>
