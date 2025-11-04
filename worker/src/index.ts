@@ -225,17 +225,21 @@ const Worker = {
               currentTimeSecond - currentIncident.start[0] <
                 workerConfig.notification.gracePeriod * 60 + 30)
           ) {
-            await formatAndNotify(
-              monitor,
-              false,
-              currentIncident.start[0],
-              currentTimeSecond,
-              status.err
-            )
+            if (currentIncident.start[0] !== currentTimeSecond && workerConfig.notification?.skipErrorChangeNotification) {
+              console.log('Skipping notification for following error reason change due to user config')
+            } else {
+              await formatAndNotify(
+                monitor,
+                false,
+                currentIncident.start[0],
+                currentTimeSecond,
+                status.err
+              )
+            }
           } else {
             console.log(
               `Grace period (${workerConfig.notification
-                ?.gracePeriod}m) not met (currently down for ${
+                ?.gracePeriod}m) not met or no change (currently down for ${
                 currentTimeSecond - currentIncident.start[0]
               }s, changed ${monitorStatusChanged}), skipping webhook DOWN notification for ${
                 monitor.name

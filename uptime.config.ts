@@ -120,6 +120,8 @@ const workerConfig: WorkerConfig = {
     gracePeriod: 5,
     // [Optional] disable notification for monitors with specified ids
     skipNotificationIds: ['foo_monitor', 'bar_monitor'],
+    // [Optional] suppress extra notifications for error reason changes during an incident, default to false
+    skipErrorChangeNotification: true,
   },
   callbacks: {
     onStatusChange: async (

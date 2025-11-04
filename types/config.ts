@@ -58,6 +58,7 @@ export type Notification = {
   timeZone?: string
   gracePeriod?: number
   skipNotificationIds?: string[]
+  skipErrorChangeNotification?: boolean
 }
 
 type SingleWebhook = {
