@@ -79,6 +79,13 @@ function templateWebhookPlayload(payload: any, message: string) {
 }
 
 async function webhookNotify(webhook: WebhookConfig, message: string) {
+  if (Array.isArray(webhook)) {
+    for (const w of webhook) {
+      webhookNotify(w, message)
+    }
+    return
+  }
+
   console.log(
     'Sending webhook notification: ' + JSON.stringify(message) + ' to webhook ' + webhook.url
   )

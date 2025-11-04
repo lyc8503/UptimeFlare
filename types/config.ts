@@ -60,7 +60,7 @@ export type Notification = {
   skipNotificationIds?: string[]
 }
 
-export type WebhookConfig = {
+type SingleWebhook = {
   url: string
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH'
   headers?: { [key: string]: string | number }
@@ -68,6 +68,8 @@ export type WebhookConfig = {
   payload: any
   timeout?: number
 }
+
+export type WebhookConfig = SingleWebhook | SingleWebhook[]
 
 export type Callbacks<TEnv = Env> = {
   onStatusChange?: (
