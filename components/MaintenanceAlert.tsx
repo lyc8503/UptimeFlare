@@ -9,7 +9,7 @@ export default function MaintenanceAlert({
   style,
   upcoming = false,
 }: {
-  maintenance: Omit<MaintenanceConfig, 'monitors'> & { monitors?: MonitorTarget[] }
+  maintenance: Omit<MaintenanceConfig, 'monitors'> & { monitors?: (MonitorTarget | undefined)[] }
   style?: React.CSSProperties
   upcoming?: boolean
 }) {
@@ -81,7 +81,7 @@ export default function MaintenanceAlert({
           </Text>
           <List size="sm" withPadding>
             {maintenance.monitors.map((comp, compIdx) => (
-              <List.Item key={compIdx}>{comp.name}</List.Item>
+              <List.Item key={compIdx}>{comp?.name ?? '[ERR: MONITOR ID NOT FOUND]'}</List.Item>
             ))}
           </List>
         </>

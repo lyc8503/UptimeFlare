@@ -72,7 +72,7 @@ export default function OverallStatus({
     }))
 
   const upcomingMaintenances: (Omit<MaintenanceConfig, 'monitors'> & {
-    monitors?: MonitorTarget[]
+    monitors?: (MonitorTarget | undefined)[]
   })[] = maintenances
     .filter((m) => now < new Date(m.start))
     .map((maintenance) => ({
