@@ -99,12 +99,12 @@ export default function OverallStatus({
       {upcomingMaintenances.length > 0 && (
         <>
           <Title mt="4px" style={{ textAlign: 'center', color: '#70778c' }} order={5}>
-            {`${upcomingMaintenances.length} upcoming maintenances`}{' '}
+            {`${upcomingMaintenances.length} upcoming ${upcomingMaintenances.length === 1 ? 'maintenance' : 'maintenances'}`}{' '}
             <span
-              style={{ textDecoration: 'underline' }}
+              style={{ textDecoration: 'underline', cursor: 'pointer' }}
               onClick={() => setExpandUpcoming(!expandUpcoming)}
             >
-              {expandUpcoming ? '[HIDE]' : '[SHOW]'}
+              {expandUpcoming ? '[Hide]' : '[Show]'}
             </span>
           </Title>
 
