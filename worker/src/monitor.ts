@@ -280,9 +280,14 @@ export async function getStatus(
   } else {
     // HTTP endpoint monitor
     try {
+      let headers = new Headers(monitor.headers as any)
+      if (!headers.has('user-agent')) {
+        headers.set('user-agent', 'UptimeFlare/1.0 (+https://github.com/lyc8503/UptimeFlare)')
+      }
+
       const response = await fetchTimeout(monitor.target, monitor.timeout || 10000, {
         method: monitor.method,
-        headers: monitor.headers as any,
+        headers: headers,
         body: monitor.body,
         cf: {
           cacheTtlByStatus: {

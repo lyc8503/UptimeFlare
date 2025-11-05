@@ -13,7 +13,7 @@ const pageConfig: PageConfig = {
     { link: 'https://github.com/lyc8503', label: 'GitHub' },
     { link: 'https://blog.lyc8503.net/', label: 'Blog' },
     { link: 'mailto:me@lyc8503.net', label: 'Email Me', highlight: true },
-  ]
+  ],
 }
 
 const workerConfig: WorkerConfig = {
@@ -102,7 +102,7 @@ const workerConfig: WorkerConfig = {
     // notification will be sent only if the monitor is down for N continuous checks after the initial failure
     // if not specified, notification will be sent immediately
     gracePeriod: 5,
-  }
+  },
 }
 
 // You can define multiple maintenances here

@@ -76,6 +76,6 @@ To contribute new features or customize your deployment furthermore, see [here](
 - [x] Universal Webhook upgrade
 - [ ] i18n...? (maybe)
 - [ ] ICMP via proxy?
-- [ ] Add default UA
+- [x] Add default UA
 - [ ] Customizable footer
 - [ ] New header logo

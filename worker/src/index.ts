@@ -225,8 +225,13 @@ const Worker = {
               currentTimeSecond - currentIncident.start[0] <
                 workerConfig.notification.gracePeriod * 60 + 30)
           ) {
-            if (currentIncident.start[0] !== currentTimeSecond && workerConfig.notification?.skipErrorChangeNotification) {
-              console.log('Skipping notification for following error reason change due to user config')
+            if (
+              currentIncident.start[0] !== currentTimeSecond &&
+              workerConfig.notification?.skipErrorChangeNotification
+            ) {
+              console.log(
+                'Skipping notification for following error reason change due to user config'
+              )
             } else {
               await formatAndNotify(
                 monitor,
