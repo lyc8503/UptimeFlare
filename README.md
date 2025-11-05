@@ -44,6 +44,10 @@ Please refer to [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
 
 Get the latest features right away with [simple upgrade process](https://github.com/lyc8503/UptimeFlare/wiki/Synchronize-updates-from-upstream)
 
+## ⚙️Docs for developer
+
+To contribute new features or customize your deployment furthermore, see [here](https://github.com/lyc8503/UptimeFlare/wiki/How-to-develop).
+
 ## New features (TODOs)
 
 - [x] Specify region for monitors
@@ -63,13 +67,15 @@ Get the latest features right away with [simple upgrade process](https://github.
 - [x] ~~Known issue~~: `fetch` doesn't support non-standard port (resolved after CF update)
 - [x] Compatibility date update
 - [x] Scheduled Maintenance
-- [ ] Update wiki/README and add docs for dev
+- [x] Add docs for dev
 - [ ] Migration to Terraform Cloudflare provider version 5.x
 - [ ] Cloudflare D1 database
 - [x] Scheduled maintenances (via IIFE)
-- [ ] Simpler config example
+- [x] Simpler config example
 - [x] Upcoming maintenances
 - [x] Universal Webhook upgrade
 - [ ] i18n...? (maybe)
 - [ ] ICMP via proxy?
 - [ ] Add default UA
+- [ ] Customizable footer
+- [ ] New header logo
