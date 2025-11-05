@@ -42,28 +42,6 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
-      # This is a temporary workaround to fix issue #13
-      # On a new Cloudflare account, the terraform apply will fail with `workers.api.error.subdomain_required`
-      # This may be due to the account not having a worker subdomain yet, so we create a dummy worker and then delete it.
-      # Cloudflare should allocate a worker subdomain after this.
-      # https://github.com/cloudflare/terraform-provider-cloudflare/issues/3304
-      - name: Create worker subdomain (temporary workaround)
-        id: create_dummy_worker
-        run: |
-          curl --request PUT --fail-with-body \
-               --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/dummy-ib4db6ntj5csdef3 \
-               --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
-               --header 'Content-Type: application/javascript' \
-               --data 'addEventListener('\''fetch'\'', (event) => event.respondWith(new Response('\''OK'\'')))'\
-
-          curl --request DELETE --fail-with-body \
-               --url https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/dummy-ib4db6ntj5csdef3 \
-               --header 'Authorization: Bearer '$CLOUDFLARE_API_TOKEN \
-               --header 'Content-Type: application/json'
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ steps.fetch_account_id.outputs.account_id }}
-
       - name: Install packages
         run: |
           npm install
