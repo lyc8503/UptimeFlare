@@ -27,7 +27,7 @@ const pageConfig: PageConfig = {
 }
 
 const workerConfig: WorkerConfig = {
-  // Write KV at most every 3 minutes unless the status changed
+  // [Optional] Write KV at most every N minutes unless the status changed, default to 3
   kvWriteCooldownMinutes: 3,
   // Enable HTTP Basic auth for status page & API by uncommenting the line below, format `<USERNAME>:<PASSWORD>`
   // passwordProtection: 'username:password',

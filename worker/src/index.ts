@@ -331,7 +331,7 @@ const Worker = {
     // Allow for a cooldown period before writing to KV
     if (
       statusChanged ||
-      currentTimeSecond - state.lastUpdate >= workerConfig.kvWriteCooldownMinutes * 60 - 10 // Allow for 10 seconds of clock drift
+      currentTimeSecond - state.lastUpdate >= (workerConfig.kvWriteCooldownMinutes ?? 3) * 60 - 10 // Allow for 10 seconds of clock drift
     ) {
       console.log('Updating state...')
       state.lastUpdate = currentTimeSecond

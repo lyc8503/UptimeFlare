@@ -46,7 +46,7 @@ export type MonitorTarget = {
 }
 
 export type WorkerConfig<TEnv = Env> = {
-  kvWriteCooldownMinutes: number
+  kvWriteCooldownMinutes?: number
   passwordProtection?: string
   monitors: MonitorTarget[]
   notification?: Notification
