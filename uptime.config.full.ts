@@ -24,6 +24,8 @@ const pageConfig: PageConfig = {
     // Active alerts will always use the color specified in the MaintenanceConfig
     upcomingColor: 'gray',
   },
+  // [OPTIONAL] Custom footer html
+  // customFooter: '',
 }
 
 const workerConfig: WorkerConfig = {
