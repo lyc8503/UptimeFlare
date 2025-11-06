@@ -18,7 +18,7 @@ export default function Header({ style }: { style?: React.CSSProperties }) {
     )
   }
 
-  const links = [{ label: 'Incident History', link: '/incidents' }, ...(pageConfig.links || [])]
+  const links = [{ label: 'Incidents', link: '/incidents' }, ...(pageConfig.links || [])]
 
   return (
     <header className={classes.header} style={style}>
@@ -28,18 +28,7 @@ export default function Header({ style }: { style?: React.CSSProperties }) {
             href={location.pathname == '/' ? 'https://github.com/lyc8503/UptimeFlare' : '/'}
             target={location.pathname == '/' ? '_blank' : undefined}
           >
-            <Text size="xl" span>
-              🕒
-            </Text>
-            <Text
-              size="xl"
-              span
-              fw={700}
-              variant="gradient"
-              gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
-            >
-              UptimeFlare
-            </Text>
+            <img src='/logo.svg' width={190} height={56} />
           </a>
         </div>
 
