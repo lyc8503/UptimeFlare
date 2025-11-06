@@ -86,9 +86,9 @@ jobs:
           if [ -n "$KV_ID" ]; then
             echo "Importing existing resources..."
             terraform import cloudflare_workers_kv_namespace.uptimeflare_kv "$TF_VAR_CLOUDFLARE_ACCOUNT_ID/$KV_ID"
-            terraform import cloudflare_worker_script.uptimeflare "$TF_VAR_CLOUDFLARE_ACCOUNT_ID/uptimeflare_worker"
-            terraform import cloudflare_worker_cron_trigger.uptimeflare_worker_cron "$TF_VAR_CLOUDFLARE_ACCOUNT_ID/uptimeflare_worker"
-            terraform import cloudflare_pages_project.uptimeflare "$TF_VAR_CLOUDFLARE_ACCOUNT_ID/uptimeflare"
+            terraform import cloudflare_worker_script.uptimeflare "$TF_VAR_CLOUDFLARE_ACCOUNT_ID/uptimeflare_worker" || echo "WARNING: Worker script import failed, continuing..."
+            terraform import cloudflare_worker_cron_trigger.uptimeflare_worker_cron "$TF_VAR_CLOUDFLARE_ACCOUNT_ID/uptimeflare_worker" || echo "WARNING: Cron trigger import failed, continuing..."
+            terraform import cloudflare_pages_project.uptimeflare "$TF_VAR_CLOUDFLARE_ACCOUNT_ID/uptimeflare" || echo "WARNING: Pages project import failed, continuing..."
           else
             echo "KV namespace not found, first-time setup."
           fi
