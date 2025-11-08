@@ -28,7 +28,13 @@ export default function Header({ style }: { style?: React.CSSProperties }) {
             href={location.pathname == '/' ? 'https://github.com/lyc8503/UptimeFlare' : '/'}
             target={location.pathname == '/' ? '_blank' : undefined}
           >
-            <Image src="/logo.svg" h={56} w={{ base: 140, sm: 190 }} fit="contain" alt="logo" />
+            <Image
+              src={pageConfig.logo ?? '/logo.svg'}
+              h={56}
+              w={{ base: 140, sm: 190 }}
+              fit="contain"
+              alt="logo"
+            />
           </a>
         </div>
 
