@@ -1,107 +1,235 @@
-// This is a simplified example config file for quickstart
-// Some not frequently used features are omitted/commented out here
-// For a full-featured example, please refer to `uptime.config.full.ts`
-
-// Don't edit this line
 import { MaintenanceConfig, PageConfig, WorkerConfig } from './types/config'
 
 const pageConfig: PageConfig = {
   // Title for your status page
-  title: "lyc8503's Status Page",
+  title: "海口希灵赛斯企业资源监控",
   // Links shown at the header of your status page, could set `highlight` to `true`
   links: [
-    { link: 'https://github.com/lyc8503', label: 'GitHub' },
-    { link: 'https://blog.lyc8503.net/', label: 'Blog' },
-    { link: 'mailto:me@lyc8503.net', label: 'Email Me', highlight: true },
+    { link: 'https://xinnew.top', label: '企业门户' },
+    { link: 'https://blog.csdn.net/qq_73252299?spm=1011.2124.3001.5343', label: '技术博客' },
+    { link: 'https://work.weixin.qq.com/kfid/kfc5c60f929a2e703af', label: '获取定制方案', highlight: true },
   ],
+  // [OPTIONAL] Group your monitors
+  // If not specified, all monitors will be shown in a single list
+  // If specified, monitors will be grouped and ordered, not-listed monitors will be invisble (but still monitored)
+  group: {
+    '🌐 企业服务集群': ['www.xinnew.top', 'mail.sec.hn.cn','sec.hn.cn','www.sec.hn.cn'],
+    '🔐 合作业务集群': ['ms.sec.hn.cn','htc-ms.xinnew.top','chats.sec.hn.cn','zcz.xinnew.top','doraemon.xinnew.top'],
+    '🛡️ 公共服务资源': ['gemini-sg.xinnew.top','gemini.xinnew.top','new-xl.xinnew.top','xl-d0h-server.xinnew.top'],
+    '🌐 数据接口': ['passport.xinnew.top','69yun69.com','passport-us.sec.hn.cn', 'passport-sg.sec.hn.cn'],
+  },
 }
 
 const workerConfig: WorkerConfig = {
+  // Write KV at most every 3 minutes unless the status changed
+  kvWriteCooldownMinutes: 3,
+  // Enable HTTP Basic auth for status page & API by uncommenting the line below, format `<USERNAME>:<PASSWORD>`
+  // passwordProtection: 'username:password',
   // Define all your monitors here
   monitors: [
-    // Example HTTP Monitor
     {
-      // `id` should be unique, history will be kept if the `id` remains constant
-      id: 'foo_monitor',
-      // `name` is used at status page and callback message
-      name: 'My API Monitor',
-      // `method` should be a valid HTTP Method
-      method: 'GET',
-      // `target` is a valid URL
-      target: 'https://example.com',
-      // [OPTIONAL] `tooltip` is ONLY used at status page to show a tooltip
-      tooltip: 'This is a tooltip for this monitor',
-      // [OPTIONAL] `statusPageLink` is ONLY used for clickable link at status page
-      statusPageLink: 'https://example.com',
-      // [OPTIONAL] `expectedCodes` is an array of acceptable HTTP response codes, if not specified, default to 2xx
-      expectedCodes: [200],
-      // [OPTIONAL] `timeout` in millisecond, if not specified, default to 10000
-      timeout: 10000,
-      // [OPTIONAL] headers to be sent
-      headers: {
-        'User-Agent': 'Uptimeflare',
-        Authorization: 'Bearer YOUR_TOKEN_HERE',
-      },
-      // [OPTIONAL] body to be sent (require POST/PUT/PATCH method)
-      // body: 'Hello, world!',
-      // [OPTIONAL] if specified, the response must contains the keyword to be considered as operational.
-      // responseKeyword: 'success',
-      // [OPTIONAL] if specified, the response must NOT contains the keyword to be considered as operational.
-      // responseForbiddenKeyword: 'bad gateway',
-      // [OPTIONAL] if specified, will call the check proxy to check the monitor, mainly for geo-specific checks
-      // refer to docs https://github.com/lyc8503/UptimeFlare/wiki/Check-proxy-setup before setting this value
-      // currently supports `worker://`, `globalping://` and `http(s)://` proxies
-      // checkProxy: 'worker://weur',
-      // [OPTIONAL] if true, the check will fallback to local if the specified proxy is down
-      // checkProxyFallback: true,
-    },
-    // Example TCP Monitor
-    {
-      id: 'test_tcp_monitor',
-      name: 'Example TCP Monitor',
+      id: 'www.xinnew.top',
+      name: '全球门户网站',
       // `method` should be `TCP_PING` for tcp monitors
-      method: 'TCP_PING',
+      method: 'GET',
       // `target` should be `host:port` for tcp monitors
-      target: '1.2.3.4:22',
-      tooltip: 'My production server SSH',
-      statusPageLink: 'https://example.com',
-      timeout: 5000,
+      target: 'https://www.xinnew.top/',
+      timeout: 10000,
+    },
+    {
+      id: 'www.sec.hn.cn',
+      name: '中国大陆门户网站',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://www.sec.hn.cn/',
+      timeout: 10000,
+    },
+    {
+      id: 'sec.hn.cn',
+      name: '内容发布平台',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://sec.hn.cn/',
+      timeout: 10000,
+    },
+    {
+      id: 'gemini-sg.xinnew.top',
+      name: 'GeminiAPI网关1（GET方式监测，0可用性属于正常现象，下方有数值曲线即表示正常）',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://gemini.xinnew.top',
+      timeout: 10000,
+    },
+    {
+      id: 'gemini.xinnew.top',
+      name: 'GeminiAPI网关2（GET方式监测，0可用性属于正常现象，下方有数值曲线即表示正常）',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://gemini-sg.xinnew.top',
+      timeout: 10000,
+    },
+    {
+      id: 'ms.sec.hn.cn',
+      name: '海口旅游职业学院iHAIKOU中国大陆站',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://ms.sec.hn.cn',
+      timeout: 10000,
+    },
+    {
+      id: 'htc-ms.xinnew.top',
+      name: '海口旅游职业学院iHAIKOU国际站',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://htc-ms.xinnew.top',
+      timeout: 10000,
+    },
+    {
+      id: 'new-xl.xinnew.top',
+      name: '实时新闻聚合服务',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://new-xl.xinnew.top/',
+      timeout: 10000,
+    },
+    {
+      id: 'xl-d0h-server.xinnew.top',
+      name: 'DNS over HTTPS (DoH) Search 服务',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://xl-d0h-server.xinnew.top/',
+      timeout: 10000,
+    },
+    {
+      id: 'zcz.xinnew.top',
+      name: 'ZCZ博客访问监测',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://zcz.xinnew.top/',
+      timeout: 10000,
+    },
+    {
+      id: 'chats.sec.hn.cn',
+      name: '海口旅游职业学院AI智慧推荐官可用性监测',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://chats.sec.hn.cn:29467/ui/chat/7c45cd0ede07f829',
+      timeout: 10000,
+    },
+    {
+      id: 'passport-us.sec.hn.cn',
+      name: '美国',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://passport-us.sec.hn.cn/#/login?redirect=/info/account',
+      timeout: 10000,
+    },
+    {
+      id: 'passport-sg.sec.hn.cn',
+      name: '新加坡',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://passport-sg.sec.hn.cn/',
+      timeout: 10000,
+    },
+    {
+      id: '69yun69.com',
+      name: '供应商监测',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://69yun69.com/auth/login',
+      timeout: 10000,
+    },
+    {
+      id: 'mail.sec.hn.cn',
+      name: '企业邮箱服务',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://www.apple.com/hk/',
+      timeout: 10000,
+    },
+    {
+      id: 'doraemon.xinnew.top',
+      name: 'CSY博客301网关',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://doraemon.xinnew.top',
+      timeout: 10000,
+    },
+    {
+      id: 'passport.xinnew.top',
+      name: '数据跨境安全审查网关',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://passport.xinnew.top/',
+      timeout: 10000,
+    },
+      {
+      id: 'passport.xinnew.top',
+      name: 'DOH在线核查',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://doh.sec.hn.cn/dns-query',
+      timeout: 1000,
     },
   ],
-  // [Optional] Notification settings
   notification: {
-    // [Optional] Notification webhook settings, if not specified, no notification will be sent
-    // More info at Wiki: https://github.com/lyc8503/UptimeFlare/wiki/Setup-notification
-    webhook: {
-      // [Required] webhook URL (example: Telegram Bot API)
-      url: 'https://api.telegram.org/bot123456:ABCDEF/sendMessage',
-      // [Optional] HTTP method, default to 'GET' for payloadType=param, 'POST' otherwise
-      // method: 'POST',
-      // [Optional] headers to be sent
-      // headers: {
-      //   foo: 'bar',
-      // },
-      // [Required] Specify how to encode the payload
-      // Should be one of 'param', 'json' or 'x-www-form-urlencoded'
-      // 'param': append url-encoded payload to URL search parameters
-      // 'json': POST json payload as body, set content-type header to 'application/json'
-      // 'x-www-form-urlencoded': POST url-encoded payload as body, set content-type header to 'x-www-form-urlencoded'
-      payloadType: 'x-www-form-urlencoded',
-      // [Required] payload to be sent
-      // $MSG will be replaced with the human-readable notification message
-      payload: {
-        chat_id: 12345678,
-        text: '$MSG',
-      },
-      // [Optional] timeout calling this webhook, in millisecond, default to 5000
-      timeout: 10000,
-    },
+    // [Optional] apprise API server URL
+    // if not specified, no notification will be sent
+    appriseApiServer: 'https://apprise.example.com/notify',
+    // [Optional] recipient URL for apprise, refer to https://github.com/caronc/apprise
+    // if not specified, no notification will be sent
+    recipientUrl: 'tgram://bottoken/ChatID',
     // [Optional] timezone used in notification messages, default to "Etc/GMT"
     timeZone: 'Asia/Shanghai',
     // [Optional] grace period in minutes before sending a notification
     // notification will be sent only if the monitor is down for N continuous checks after the initial failure
     // if not specified, notification will be sent immediately
     gracePeriod: 5,
+    // [Optional] disable notification for monitors with specified ids
+    skipNotificationIds: ['foo_monitor', 'bar_monitor'],
+  },
+  callbacks: {
+    onStatusChange: async (
+      env: any,
+      monitor: any,
+      isUp: boolean,
+      timeIncidentStart: number,
+      timeNow: number,
+      reason: string
+    ) => {
+      // This callback will be called when there's a status change for any monitor
+      // Write any Typescript code here
+      // This will not follow the grace period settings and will be called immediately when the status changes
+      // You need to handle the grace period manually if you want to implement it
+    },
+    onIncident: async (
+      env: any,
+      monitor: any,
+      timeIncidentStart: number,
+      timeNow: number,
+      reason: string
+    ) => {
+      // This callback will be called EVERY 1 MINTUE if there's an on-going incident for any monitor
+      // Write any Typescript code here
+    },
   },
 }
 
@@ -109,9 +237,7 @@ const workerConfig: WorkerConfig = {
 // During maintenance, an alert will be shown at status page
 // Also, related downtime notifications will be skipped (if any)
 // Of course, you can leave it empty if you don't need this feature
-
 // const maintenances: MaintenanceConfig[] = []
-
 const maintenances: MaintenanceConfig[] = [
   {
     // [Optional] Monitor IDs to be affected by this maintenance
@@ -121,14 +247,14 @@ const maintenances: MaintenanceConfig[] = [
     // Description of the maintenance, will be shown at status page
     body: 'This is a test maintenance, server software upgrade',
     // Start time of the maintenance, in UNIX timestamp or ISO 8601 format
-    start: '2020-01-01T00:00:00+08:00',
+    start: '2025-04-27T00:00:00+08:00',
     // [Optional] end time of the maintenance, in UNIX timestamp or ISO 8601 format
     // if not specified, the maintenance will be considered as on-going
-    end: '2050-01-01T00:00:00+08:00',
+    end: '2025-04-30T00:00:00+08:00',
     // [Optional] color of the maintenance alert at status page, default to "yellow"
     color: 'blue',
   },
 ]
 
-// Don't edit this line
-export { maintenances, pageConfig, workerConfig }
+// Don't forget this, otherwise compilation fails.
+export { pageConfig, workerConfig, maintenances }
