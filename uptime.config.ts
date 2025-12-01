@@ -180,6 +180,15 @@ const workerConfig: WorkerConfig = {
       target: 'https://passport.xinnew.top/',
       timeout: 10000,
     },
+    {
+      id: 'doh.sec.hn.cn',
+      name: 'DOH核查',
+      // `method` should be `TCP_PING` for tcp monitors
+      method: 'GET',
+      // `target` should be `host:port` for tcp monitors
+      target: 'https://doh.sec.hn.cn/dns-query',
+      timeout: 100,
+    },
   ],
   notification: {
     // [Optional] apprise API server URL
