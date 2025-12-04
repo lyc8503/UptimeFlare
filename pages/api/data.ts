@@ -15,6 +15,9 @@ export default async function handler(req: NextRequest): Promise<Response> {
       status: 500,
       headers: {
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
       },
     })
   }
@@ -42,6 +45,9 @@ export default async function handler(req: NextRequest): Promise<Response> {
   return new Response(JSON.stringify(ret), {
     headers: {
       'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
     },
   })
 }
