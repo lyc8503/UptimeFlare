@@ -78,7 +78,7 @@ export default async function handler(req: NextRequest): Promise<Response> {
       })
     }
 
-    const isUp = Boolean(monitor.up)
+    const isUp = monitor.up
     const badge: BadgePayload = {
       schemaVersion: 1,
       label,
