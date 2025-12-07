@@ -45,6 +45,12 @@ export default async function handler(req: NextRequest): Promise<Response> {
     const url = new URL(req.url)
 
     const monitorId = url.searchParams.get('id')
+    if (!monitorId) {
+      return new Response(JSON.stringify(errorBadge('UptimeFlare', 'id required')), {
+        headers: jsonHeaders,
+        status: 400,
+      })
+    }
     const label = url.searchParams.get('label') ?? 'UptimeFlare'
 
     const upMsg = url.searchParams.get('up') ?? 'UP'
