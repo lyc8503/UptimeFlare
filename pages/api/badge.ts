@@ -1,21 +1,8 @@
+import { workerConfig } from '@/uptime.config'
+import { MonitorState } from '@/types/config'
 import { NextRequest } from 'next/server'
 
 export const runtime = 'edge'
-
-type DataResponse = {
-  up: number
-  down: number
-  updatedAt: number
-  monitors: Record<
-    string,
-    {
-      up: boolean
-      latency: number
-      location: string
-      message: string
-    }
-  >
-}
 
 type BadgePayload = {
   schemaVersion: 1
@@ -44,41 +31,48 @@ export default async function handler(req: NextRequest): Promise<Response> {
   try {
     const url = new URL(req.url)
 
-    const monitorId = url.searchParams.get('id')
-    if (!monitorId) {
-      return new Response(JSON.stringify(errorBadge('UptimeFlare', 'id required')), {
-        headers: jsonHeaders,
-        status: 400,
-      })
-    }
-    const label = url.searchParams.get('label') ?? 'UptimeFlare'
+    const defaultMonitorId = workerConfig.monitors[0]?.id
+    const monitorId = url.searchParams.get('id') ?? defaultMonitorId
+    const label = url.searchParams.get('label') ?? monitorId ?? 'UptimeFlare'
 
     const upMsg = url.searchParams.get('up') ?? 'UP'
     const downMsg = url.searchParams.get('down') ?? 'DOWN'
     const colorUp = url.searchParams.get('colorUp') ?? 'brightgreen'
     const colorDown = url.searchParams.get('colorDown') ?? 'red'
 
-    const dataUrl = new URL('/api/data', url.origin)
-    const resp = await fetch(dataUrl, { cache: 'no-store' })
-
-    if (!resp.ok) {
-      return new Response(JSON.stringify(errorBadge(label, 'unavailable')), {
+    if (!monitorId) {
+      return new Response(JSON.stringify(errorBadge(label, 'no-monitor')), {
         headers: jsonHeaders,
-        status: resp.status,
+        status: 400,
       })
     }
 
-    const payload = (await resp.json()) as DataResponse
-    const monitor = payload.monitors?.[monitorId]
+    const { UPTIMEFLARE_STATE } = process.env as unknown as {
+      UPTIMEFLARE_STATE: KVNamespace
+    }
 
-    if (!monitor) {
+    const stateStr = await UPTIMEFLARE_STATE?.get('state')
+    if (!stateStr) {
+      return new Response(JSON.stringify(errorBadge(label, 'unavailable')), {
+        headers: jsonHeaders,
+        status: 503,
+      })
+    }
+
+    const state = JSON.parse(stateStr) as MonitorState
+    const monitorIncidentHistory = state.incident?.[monitorId]
+    const hasLatencyData = Boolean(state.latency?.[monitorId]?.recent?.length)
+
+    if (!monitorIncidentHistory || monitorIncidentHistory.length === 0 || !hasLatencyData) {
       return new Response(JSON.stringify(errorBadge(label, 'unknown')), {
         headers: jsonHeaders,
         status: 404,
       })
     }
 
-    const isUp = monitor.up
+    const latestIncident = monitorIncidentHistory.slice(-1)[0]
+    const isUp = latestIncident.end !== undefined
+
     const badge: BadgePayload = {
       schemaVersion: 1,
       label,
