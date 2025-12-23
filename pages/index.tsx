@@ -10,6 +10,7 @@ import MonitorList from '@/components/MonitorList'
 import { Center, Text } from '@mantine/core'
 import MonitorDetail from '@/components/MonitorDetail'
 import Footer from '@/components/Footer'
+import { useTranslation } from 'react-i18next'
 
 export const runtime = 'experimental-edge'
 const inter = Inter({ subsets: ['latin'] })
@@ -23,6 +24,7 @@ export default function Home({
   tooltip?: string
   statusPageLink?: string
 }) {
+  const { t } = useTranslation('common')
   let state
   if (stateStr !== undefined) {
     state = JSON.parse(stateStr) as MonitorState
@@ -33,7 +35,7 @@ export default function Home({
   if (monitorId) {
     const monitor = monitors.find((monitor) => monitor.id === monitorId)
     if (!monitor || !state) {
-      return <Text fw={700}>Monitor with id {monitorId} not found!</Text>
+      return <Text fw={700}>{t('Monitor not found', { id: monitorId })}</Text>
     }
     return (
       <div style={{ maxWidth: '810px' }}>
@@ -55,8 +57,7 @@ export default function Home({
         {state == undefined ? (
           <Center>
             <Text fw={700}>
-              Monitor State is not defined now, please check your worker&apos;s status and KV
-              binding!
+              {t('Monitor State not defined')}
             </Text>
           </Center>
         ) : (

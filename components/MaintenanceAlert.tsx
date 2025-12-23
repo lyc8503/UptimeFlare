@@ -3,6 +3,7 @@ import { useMediaQuery } from '@mantine/hooks'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { MaintenanceConfig, MonitorTarget } from '@/types/config'
 import { pageConfig } from '@/uptime.config'
+import { useTranslation } from 'react-i18next'
 
 export default function MaintenanceAlert({
   maintenance,
@@ -13,6 +14,7 @@ export default function MaintenanceAlert({
   style?: React.CSSProperties
   upcoming?: boolean
 }) {
+  const { t } = useTranslation('common')
   const theme = useMantineTheme()
   const isDesktop = useMediaQuery(`(min-width: ${theme.breakpoints.sm})`)
 
@@ -26,7 +28,7 @@ export default function MaintenanceAlert({
             fontWeight: 700,
           }}
         >
-          {(upcoming ? '[Upcoming] ' : '') + (maintenance.title || 'Scheduled Maintenance')}
+          {(upcoming ? t('Upcoming') : '') + (maintenance.title || t('Scheduled Maintenance'))}
         </span>
       }
       color={
@@ -61,14 +63,14 @@ export default function MaintenanceAlert({
           }}
         >
           <div style={{ textAlign: 'right', fontWeight: 'bold' }}>
-            {upcoming ? 'Scheduled for:' : 'From:'}
+            {upcoming ? t('Scheduled for') : t('From')}
           </div>
           <div>{new Date(maintenance.start).toLocaleString()}</div>
           <div style={{ textAlign: 'right', fontWeight: 'bold' }}>
-            {upcoming ? 'Expected end:' : 'To:'}
+            {upcoming ? t('Expected end') : t('To')}
           </div>
           <div>
-            {maintenance.end ? new Date(maintenance.end).toLocaleString() : 'Until further notice'}
+            {maintenance.end ? new Date(maintenance.end).toLocaleString() : t('Until further notice')}
           </div>
         </div>
       </div>
@@ -77,11 +79,11 @@ export default function MaintenanceAlert({
       {maintenance.monitors && maintenance.monitors.length > 0 && (
         <>
           <Text mt="xs">
-            <b>Affected components:</b>
+            <b>{t('Affected components')}</b>
           </Text>
           <List size="sm" withPadding>
             {maintenance.monitors.map((comp, compIdx) => (
-              <List.Item key={compIdx}>{comp?.name ?? '[ERR: MONITOR ID NOT FOUND]'}</List.Item>
+              <List.Item key={compIdx}>{comp?.name ?? t('MONITOR ID NOT FOUND')}</List.Item>
             ))}
           </List>
         </>

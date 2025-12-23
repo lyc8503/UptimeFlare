@@ -3,6 +3,7 @@ import { Accordion, Card, Center, Text } from '@mantine/core'
 import MonitorDetail from './MonitorDetail'
 import { pageConfig } from '@/uptime.config'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 function countDownCount(state: MonitorState, ids: string[]) {
   let downCount = 0
@@ -36,6 +37,7 @@ export default function MonitorList({
   monitors: MonitorTarget[]
   state: MonitorState
 }) {
+  const { t } = useTranslation('common')
   const group = pageConfig.group
   const groupedMonitor = group && Object.keys(group).length > 0
   let content
@@ -81,7 +83,7 @@ export default function MonitorList({
                   }}
                 >
                   {group[groupName].length - countDownCount(state, group[groupName])}/
-                  {group[groupName].length} Operational
+                  {group[groupName].length} {t('Operational')}
                 </Text>
               </div>
             </Accordion.Control>
