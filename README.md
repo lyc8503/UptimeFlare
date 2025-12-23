@@ -19,6 +19,7 @@ A more advanced, serverless, and free uptime monitoring & status page solution, 
   - Custom status code & keyword checks for HTTP(s)
   - Downtime notification supporting [100+ notification channels](https://github.com/caronc/apprise/wiki)
   - Customizable Webhook
+  - Multi-language support (English/Chinese)
 - Status page
   - Interactive ping (response time) chart for all types of monitors
   - Scheduled maintenances alerts & Incident history page
@@ -74,8 +75,10 @@ To contribute new features or customize your deployment furthermore, see [here](
 - [x] Simpler config example
 - [x] Upcoming maintenances
 - [x] Universal Webhook upgrade
-- [ ] i18n...? (maybe)
+- [x] i18n...? (maybe)
 - [ ] ICMP via proxy?
 - [x] Add default UA
-- [ ] Customizable footer
-- [ ] New header logo
+- [x] Customizable footer
+- [x] New header logo
+- [ ] Improve CPU time usage
+- [ ] Local deployment

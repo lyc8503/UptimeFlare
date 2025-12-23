@@ -304,6 +304,8 @@ export async function getStatus(
         response.status,
         response.text.bind(response)
       )
+      try { await response.body?.cancel() } catch(e) {} // Always try to cancel body, see issue #166
+
       if (err !== null) {
         console.log(`${monitor.name} didn't pass response check: ${err}`)
       }
