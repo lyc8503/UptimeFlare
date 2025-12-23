@@ -1,3 +1,4 @@
 name = "uptimeflare_worker"
 main = "src/index.ts"
 compatibility_date = "2025-04-02"
+compatibility_flags = [ "nodejs_comat" ]

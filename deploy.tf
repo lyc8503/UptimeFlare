@@ -27,6 +27,7 @@ resource "cloudflare_worker_script" "uptimeflare" {
   content            = file("worker/dist/index.js")
   module             = true
   compatibility_date = "2025-04-02"
+  compatibility_flags = ["nodejs_compat"]
 
   kv_namespace_binding {
     name         = "UPTIMEFLARE_STATE"
