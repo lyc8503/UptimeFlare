@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "vercel-build": "next build",
     "deploy": "wrangler deploy",
     "dev": "wrangler dev --config wrangler-dev.toml --test-scheduled --persist-to ../.wrangler/state",
     "start": "wrangler dev"
