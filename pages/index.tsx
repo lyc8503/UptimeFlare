@@ -11,6 +11,7 @@ import { Center, Text } from '@mantine/core'
 import MonitorDetail from '@/components/MonitorDetail'
 import Footer from '@/components/Footer'
 import { useTranslation } from 'react-i18next'
+import { getFromStore } from '@/worker/src/store'
 
 export const runtime = 'experimental-edge'
 const inter = Inter({ subsets: ['latin'] })
@@ -74,12 +75,8 @@ export default function Home({
 }
 
 export async function getServerSideProps() {
-  const { UPTIMEFLARE_STATE } = process.env as unknown as {
-    UPTIMEFLARE_STATE: KVNamespace
-  }
-
   // Read state as string from KV, to avoid hitting server-side cpu time limit
-  const state = (await UPTIMEFLARE_STATE?.get('state')) as unknown as MonitorState
+  const state = await getFromStore(process.env as any, 'state') as unknown as MonitorState
 
   // Only present these values to client
   const monitors = workerConfig.monitors.map((monitor) => {

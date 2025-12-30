@@ -3,10 +3,12 @@ import { MonitorState, MonitorTarget } from '../../types/config'
 import { maintenances, workerConfig } from '../../uptime.config'
 import { getStatus, getStatusWithGlobalPing } from './monitor'
 import { formatStatusChangeNotification, getWorkerLocation, webhookNotify } from './util'
+import { getFromStore, setToStore } from './store'
 
 export interface Env {
   UPTIMEFLARE_STATE: KVNamespace
   REMOTE_CHECKER_DO: DurableObjectNamespace<RemoteChecker>
+  UPTIMEFLARE_D1: D1Database
 }
 
 const Worker = {
@@ -62,18 +64,16 @@ const Worker = {
     }
 
     // Read state, set init state if it doesn't exist
-    let state =
-      ((await env.UPTIMEFLARE_STATE.get('state', {
-        type: 'json',
-      })) as unknown as MonitorState) ||
-      ({
-        version: 1,
+    let state = JSON.parse(await getFromStore(env, 'state') || '{}') as unknown as MonitorState
+    if (!state || Object.keys(state).length === 0) {
+      state = {
         lastUpdate: 0,
         overallUp: 0,
         overallDown: 0,
         incident: {},
         latency: {},
-      } as MonitorState)
+      }
+    }
     state.overallDown = 0
     state.overallUp = 0
 
@@ -340,7 +340,7 @@ const Worker = {
     ) {
       console.log('Updating state...')
       state.lastUpdate = currentTimeSecond
-      await env.UPTIMEFLARE_STATE.put('state', JSON.stringify(state))
+      await setToStore(env, 'state', JSON.stringify(state))
     } else {
       console.log('Skipping state update due to cooldown period.')
     }
