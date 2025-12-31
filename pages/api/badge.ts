@@ -61,7 +61,7 @@ export default async function handler(req: NextRequest): Promise<Response> {
 
     const state = JSON.parse(stateStr) as MonitorState
     const monitorIncidentHistory = state.incident?.[monitorId]
-    const hasLatencyData = Boolean(state.latency?.[monitorId]?.recent?.length)
+    const hasLatencyData = Boolean(state.latency?.[monitorId]?.length)
 
     if (!monitorIncidentHistory || monitorIncidentHistory.length === 0 || !hasLatencyData) {
       return new Response(JSON.stringify(errorBadge(label, 'unknown')), {

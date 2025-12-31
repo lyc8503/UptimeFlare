@@ -1,4 +1,5 @@
-import { WebhookConfig } from '../../types/config'
+import { MonitorTarget, WebhookConfig } from '../../types/config'
+import { maintenances, workerConfig } from '../../uptime.config'
 
 async function getWorkerLocation() {
   const res = await fetch('https://cloudflare.com/cdn-cgi/trace')
@@ -145,10 +146,59 @@ async function webhookNotify(webhook: WebhookConfig, message: string) {
   }
 }
 
+// Auxiliary function to format notification and send it via webhook
+const formatAndNotify = async (
+  monitor: MonitorTarget,
+  isUp: boolean,
+  timeIncidentStart: number,
+  timeNow: number,
+  reason: string
+) => {
+  // Skip notification if monitor is in the skip list
+  const skipList = workerConfig.notification?.skipNotificationIds
+  if (skipList && skipList.includes(monitor.id)) {
+    console.log(
+      `Skipping notification for ${monitor.name} (${monitor.id} in skipNotificationIds)`
+    )
+    return
+  }
+
+  // Skip notification if monitor is in maintenance
+  const maintenanceList = maintenances
+    .filter(
+      (m) =>
+        new Date(timeNow * 1000) >= new Date(m.start) &&
+        (!m.end || new Date(timeNow * 1000) <= new Date(m.end))
+    )
+    .map((e) => e.monitors || [])
+    .flat()
+
+  if (maintenanceList.includes(monitor.id)) {
+    console.log(`Skipping notification for ${monitor.name} (in maintenance)`)
+    return
+  }
+
+  if (workerConfig.notification?.webhook) {
+    const notification = formatStatusChangeNotification(
+      monitor,
+      isUp,
+      timeIncidentStart,
+      timeNow,
+      reason,
+      workerConfig.notification?.timeZone ?? 'Etc/GMT'
+    )
+    await webhookNotify(workerConfig.notification.webhook, notification)
+  } else {
+    console.log(`Webhook not set, skipping notification for ${monitor.name}`)
+  }
+}
+
+
 export {
   getWorkerLocation,
   fetchTimeout,
   withTimeout,
   webhookNotify,
   formatStatusChangeNotification,
+  formatAndNotify,
 }

@@ -1,5 +1,4 @@
-name = "uptimeflare_worker"
-main = "src/index.ts"
+name = "uptimeflare"
 compatibility_date = "2025-04-02"
 compatibility_flags = [ "nodejs_compat" ]
 

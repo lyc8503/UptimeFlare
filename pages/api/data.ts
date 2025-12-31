@@ -29,8 +29,8 @@ export default async function handler(req: NextRequest): Promise<Response> {
     const isUp = state.incident[monitor.id].slice(-1)[0].end !== undefined
     monitors[monitor.id] = {
       up: isUp,
-      latency: state.latency[monitor.id].recent.slice(-1)[0].ping,
-      location: state.latency[monitor.id].recent.slice(-1)[0].loc,
+      latency: state.latency[monitor.id].slice(-1)[0].ping,
+      location: state.latency[monitor.id].slice(-1)[0].loc,
       message: isUp ? 'OK' : state.incident[monitor.id].slice(-1)[0].error.slice(-1)[0],
     }
   }

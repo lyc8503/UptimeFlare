@@ -34,7 +34,7 @@ export default function DetailChart({
   state: MonitorState
 }) {
   const { t } = useTranslation('common')
-  const latencyData = state.latency[monitor.id].recent.map((point) => ({
+  const latencyData = state.latency[monitor.id].map((point) => ({
     x: point.time * 1000,
     y: point.ping,
     loc: point.loc,

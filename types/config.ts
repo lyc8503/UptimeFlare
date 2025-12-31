@@ -92,32 +92,61 @@ export type Callbacks<TEnv = Env> = {
   ) => Promise<any> | any
 }
 
+export type IncidentRecord = {
+  start: number[]
+  end: number | null  // null if it's still open
+  error: string[]
+}
+
+export type LatencyRecord = {
+  loc: string
+  ping: number
+  time: number
+}
+
 export type MonitorState = {
   lastUpdate: number
   overallUp: number
   overallDown: number
+  incident: Record<string, IncidentRecord[]>
+  latency: Record<string, LatencyRecord[]>  // recent 12 hour data, N min interval
+}
+
+// This is now the actual stored format (after TODO D1 migration) to improve (de)serialization performance
+// This gives a ~3.5x speedup in computing and a 58% reduction in size
+// The CPULimitExceeded issue with 10+ monitors on free tier should be largely mitigated by this change
+// local profiling result (1 op = parse + stringify):
+// MonitorState (original): 277 ops/s, ±0.51%   | slowest, 71.09% slower
+// MonitorStateCompacted:   958 ops/s, ±1.17%   | fastest
+export type MonitorStateCompacted = {
+  lastUpdate: number
+  overallUp: number
+  overallDown: number
+
+  // incident in stored in columnar format
   incident: Record<
-    string,
+    string, // monitor id
     {
-      start: number[]
-      end: number | undefined // undefined if it's still open
-      error: string[]
-    }[]
+      start: number[][]
+      end: (number | null)[]
+      error: string[][]
+    }
   >
 
+  // latency in stored in columnar format
+  // also uses Run-length encoding for loc & Base64 encoding for number arrays
   latency: Record<
-    string,
+    string, // monitor id
     {
-      recent: {
-        loc: string
-        ping: number
-        time: number
-      }[] // recent 12 hour data, 2 min interval
-      all: {
-        loc: string
-        ping: number
-        time: number
-      }[] // all data in 90 days, 1 hour interval
+      loc: {
+        v: string[] // RLE values
+        c: number[] // RLE counts
+      }
+      // Hex results in a larger size and slower encoding/decoding than base64,
+      // but we can pop/append arbitrary number of bytes without decoding then re-encoding the whole string
+      // This is useful in Workers and shows a ~2% speedup comapred to base64, and it also simplifies the code
+      ping: string // Hex encoded Uint16Array 
+      time: string // Hex encoded Uint32Array
     }
   >
 }

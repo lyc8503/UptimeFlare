@@ -57,9 +57,7 @@ export default function Home({
 
         {state == undefined ? (
           <Center>
-            <Text fw={700}>
-              {t('Monitor State not defined')}
-            </Text>
+            <Text fw={700}>{t('Monitor State not defined')}</Text>
           </Center>
         ) : (
           <div>
@@ -76,7 +74,7 @@ export default function Home({
 
 export async function getServerSideProps() {
   // Read state as string from KV, to avoid hitting server-side cpu time limit
-  const state = await getFromStore(process.env as any, 'state') as unknown as MonitorState
+  const state = (await getFromStore(process.env as any, 'state')) as unknown as MonitorState
 
   // Only present these values to client
   const monitors = workerConfig.monitors.map((monitor) => {

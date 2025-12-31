@@ -70,7 +70,9 @@ export default function MaintenanceAlert({
             {upcoming ? t('Expected end') : t('To')}
           </div>
           <div>
-            {maintenance.end ? new Date(maintenance.end).toLocaleString() : t('Until further notice')}
+            {maintenance.end
+              ? new Date(maintenance.end).toLocaleString()
+              : t('Until further notice')}
           </div>
         </div>
       </div>
