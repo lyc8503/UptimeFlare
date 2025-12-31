@@ -1,53 +1,49 @@
 import { workerConfig } from '@/uptime.config'
-import { MonitorState } from '@/types/config'
 import { NextRequest } from 'next/server'
+import { CompactedMonitorStateWrapper, getFromStore } from '@/worker/src/store'
 
 export const runtime = 'edge'
 
-export default async function handler(req: NextRequest): Promise<Response> {
-  const { UPTIMEFLARE_STATE } = process.env as unknown as {
-    UPTIMEFLARE_STATE: KVNamespace
-  }
+const headers = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+}
 
-  const stateStr = await UPTIMEFLARE_STATE?.get('state')
-  if (!stateStr) {
+export default async function handler(req: NextRequest): Promise<Response> {
+  const compactedState = new CompactedMonitorStateWrapper(await getFromStore(process.env as any, 'state'))
+
+  if (compactedState.data.lastUpdate === 0) {
     return new Response(JSON.stringify({ error: 'No data available' }), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
+      headers
     })
   }
-  const state = JSON.parse(stateStr) as unknown as MonitorState
 
   let monitors: any = {}
 
   for (let monitor of workerConfig.monitors) {
-    const isUp = state.incident[monitor.id].slice(-1)[0].end !== undefined
+    const lastIncident = compactedState.getIncident(monitor.id, compactedState.incidentLen(monitor.id) - 1)
+
+    const isUp = lastIncident?.end !== null
+    const latency = compactedState.getLastLatency(monitor.id)
     monitors[monitor.id] = {
       up: isUp,
-      latency: state.latency[monitor.id].slice(-1)[0].ping,
-      location: state.latency[monitor.id].slice(-1)[0].loc,
-      message: isUp ? 'OK' : state.incident[monitor.id].slice(-1)[0].error.slice(-1)[0],
+      latency: latency.ping,
+      location: latency.loc,
+      message: isUp ? 'OK' : lastIncident?.error[lastIncident.error.length - 1],
     }
   }
 
   let ret = {
-    up: state.overallUp,
-    down: state.overallDown,
-    updatedAt: state.lastUpdate,
+    up: compactedState.data.overallUp,
+    down: compactedState.data.overallDown,
+    updatedAt: compactedState.data.lastUpdate,
     monitors: monitors,
   }
 
   return new Response(JSON.stringify(ret), {
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
+    headers
   })
 }

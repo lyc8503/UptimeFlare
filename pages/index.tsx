@@ -1,8 +1,7 @@
 import Head from 'next/head'
 
 import { Inter } from 'next/font/google'
-import { MonitorState, MonitorTarget } from '@/types/config'
-import { KVNamespace } from '@cloudflare/workers-types'
+import { MonitorTarget } from '@/types/config'
 import { maintenances, pageConfig, workerConfig } from '@/uptime.config'
 import OverallStatus from '@/components/OverallStatus'
 import Header from '@/components/Header'
@@ -11,25 +10,22 @@ import { Center, Text } from '@mantine/core'
 import MonitorDetail from '@/components/MonitorDetail'
 import Footer from '@/components/Footer'
 import { useTranslation } from 'react-i18next'
-import { getFromStore } from '@/worker/src/store'
+import { CompactedMonitorStateWrapper, getFromStore } from '@/worker/src/store'
 
 export const runtime = 'experimental-edge'
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home({
-  state: stateStr,
+  compactedStateStr,
   monitors,
 }: {
-  state: string
+  compactedStateStr: string
   monitors: MonitorTarget[]
   tooltip?: string
   statusPageLink?: string
 }) {
   const { t } = useTranslation('common')
-  let state
-  if (stateStr !== undefined) {
-    state = JSON.parse(stateStr) as MonitorState
-  }
+  let state = new CompactedMonitorStateWrapper(compactedStateStr).uncompact()
 
   // Specify monitorId in URL hash to view a specific monitor (can be used in iframe)
   const monitorId = window.location.hash.substring(1)
@@ -55,7 +51,7 @@ export default function Home({
       <main className={inter.className}>
         <Header />
 
-        {state == undefined ? (
+        {state.lastUpdate === 0 ? (
           <Center>
             <Text fw={700}>{t('Monitor State not defined')}</Text>
           </Center>
@@ -73,8 +69,8 @@ export default function Home({
 }
 
 export async function getServerSideProps() {
-  // Read state as string from KV, to avoid hitting server-side cpu time limit
-  const state = (await getFromStore(process.env as any, 'state')) as unknown as MonitorState
+  // Read state as string from storage, to avoid hitting server-side cpu time limit
+  const compactedStateStr = await getFromStore(process.env as any, 'state')
 
   // Only present these values to client
   const monitors = workerConfig.monitors.map((monitor) => {
@@ -90,5 +86,5 @@ export async function getServerSideProps() {
     }
   })
 
-  return { props: { state, monitors } }
+  return { props: { compactedStateStr, monitors } }
 }

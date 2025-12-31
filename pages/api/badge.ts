@@ -1,6 +1,5 @@
-import { workerConfig } from '@/uptime.config'
-import { MonitorState } from '@/types/config'
 import { NextRequest } from 'next/server'
+import { CompactedMonitorStateWrapper, getFromStore } from '@/worker/src/store'
 
 export const runtime = 'edge'
 
@@ -31,8 +30,7 @@ export default async function handler(req: NextRequest): Promise<Response> {
   try {
     const url = new URL(req.url)
 
-    const defaultMonitorId = workerConfig.monitors[0]?.id
-    const monitorId = url.searchParams.get('id') ?? defaultMonitorId
+    const monitorId = url.searchParams.get('id')
     const label = url.searchParams.get('label') ?? monitorId ?? 'UptimeFlare'
 
     const upMsg = url.searchParams.get('up') ?? 'UP'
@@ -47,31 +45,12 @@ export default async function handler(req: NextRequest): Promise<Response> {
       })
     }
 
-    const { UPTIMEFLARE_STATE } = process.env as unknown as {
-      UPTIMEFLARE_STATE: KVNamespace
-    }
+    const compactedState = new CompactedMonitorStateWrapper(
+      await getFromStore(process.env as any, 'state')
+    )
 
-    const stateStr = await UPTIMEFLARE_STATE?.get('state')
-    if (!stateStr) {
-      return new Response(JSON.stringify(errorBadge(label, 'unavailable')), {
-        headers: jsonHeaders,
-        status: 503,
-      })
-    }
-
-    const state = JSON.parse(stateStr) as MonitorState
-    const monitorIncidentHistory = state.incident?.[monitorId]
-    const hasLatencyData = Boolean(state.latency?.[monitorId]?.length)
-
-    if (!monitorIncidentHistory || monitorIncidentHistory.length === 0 || !hasLatencyData) {
-      return new Response(JSON.stringify(errorBadge(label, 'unknown')), {
-        headers: jsonHeaders,
-        status: 404,
-      })
-    }
-
-    const latestIncident = monitorIncidentHistory.slice(-1)[0]
-    const isUp = latestIncident.end !== undefined
+    const lastIncident = compactedState.getIncident(monitorId, compactedState.incidentLen(monitorId) - 1)
+    const isUp = lastIncident?.end !== null
 
     const badge: BadgePayload = {
       schemaVersion: 1,

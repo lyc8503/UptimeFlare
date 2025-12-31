@@ -1,5 +1,5 @@
 import { Env } from '.'
-import { IncidentRecord, LatencyRecord, MonitorStateCompacted } from '../../types/config'
+import { IncidentRecord, LatencyRecord, MonitorState, MonitorStateCompacted } from '../../types/config'
 
 export async function getFromStore(env: Env, key: string): Promise<string | null> {
   const stmt = env.UPTIMEFLARE_D1.prepare('SELECT value FROM uptimeflare WHERE key = ?')
@@ -34,6 +34,64 @@ export class CompactedMonitorStateWrapper {
 
   getCompactedStateStr(): string {
     return JSON.stringify(this.data)
+  }
+
+  // Don't use this method at server-side
+  uncompact(): MonitorState {
+    let state: MonitorState = {
+      lastUpdate: this.data.lastUpdate,
+      overallUp: this.data.overallUp,
+      overallDown: this.data.overallDown,
+      incident: {},
+      latency: {},
+    }
+
+    Object.keys(this.data.incident).forEach((monitorId) => {
+      state.incident[monitorId] = []
+      const incidents = this.data.incident[monitorId]
+
+      if (incidents.start.length !== incidents.end.length || incidents.start.length !== incidents.error.length) {
+        throw new Error('Inconsistent incident data lengths, please report an issue at https://github.com/lyc8503/UptimeFlare')
+      }
+
+      for (let i = 0; i < incidents.start.length; i++) {
+        state.incident[monitorId].push({
+          start: incidents.start[i],
+          end: incidents.end[i],
+          error: incidents.error[i],
+        })
+      }
+    })
+
+    Object.keys(this.data.latency).forEach((monitorId) => {
+      state.latency[monitorId] = []
+      const latencies = this.data.latency[monitorId]
+      const locUncompacted: string[] = []
+      latencies.loc.c.forEach((count, index) => {
+        for (let i = 0; i < count; i++) {
+          locUncompacted.push(latencies.loc.v[index])
+        }
+      })
+
+      // @ts-expect-error
+      const timeArr = new Uint32Array(Uint8Array.fromHex(latencies.time).buffer)
+      // @ts-expect-error
+      const pingArr = new Uint16Array(Uint8Array.fromHex(latencies.ping).buffer)
+
+      if (timeArr.length !== pingArr.length || timeArr.length !== locUncompacted.length) {
+        throw new Error('Inconsistent latency data lengths, please report an issue at https://github.com/lyc8503/UptimeFlare.')
+      }
+
+      for (let i = 0; i < timeArr.length; i++) {
+        state.latency[monitorId].push({
+          time: timeArr[i],
+          ping: pingArr[i],
+          loc: locUncompacted[i],
+        })
+      }
+    })
+
+    return state
   }
 
   incidentLen(monitorId: string): number {
@@ -137,6 +195,18 @@ export class CompactedMonitorStateWrapper {
       // @ts-expect-error
       ping: new Uint16Array(Uint8Array.fromHex(latencies.ping.slice(0, 4)).buffer)[0],
       loc: latencies.loc.v[0],
+    }
+  }
+
+  getLastLatency(monitorId: string): LatencyRecord {
+    let latencies = this.data.latency[monitorId]
+
+    return {
+      // @ts-expect-error
+      time: new Uint32Array(Uint8Array.fromHex(latencies.time.slice(-8)).buffer)[0],
+      // @ts-expect-error
+      ping: new Uint16Array(Uint8Array.fromHex(latencies.ping.slice(-4)).buffer)[0],
+      loc: latencies.loc.v[latencies.loc.v.length - 1],
     }
   }
 

@@ -29,7 +29,7 @@
   "No incidents in this month": "本月无故障",
   "There are no incidents for this month": "本月没有发生任何故障。",
   "Monitor not found": "未找到 ID 为 {{id}} 的监控！",
-  "Monitor State not defined": "监控状态未定义，请检查您的 Worker 状态和 KV 绑定！",
+  "Monitor State not defined": "监控状态未定义，请检查您的 Worker 状态和绑定！",
   "All": "全部",
   "Select monitor": "选择监控",
   "Backwards": "← 上一月",

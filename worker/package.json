@@ -4,12 +4,12 @@
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
-    "dev": "wrangler dev --config wrangler-dev.toml --test-scheduled --persist-to ../.wrangler/state",
+    "dev": "wrangler dev --test-scheduled --persist-to ../.wrangler/state",
     "start": "wrangler dev"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250410.0",
     "typescript": "^5.0.4",
-    "wrangler": "^4.10.0"
+    "wrangler": "^4.54.0"
   }
 }

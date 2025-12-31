@@ -29,7 +29,7 @@
   "No incidents in this month": "No incidents in this month",
   "There are no incidents for this month": "There are no incidents for this month.",
   "Monitor not found": "Monitor with id {{id}} not found!",
-  "Monitor State not defined": "Monitor State is not defined now, please check your worker's status and KV binding!",
+  "Monitor State not defined": "Monitor State is not defined now, please check your worker's status and binding!",
   "All": "All",
   "Select monitor": "Select monitor",
   "Backwards": "← Backwards",
