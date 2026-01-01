@@ -1,4 +1,4 @@
-import { workerConfig } from '@/uptime.config'
+import { maintenances, workerConfig } from '@/uptime.config'
 import { MonitorState } from '@/types/config'
 import { NextRequest } from 'next/server'
 
@@ -39,7 +39,8 @@ export default async function handler(req: NextRequest): Promise<Response> {
     up: state.overallUp,
     down: state.overallDown,
     updatedAt: state.lastUpdate,
-    monitors: monitors,
+    monitors,
+    maintenances,
   }
 
   return new Response(JSON.stringify(ret), {
