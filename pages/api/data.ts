@@ -1,4 +1,4 @@
-import { workerConfig } from '@/uptime.config'
+import { maintenances, workerConfig } from '@/uptime.config'
 import { NextRequest } from 'next/server'
 import { CompactedMonitorStateWrapper, getFromStore } from '@/worker/src/store'
 
@@ -45,7 +45,8 @@ export default async function handler(req: NextRequest): Promise<Response> {
     up: compactedState.data.overallUp,
     down: compactedState.data.overallDown,
     updatedAt: compactedState.data.lastUpdate,
-    monitors: monitors,
+    monitors,
+    maintenances,
   }
 
   return new Response(JSON.stringify(ret), {

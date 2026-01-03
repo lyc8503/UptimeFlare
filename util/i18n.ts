@@ -3,6 +3,7 @@ import { initReactI18next } from 'react-i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import en from '../locales/en/common.json'
 import zhCN from '../locales/zh-CN/common.json'
+import zhTW from '../locales/zh-TW/common.json'
 
 i18n
   .use(LanguageDetector)
@@ -12,6 +13,7 @@ i18n
       en: { common: en },
       'zh-CN': { common: zhCN },
       zh: { common: zhCN },
+      'zh-TW': { common: zhTW },
     },
     fallbackLng: 'en',
     interpolation: {
