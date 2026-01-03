@@ -51,6 +51,7 @@ jobs:
           git push
 
       - name: Trigger deployment
+        if: ${{ inputs.override-token == '' }}
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: deploy.yml
