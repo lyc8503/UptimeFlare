@@ -157,9 +157,7 @@ const formatAndNotify = async (
   // Skip notification if monitor is in the skip list
   const skipList = workerConfig.notification?.skipNotificationIds
   if (skipList && skipList.includes(monitor.id)) {
-    console.log(
-      `Skipping notification for ${monitor.name} (${monitor.id} in skipNotificationIds)`
-    )
+    console.log(`Skipping notification for ${monitor.name} (${monitor.id} in skipNotificationIds)`)
     return
   }
 
@@ -192,7 +190,6 @@ const formatAndNotify = async (
     console.log(`Webhook not set, skipping notification for ${monitor.name}`)
   }
 }
-
 
 export {
   getWorkerLocation,

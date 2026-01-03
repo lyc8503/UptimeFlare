@@ -49,7 +49,10 @@ export default async function handler(req: NextRequest): Promise<Response> {
       await getFromStore(process.env as any, 'state')
     )
 
-    const lastIncident = compactedState.getIncident(monitorId, compactedState.incidentLen(monitorId) - 1)
+    const lastIncident = compactedState.getIncident(
+      monitorId,
+      compactedState.incidentLen(monitorId) - 1
+    )
     const isUp = lastIncident?.end !== null
 
     const badge: BadgePayload = {

@@ -94,7 +94,7 @@ export type Callbacks<TEnv = Env> = {
 
 export type IncidentRecord = {
   start: number[]
-  end: number | null  // null if it's still open
+  end: number | null // null if it's still open
   error: string[]
 }
 
@@ -109,15 +109,18 @@ export type MonitorState = {
   overallUp: number
   overallDown: number
   incident: Record<string, IncidentRecord[]>
-  latency: Record<string, LatencyRecord[]>  // recent 12 hour data, N min interval
+  latency: Record<string, LatencyRecord[]> // recent 12 hour data, N min interval
 }
 
-// This is now the actual stored format (after TODO D1 migration) to improve (de)serialization performance
-// This gives a ~3.5x speedup in computing and a 58% reduction in size
-// The CPULimitExceeded issue with 10+ monitors on free tier should be largely mitigated by this change
+// This is now the actual stored format (after 2026/01/01 D1 migration) to improve (de)serialization performance
+// This gives a ~3.5x speedup in computing and a 40-60% reduction in size
+// The CPULimitExceeded issue with 10+ monitors on free tier should be mitigated by this change
 // local profiling result (1 op = parse + stringify):
 // MonitorState (original): 277 ops/s, ±0.51%   | slowest, 71.09% slower
 // MonitorStateCompacted:   958 ops/s, ±1.17%   | fastest
+// Real world test with 8 monitors and a few hundred incidents and full latency data (status.lyc8503.net):
+// original: 433KB size, 11.24ms P50 cpu time, 18.11ms P99 cpu time
+// compacted: 181KB size (59% smaller), 6.36ms P50 cpu time (43% faster), 8.86ms P99 cpu time (51% faster)
 export type MonitorStateCompacted = {
   lastUpdate: number
   overallUp: number
@@ -145,7 +148,7 @@ export type MonitorStateCompacted = {
       // Hex results in a larger size and slower encoding/decoding than base64,
       // but we can pop/append arbitrary number of bytes without decoding then re-encoding the whole string
       // This is useful in Workers and shows a ~2% speedup comapred to base64, and it also simplifies the code
-      ping: string // Hex encoded Uint16Array 
+      ping: string // Hex encoded Uint16Array
       time: string // Hex encoded Uint32Array
     }
   >

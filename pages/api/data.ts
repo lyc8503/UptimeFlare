@@ -12,19 +12,24 @@ const headers = {
 }
 
 export default async function handler(req: NextRequest): Promise<Response> {
-  const compactedState = new CompactedMonitorStateWrapper(await getFromStore(process.env as any, 'state'))
+  const compactedState = new CompactedMonitorStateWrapper(
+    await getFromStore(process.env as any, 'state')
+  )
 
   if (compactedState.data.lastUpdate === 0) {
     return new Response(JSON.stringify({ error: 'No data available' }), {
       status: 500,
-      headers
+      headers,
     })
   }
 
   let monitors: any = {}
 
   for (let monitor of workerConfig.monitors) {
-    const lastIncident = compactedState.getIncident(monitor.id, compactedState.incidentLen(monitor.id) - 1)
+    const lastIncident = compactedState.getIncident(
+      monitor.id,
+      compactedState.incidentLen(monitor.id) - 1
+    )
 
     const isUp = lastIncident?.end !== null
     const latency = compactedState.getLastLatency(monitor.id)
@@ -44,6 +49,6 @@ export default async function handler(req: NextRequest): Promise<Response> {
   }
 
   return new Response(JSON.stringify(ret), {
-    headers
+    headers,
   })
 }

@@ -17,9 +17,7 @@ const Worker = {
     console.log(`Running scheduled event on ${workerLocation}...`)
 
     // Create a wrapped MonitorState from stored compacted state
-    const state = new CompactedMonitorStateWrapper(
-      await getFromStore(env, 'state')
-    )
+    const state = new CompactedMonitorStateWrapper(await getFromStore(env, 'state'))
     state.data.overallDown = 0
     state.data.overallUp = 0
 
@@ -147,10 +145,7 @@ const Worker = {
             error: [status.err],
           })
           monitorStatusChanged = true
-        } else if (
-          lastIncident.end === null &&
-          lastIncident.error.slice(-1)[0] !== status.err
-        ) {
+        } else if (lastIncident.end === null && lastIncident.error.slice(-1)[0] !== status.err) {
           // append if the error message changes
           lastIncident.start.push(currentTimeSecond)
           lastIncident.error.push(status.err)
@@ -160,10 +155,7 @@ const Worker = {
           monitorStatusChanged = true
         }
 
-        const currentIncident = state.getIncident(
-          monitor.id,
-          state.incidentLen(monitor.id) - 1
-        )
+        const currentIncident = state.getIncident(monitor.id, state.incidentLen(monitor.id) - 1)
         try {
           if (
             // monitor status changed AND...
@@ -240,7 +232,7 @@ const Worker = {
       }
 
       // append to latency data
-      state.appendLatency(monitor.id,{
+      state.appendLatency(monitor.id, {
         loc: checkLocation,
         ping: status.ping,
         time: currentTimeSecond,
@@ -283,7 +275,8 @@ const Worker = {
     // Allow for a cooldown period before writing to storage
     if (
       statusChanged ||
-      currentTimeSecond - state.data.lastUpdate >= (workerConfig.kvWriteCooldownMinutes ?? 3) * 60 - 10 // Allow for 10 seconds of clock drift
+      currentTimeSecond - state.data.lastUpdate >=
+        (workerConfig.kvWriteCooldownMinutes ?? 3) * 60 - 10 // Allow for 10 seconds of clock drift
     ) {
       console.log('Updating state...')
       state.data.lastUpdate = currentTimeSecond

@@ -1,5 +1,10 @@
 import { Env } from '.'
-import { IncidentRecord, LatencyRecord, MonitorState, MonitorStateCompacted } from '../../types/config'
+import {
+  IncidentRecord,
+  LatencyRecord,
+  MonitorState,
+  MonitorStateCompacted,
+} from '../../types/config'
 
 export async function getFromStore(env: Env, key: string): Promise<string | null> {
   const stmt = env.UPTIMEFLARE_D1.prepare('SELECT value FROM uptimeflare WHERE key = ?')
@@ -50,8 +55,13 @@ export class CompactedMonitorStateWrapper {
       state.incident[monitorId] = []
       const incidents = this.data.incident[monitorId]
 
-      if (incidents.start.length !== incidents.end.length || incidents.start.length !== incidents.error.length) {
-        throw new Error('Inconsistent incident data lengths, please report an issue at https://github.com/lyc8503/UptimeFlare')
+      if (
+        incidents.start.length !== incidents.end.length ||
+        incidents.start.length !== incidents.error.length
+      ) {
+        throw new Error(
+          'Inconsistent incident data lengths, please report an issue at https://github.com/lyc8503/UptimeFlare'
+        )
       }
 
       for (let i = 0; i < incidents.start.length; i++) {
@@ -79,7 +89,9 @@ export class CompactedMonitorStateWrapper {
       const pingArr = new Uint16Array(Uint8Array.fromHex(latencies.ping).buffer)
 
       if (timeArr.length !== pingArr.length || timeArr.length !== locUncompacted.length) {
-        throw new Error('Inconsistent latency data lengths, please report an issue at https://github.com/lyc8503/UptimeFlare.')
+        throw new Error(
+          'Inconsistent latency data lengths, please report an issue at https://github.com/lyc8503/UptimeFlare.'
+        )
       }
 
       for (let i = 0; i < timeArr.length; i++) {
@@ -155,7 +167,7 @@ export class CompactedMonitorStateWrapper {
   latencyLen(monitorId: string): number {
     const latencies = this.data.latency[monitorId]
     if (!latencies) return 0
-    return latencies.ping.length / 4  // Uint16Array, 4 characters per entry in hex
+    return latencies.ping.length / 4 // Uint16Array, 4 characters per entry in hex
   }
 
   appendLatency(monitorId: string, record: LatencyRecord) {
@@ -172,7 +184,7 @@ export class CompactedMonitorStateWrapper {
       }
       latencies = this.data.latency[monitorId]
     }
-    
+
     // @ts-expect-error
     latencies.time += new Uint8Array(new Uint32Array([record.time]).buffer).toHex()
     // @ts-expect-error
@@ -212,7 +224,7 @@ export class CompactedMonitorStateWrapper {
 
   unshiftLatency(monitorId: string) {
     let latencies = this.data.latency[monitorId]
-    
+
     latencies.time = latencies.time.slice(8)
     latencies.ping = latencies.ping.slice(4)
 
