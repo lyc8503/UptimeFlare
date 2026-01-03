@@ -78,17 +78,21 @@ r = requests.post(
     }
 ).json()
 
-if r['success'] :
-    print("State migrated to D1 successfully. Trying to delete unused KV namespace...")
-    r = requests.delete(
-        api_endpoint + f"/storage/kv/namespaces/{kv_id}",
-        headers=headers
-    ).json()
-    if r['success']:
-        print("KV namespace deleted successfully.")
+if not r['success']:
+    # UNIQUE constraint failed: uptimeflare.key: SQLITE_CONSTRAINT
+    if r['errors'][0]['code'] == 7500 and "UNIQUE" in r['errors'][0]['message']:
+        print("State probably already migrated to D1. Migration skipped.")
     else:
-        print("Error deleting KV namespace: ", r)
+        print("Error writing state to D1: ", r)
+        print("Migration failed. Please report this issue at https://github.com/lyc8503/UptimeFlare/issues.")
+        exit(1)
+
+print("State migrated to D1 successfully. Trying to delete unused KV namespace...")
+r = requests.delete(
+    api_endpoint + f"/storage/kv/namespaces/{kv_id}",
+    headers=headers
+).json()
+if r['success']:
+    print("KV namespace deleted successfully.")
 else:
-    print("Error writing state to D1: ", r)
-    print("Migration failed. Please report this issue at https://github.com/lyc8503/UptimeFlare/issues.")
-    exit(1)
+    print("Error deleting KV namespace: ", r)
