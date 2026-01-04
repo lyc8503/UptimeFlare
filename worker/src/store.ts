@@ -51,6 +51,21 @@ export class CompactedMonitorStateWrapper {
       latency: {},
     }
 
+    const hex2Uint8Arr = (hex: string): Uint8Array => {
+      // @ts-expect-error This method is not available in Node.js 22.x, but available in Cloudflare Workers and new browsers
+      if (Uint8Array.fromHex) {
+        // @ts-expect-error
+        return Uint8Array.fromHex(hex)
+      } else {
+        console.warn('Uint8Array.fromHex is not available, using parseInt as fallback. Consider upgrading your browser.')
+        const ret = new Uint8Array(hex.length / 2)
+        for (let i = 0; i < hex.length; i += 2) {
+          ret[i / 2] = parseInt(hex.slice(i, i + 2), 16)
+        }
+        return ret
+      }
+    }
+
     Object.keys(this.data.incident).forEach((monitorId) => {
       state.incident[monitorId] = []
       const incidents = this.data.incident[monitorId]
@@ -83,10 +98,8 @@ export class CompactedMonitorStateWrapper {
         }
       })
 
-      // @ts-expect-error
-      const timeArr = new Uint32Array(Uint8Array.fromHex(latencies.time).buffer)
-      // @ts-expect-error
-      const pingArr = new Uint16Array(Uint8Array.fromHex(latencies.ping).buffer)
+      const timeArr = new Uint32Array(hex2Uint8Arr(latencies.time).buffer)
+      const pingArr = new Uint16Array(hex2Uint8Arr(latencies.ping).buffer)
 
       if (timeArr.length !== pingArr.length || timeArr.length !== locUncompacted.length) {
         throw new Error(
