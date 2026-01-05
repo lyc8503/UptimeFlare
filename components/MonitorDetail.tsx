@@ -29,7 +29,7 @@ export default function MonitorDetail({
     )
 
   let statusIcon =
-    state.incident[monitor.id].slice(-1)[0].end === undefined ? (
+    state.incident[monitor.id].slice(-1)[0].end === null ? (
       <IconAlertCircle
         style={{ width: '1.25em', height: '1.25em', color: '#b91c1c', marginRight: '3px' }}
       />

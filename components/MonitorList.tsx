@@ -12,7 +12,7 @@ function countDownCount(state: MonitorState, ids: string[]) {
       continue
     }
 
-    if (state.incident[id].slice(-1)[0].end === undefined) {
+    if (state.incident[id].slice(-1)[0].end === null) {
       downCount++
     }
   }
