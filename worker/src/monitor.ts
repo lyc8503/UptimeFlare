@@ -1,6 +1,28 @@
 import { MonitorTarget } from '../../types/config'
 import { withTimeout, fetchTimeout } from './util'
 
+function isIpAddress(hostname: string): boolean {
+  // `URL.hostname` strips brackets for IPv6, so a `:` reliably indicates an IPv6 literal here.
+  if (hostname.includes(':')) return true
+
+  const parts = hostname.split('.')
+  if (parts.length !== 4) return false
+
+  return parts.every((part) => {
+    if (!/^\d{1,3}$/.test(part)) return false
+    const value = Number(part)
+    return value >= 0 && value <= 255
+  })
+}
+
+function getDomainOnlyIpVersionOption(hostname: string, gpUrl: URL): { ipVersion?: number } {
+  // Globalping only allows `measurementOptions.ipVersion` when `target` is a domain (it controls DNS resolution).
+  if (isIpAddress(hostname)) return {}
+
+  // Keep the original behavior for domain targets.
+  return { ipVersion: Number(gpUrl.searchParams.get('ipVersion') || 4) }
+}
+
 async function httpResponseBasicCheck(
   monitor: MonitorTarget,
   code: number,
@@ -66,6 +88,7 @@ export async function getStatusWithGlobalPing(
 
     if (monitor.method === 'TCP_PING') {
       const targetUrl = new URL('https://' + monitor.target) // dummy https:// to parse hostname & port
+      const ipVersionOption = getDomainOnlyIpVersionOption(targetUrl.hostname, gpUrl)
       globalPingRequest = {
         type: 'ping',
         target: targetUrl.hostname,
@@ -81,11 +104,12 @@ export async function getStatusWithGlobalPing(
           port: targetUrl.port,
           packets: 1,
           protocol: 'tcp', // TODO: icmp?
-          ipVersion: Number(gpUrl.searchParams.get('ipVersion') || 4),
+          ...ipVersionOption,
         },
       }
     } else {
       const targetUrl = new URL(monitor.target)
+      const ipVersionOption = getDomainOnlyIpVersionOption(targetUrl.hostname, gpUrl)
       if (monitor.body !== undefined) {
         throw 'custom body not supported'
       }
@@ -119,7 +143,7 @@ export async function getStatusWithGlobalPing(
                 : 443
               : Number(targetUrl.port),
           protocol: targetUrl.protocol.replace(':', ''),
-          ipVersion: Number(gpUrl.searchParams.get('ipVersion') || 4),
+          ...ipVersionOption,
         },
       }
     }
