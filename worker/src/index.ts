@@ -1,12 +1,12 @@
 import { DurableObject } from 'cloudflare:workers'
 import { MonitorTarget } from '../../types/config'
 import { workerConfig } from '../../uptime.config'
-import { getStatus, getStatusWithGlobalPing } from './monitor'
+import { doMonitor, getStatus } from './monitor'
 import { formatAndNotify, getWorkerLocation } from './util'
 import { CompactedMonitorStateWrapper, getFromStore, setToStore } from './store'
+import pLimit from 'p-limit'
 
 export interface Env {
-  UPTIMEFLARE_STATE: KVNamespace
   REMOTE_CHECKER_DO: DurableObjectNamespace<RemoteChecker>
   UPTIMEFLARE_D1: D1Database
 }
@@ -24,62 +24,25 @@ const Worker = {
     let statusChanged = false
     const currentTimeSecond = Math.round(Date.now() / 1000)
 
-    // Check each monitor
-    // TODO: concurrent status check
+    // Parallel check multiple monitors
+    // Max concurrent connection is 6 limited by Cloudflare Workers, we use 5 here to be safe
+    type CheckResult = { id: string; location: string; status: { ping: number; up: boolean; err: string } }
+    let checkQueue: Promise<CheckResult>[] = []
+    let checkResult: Record<string, CheckResult> = {};
+    const limit = pLimit(5);
     for (const monitor of workerConfig.monitors) {
-      console.log(`[${workerLocation}] Checking ${monitor.name}...`)
+      checkQueue.push(limit(() => doMonitor(monitor, workerLocation, env)))
+    }
+    for (const result of await Promise.all(checkQueue)) {
+      checkResult[result.id] = result
+    }
+
+    // Update each monitor's state based on check results
+    for (const monitor of workerConfig.monitors) {
+      console.log(`Processing monitor result: ${monitor.name} (${monitor.id})`)
 
       let monitorStatusChanged = false
-      let checkLocation = workerLocation
-      let status
-
-      if (monitor.checkProxy) {
-        // Initiate a check using proxy (Geo-specific monitoring)
-        try {
-          console.log('Calling check proxy: ' + monitor.checkProxy)
-          let resp
-          if (monitor.checkProxy.startsWith('worker://')) {
-            const doLoc = monitor.checkProxy.replace('worker://', '')
-            const doId = env.REMOTE_CHECKER_DO.idFromName(doLoc)
-            const doStub = env.REMOTE_CHECKER_DO.get(doId, {
-              locationHint: doLoc as DurableObjectLocationHint,
-            })
-            resp = await doStub.getLocationAndStatus(monitor)
-            try {
-              // Kill the DO instance after use, to avoid extra resource usage
-              await doStub.kill()
-            } catch (err) {
-              // An error here is expected, ignore it
-            }
-          } else if (monitor.checkProxy.startsWith('globalping://')) {
-            resp = await getStatusWithGlobalPing(monitor)
-          } else {
-            resp = await (
-              await fetch(monitor.checkProxy, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(monitor),
-              })
-            ).json<{ location: string; status: { ping: number; up: boolean; err: string } }>()
-          }
-          checkLocation = resp.location
-          status = resp.status
-        } catch (err) {
-          console.log('Error calling proxy: ' + err)
-          if (monitor.checkProxyFallback) {
-            console.log('Falling back to local check...')
-            status = await getStatus(monitor)
-          } else {
-            // TODO: more consistent error handling (throw or return?)
-            status = { ping: 0, up: false, err: 'Unknown check proxy error' }
-          }
-        }
-      } else {
-        // Initiate a check from the current location
-        status = await getStatus(monitor)
-      }
-
-      const currentTimeSecond = Math.round(Date.now() / 1000)
+      const { location: checkLocation, status } = checkResult[monitor.id]
 
       // Update counters
       status.up ? state.data.overallUp++ : state.data.overallDown++

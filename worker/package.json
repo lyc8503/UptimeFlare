@@ -11,5 +11,8 @@
     "@cloudflare/workers-types": "^4.20250410.0",
     "typescript": "^5.0.4",
     "wrangler": "^4.54.0"
+  },
+  "dependencies": {
+    "p-limit": "^7.2.0"
   }
 }

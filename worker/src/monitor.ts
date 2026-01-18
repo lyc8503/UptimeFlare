@@ -1,3 +1,4 @@
+import { Env } from '.'
 import { MonitorTarget } from '../../types/config'
 import { withTimeout, fetchTimeout } from './util'
 
@@ -351,4 +352,63 @@ export async function getStatus(
   }
 
   return status
+}
+
+export async function doMonitor(monitor: MonitorTarget, defaultLocation: string, env: Env) {
+  let checkLocation = defaultLocation
+  let status
+
+  if (monitor.checkProxy) {
+    // Initiate a check using proxy (Geo-specific monitoring)
+    try {
+      console.log(`[${monitor.id}] Calling check proxy: ${monitor.checkProxy}`)
+      let resp
+      if (monitor.checkProxy.startsWith('worker://')) {
+        const doLoc = monitor.checkProxy.replace('worker://', '')
+        const doId = env.REMOTE_CHECKER_DO.idFromName(monitor.id)
+        const doStub = env.REMOTE_CHECKER_DO.get(doId, {
+          locationHint: doLoc as DurableObjectLocationHint,
+        })
+        resp = await doStub.getLocationAndStatus(monitor)
+        try {
+          // Kill the DO instance after use, to avoid extra resource usage
+          await doStub.kill()
+        } catch (err) {
+          // An error here is expected, ignore it
+        }
+      } else if (monitor.checkProxy.startsWith('globalping://')) {
+        resp = await getStatusWithGlobalPing(monitor)
+      } else {
+        resp = await (
+          await fetch(monitor.checkProxy, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(monitor),
+          })
+        ).json<{ location: string; status: { ping: number; up: boolean; err: string } }>()
+      }
+      checkLocation = resp.location
+      status = resp.status
+    } catch (err) {
+      console.log(`[${monitor.id}] Error calling proxy: ${err}`)
+      if (monitor.checkProxyFallback) {
+        console.log('Falling back to local check...')
+        status = await getStatus(monitor)
+      } else {
+        // TODO: more consistent error handling (throw or return?)
+        status = { ping: 0, up: false, err: 'Unknown check proxy error' }
+      }
+    }
+  } else {
+    // Initiate a check from the current location
+    status = await getStatus(monitor)
+  }
+
+  console.log(`[${monitor.id}] Check result from ${checkLocation}: up=${status.up}, ping=${status.ping}, err=${status.err}`)
+
+  return {
+    location: checkLocation,
+    status,
+    id: monitor.id,
+  }
 }
