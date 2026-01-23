@@ -7,65 +7,105 @@ import { MaintenanceConfig, PageConfig, WorkerConfig } from './types/config'
 
 const pageConfig: PageConfig = {
   // Title for your status page
-  title: "lyc8503's Status Page",
+  title: "PanSo 节点服务状态监测",
   // Links shown at the header of your status page, could set `highlight` to `true`
   links: [
-    { link: 'https://github.com/lyc8503', label: 'GitHub' },
-    { link: 'https://blog.lyc8503.net/', label: 'Blog' },
-    { link: 'mailto:me@lyc8503.net', label: 'Email Me', highlight: true },
+    { link: 'https://panso.icu', label: '盘搜 PanSo' },
   ],
 }
 
 const workerConfig: WorkerConfig = {
   // Define all your monitors here
   monitors: [
-    // Example HTTP Monitor
+    // Pangolin 监控
     {
-      // `id` should be unique, history will be kept if the `id` remains constant
-      id: 'foo_monitor',
-      // `name` is used at status page and callback message
-      name: 'My API Monitor',
-      // `method` should be a valid HTTP Method
+      id: 'pangolin_monitor',
+      name: 'Pangolin',
       method: 'GET',
-      // `target` is a valid URL
-      target: 'https://example.com',
-      // [OPTIONAL] `tooltip` is ONLY used at status page to show a tooltip
-      tooltip: 'This is a tooltip for this monitor',
-      // [OPTIONAL] `statusPageLink` is ONLY used for clickable link at status page
-      statusPageLink: 'https://example.com',
-      // [OPTIONAL] `expectedCodes` is an array of acceptable HTTP response codes, if not specified, default to 2xx
-      expectedCodes: [200],
-      // [OPTIONAL] `timeout` in millisecond, if not specified, default to 10000
-      timeout: 10000,
-      // [OPTIONAL] headers to be sent
-      headers: {
-        'User-Agent': 'Uptimeflare',
-        Authorization: 'Bearer YOUR_TOKEN_HERE',
-      },
-      // [OPTIONAL] body to be sent (require POST/PUT/PATCH method)
-      // body: 'Hello, world!',
-      // [OPTIONAL] if specified, the response must contains the keyword to be considered as operational.
-      // responseKeyword: 'success',
-      // [OPTIONAL] if specified, the response must NOT contains the keyword to be considered as operational.
-      // responseForbiddenKeyword: 'bad gateway',
-      // [OPTIONAL] if specified, will call the check proxy to check the monitor, mainly for geo-specific checks
-      // refer to docs https://github.com/lyc8503/UptimeFlare/wiki/Check-proxy-setup before setting this value
-      // currently supports `worker://`, `globalping://` and `http(s)://` proxies
-      // checkProxy: 'worker://weur',
-      // [OPTIONAL] if true, the check will fallback to local if the specified proxy is down
-      // checkProxyFallback: true,
+      target: 'https://panso.icu',
+      tooltip: 'Pangolin节点分发状态',
+      statusPageLink: 'https://panso.icu',
+      timeout: 48000,
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206],
     },
-    // Example TCP Monitor
+    // EdgeOne 监控
     {
-      id: 'test_tcp_monitor',
-      name: 'Example TCP Monitor',
-      // `method` should be `TCP_PING` for tcp monitors
-      method: 'TCP_PING',
-      // `target` should be `host:port` for tcp monitors
-      target: '1.2.3.4:22',
-      tooltip: 'My production server SSH',
-      statusPageLink: 'https://example.com',
-      timeout: 5000,
+      id: 'edgeone_monitor',
+      name: 'EdgeOne',
+      method: 'GET',
+      target: 'https://search.panso.icu',
+      tooltip: 'EdgeOne节点分发状态',
+      statusPageLink: 'https://search.panso.icu',
+      timeout: 48000,
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206],
+    },
+    // Cloudflare 监控
+    {
+      id: 'cloudflare_monitor',
+      name: 'Cloudflare',
+      method: 'GET',
+      target: 'https://sea.lrchimedes.fun',
+      tooltip: 'Cloudflare节点分发状态',
+      statusPageLink: 'https://sea.lrchimedes.fun',
+      timeout: 48000,
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206],
+    },
+    // Vercel 监控
+    {
+      id: 'vercel_monitor',
+      name: 'Vercel',
+      method: 'GET',
+      target: 'https://sea.panso.icu',
+      tooltip: 'Vercel节点分发状态',
+      statusPageLink: 'https://sea.panso.icu',
+      timeout: 48000,
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206],
+    },
+    // Netlify 监控
+    {
+      id: 'netlify_monitor',
+      name: 'Netlify',
+      method: 'GET',
+      target: 'https://search.lrchimedes.cyou',
+      tooltip: 'Netlify节点分发状态',
+      statusPageLink: 'https://search.lrchimedes.cyou',
+      timeout: 48000,
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206],
+    },   
+     // Iepose-S 监控
+    {
+      id: 'iepose_s_monitor',
+      name: 'Iepose-S',
+      method: 'GET',
+      target: 'https://sooo.iepose.cn',
+      tooltip: 'Iepose-S节点分发状态',
+      statusPageLink: 'https://sooo.iepose.cn',
+      timeout: 48000,
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206],
+      responseKeyword: '<title>盘搜  - panso.icu 都在用的网盘资源搜索，资源多丨更新快丨无广告丨永久免费</title>',
+    },
+    // Iepose-L 监控 (第一个)
+    {
+      id: 'iepose_l_monitor_1',
+      name: 'Iepose-L',
+      method: 'GET',
+      target: 'https://lrchime.iepose.cn',
+      tooltip: 'Iepose-L节点分发状态',
+      statusPageLink: 'https://lrchime.iepose.cn',
+      timeout: 48000,
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206],
+      responseKeyword: '<title>盘搜  - panso.icu 都在用的网盘资源搜索，资源多丨更新快丨无广告丨永久免费</title>',
+    },
+    // 延迟测速 监控
+    {
+      id: 'speed_test_monitor',
+      name: '延迟测速',
+      method: 'GET',
+      target: 'https://speed-t.lrchimedes.fun',
+      tooltip: 'PanSo.icu各节点访问延迟测速',
+      statusPageLink: 'https://speed-t.lrchimedes.fun',
+      timeout: 48000,
+      expectedCodes: [200, 201, 202, 203, 204, 205, 206],
     },
   ],
   // [Optional] Notification settings
