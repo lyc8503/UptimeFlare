@@ -13,7 +13,7 @@ on:
         required: true
         default: false
       override-token:
-        description: '[Optional] Replace the default token with the supplied PAT. Used to resolve `refusing to allow a GitHub App to create or update workflow... `'
+        description: '[Optional] Paste a PAT here. If left blank, PAT_TOKEN secret will be used (if set), otherwise GITHUB_TOKEN.'
         required: false
 
 jobs:
