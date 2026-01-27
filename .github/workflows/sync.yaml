@@ -25,7 +25,7 @@ jobs:
       - name: Checkout target repo
         uses: actions/checkout@v3
         with:
-          token: ${{ inputs.override-token || secrets.GITHUB_TOKEN }}
+          token: ${{ inputs.override-token || secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Current config
         run: |
