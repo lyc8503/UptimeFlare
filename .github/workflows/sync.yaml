@@ -13,7 +13,7 @@ on:
         required: true
         default: false
       override-token:
-        description: '[Optional] Paste a PAT here. If left blank, PAT_TOKEN secret will be used (if set), otherwise GITHUB_TOKEN.'
+        description: '[Optional] Paste a PAT here. If left blank, PAT_TOKEN secret will be used (if set). Used to solve `refusing to allow a GitHub App to create or update workflow... `, more info at https://github.com/lyc8503/UptimeFlare/wiki/Synchronize-updates-from-upstream#upgrade-methods'
         required: false
 
 jobs:
