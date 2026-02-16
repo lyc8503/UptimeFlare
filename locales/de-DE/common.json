@@ -1,7 +1,7 @@
 {
   "Incidents": "Vorfälle",
   "No data yet": "Noch keine Daten",
-  "All systems not operational": "Alle Systeme nicht funktional",
+  "All systems not operational": "Nicht alle Systeme funktional",
   "All systems operational": "Alle System funktional",
   "Some systems not operational": "Manche Systeme sind nicht funktional ({{down}} von {{total}})",
   "Last updated on": "Letzte Aktualisierung: {{date}} (vor {{seconds}} Sekunden)",
