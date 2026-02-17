@@ -11,7 +11,7 @@ const pageConfig: PageConfig = {
   ],
   // [OPTIONAL] Group your monitors
   // If not specified, all monitors will be shown in a single list
-  // If specified, monitors will be grouped and ordered, not-listed monitors will be invisble (but still monitored)
+  // If specified, monitors will be grouped and ordered, not-listed monitors will be invisible (but still monitored)
   group: {
     '🌐 Public (example group name)': ['foo_monitor', 'bar_monitor', 'more monitor ids...'],
     '🔐 Private': ['test_tcp_monitor'],
@@ -148,7 +148,7 @@ const workerConfig: WorkerConfig = {
       timeNow: number,
       reason: string
     ) => {
-      // This callback will be called EVERY 1 MINTUE if there's an on-going incident for any monitor
+      // This callback will be called EVERY 1 MINUTE if there's an on-going incident for any monitor
       // Write any TypeScript code here
     },
   },
