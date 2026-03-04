@@ -2,7 +2,7 @@ import Head from 'next/head'
 
 import { Inter } from 'next/font/google'
 import { MonitorTarget } from '@/types/config'
-import { maintenances, pageConfig, workerConfig } from '@/uptime.config'
+import { maintenances, pageConfig } from '@/uptime.config'
 import OverallStatus from '@/components/OverallStatus'
 import Header from '@/components/Header'
 import MonitorList from '@/components/MonitorList'
@@ -69,6 +69,7 @@ export default function Home({
 }
 
 export async function getServerSideProps() {
+  const { workerConfig } = await import('@/uptime.config')
   // Read state as string from storage, to avoid hitting server-side cpu time limit
   const compactedStateStr = await getFromStore(process.env as any, 'state')
 
