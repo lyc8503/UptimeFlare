@@ -2,7 +2,7 @@ import Head from 'next/head'
 
 import { Inter } from 'next/font/google'
 import { MaintenanceConfig, MonitorTarget } from '@/types/config'
-import { maintenances, pageConfig, workerConfig } from '@/uptime.config'
+import { maintenances, pageConfig } from '@/uptime.config'
 import Header from '@/components/Header'
 import { Box, Button, Center, Container, Group, Select } from '@mantine/core'
 import Footer from '@/components/Footer'
@@ -25,7 +25,8 @@ function getSelectedMonth() {
 
 function filterIncidentsByMonth(
   incidents: MaintenanceConfig[],
-  monthStr: string
+  monthStr: string,
+  monitors: MonitorTarget[]
 ): (Omit<MaintenanceConfig, 'monitors'> & { monitors: MonitorTarget[] })[] {
   return incidents
     .filter((incident) => {
@@ -35,7 +36,7 @@ function filterIncidentsByMonth(
     })
     .map((e) => ({
       ...e,
-      monitors: (e.monitors || []).map((e) => workerConfig.monitors.find((mon) => mon.id === e)!),
+      monitors: (e.monitors || []).map((e) => monitors.find((mon) => mon.id === e)!),
     }))
     .sort((a, b) => (new Date(a.start) > new Date(b.start) ? -1 : 1))
 }
@@ -53,7 +54,7 @@ function getPrevNextMonth(monthStr: string) {
   }
 }
 
-export default function IncidentsPage() {
+export default function IncidentsPage({ monitors }: { monitors: MonitorTarget[] }) {
   const { t } = useTranslation('common')
   const [selectedMonitor, setSelectedMonitor] = useState<string | null>('')
   const [selectedMonth, setSelectedMonth] = useState(getSelectedMonth())
@@ -64,7 +65,7 @@ export default function IncidentsPage() {
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
 
-  const filteredIncidents = filterIncidentsByMonth(maintenances, selectedMonth)
+  const filteredIncidents = filterIncidentsByMonth(maintenances, selectedMonth, monitors)
   const monitorFilteredIncidents = selectedMonitor
     ? filteredIncidents.filter((i) => i.monitors.find((e) => e.id === selectedMonitor))
     : filteredIncidents
@@ -73,7 +74,7 @@ export default function IncidentsPage() {
 
   const monitorOptions = [
     { value: '', label: t('All') },
-    ...workerConfig.monitors.map((monitor) => ({
+    ...monitors.map((monitor) => ({
       value: monitor.id,
       label: monitor.name,
     })),
@@ -130,4 +131,14 @@ export default function IncidentsPage() {
       </main>
     </>
   )
+}
+
+export async function getServerSideProps() {
+  const { workerConfig } = await import('@/uptime.config')
+  // Only present these values to client
+  const monitors: MonitorTarget[] = workerConfig.monitors.map((monitor) => ({
+    id: monitor.id,
+    name: monitor.name,
+  })) as MonitorTarget[]
+  return { props: { monitors } }
 }

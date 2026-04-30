@@ -4,6 +4,8 @@ import LanguageDetector from 'i18next-browser-languagedetector'
 import en from '../locales/en/common.json'
 import zhCN from '../locales/zh-CN/common.json'
 import zhTW from '../locales/zh-TW/common.json'
+import frFR from '../locales/fr-FR/common.json'
+import deDE from '../locales/de-DE/common.json'
 
 i18n
   .use(LanguageDetector)
@@ -14,6 +16,10 @@ i18n
       'zh-CN': { common: zhCN },
       zh: { common: zhCN },
       'zh-TW': { common: zhTW },
+      fr: { common: frFR },
+      'fr-FR': { common: frFR },
+      de: { common: deDE },
+      'de-DE': { common: deDE },
     },
     fallbackLng: 'en',
     interpolation: {
