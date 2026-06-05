@@ -38,4 +38,4 @@
 
 ## ⚡快速入门 / 📄文档
 
-请参阅 [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
+请参阅 [English Wiki](https://github.com/lyc8503/UptimeFlare/wiki)  [中文Wiki](https://github.com/bian2022/UptimeFlare-zh/wiki)
