@@ -356,52 +356,68 @@ export async function getStatus(
 
 export async function doMonitor(monitor: MonitorTarget, defaultLocation: string, env: Env) {
   let checkLocation = defaultLocation
-  let status
+  let status: { ping: number; up: boolean; err: string } = { ping: 0, up: false, err: '' }
 
-  if (monitor.checkProxy) {
-    // Initiate a check using proxy (Geo-specific monitoring)
-    try {
-      console.log(`[${monitor.id}] Calling check proxy: ${monitor.checkProxy}`)
-      let resp
-      if (monitor.checkProxy.startsWith('worker://')) {
-        const doLoc = monitor.checkProxy.replace('worker://', '')
-        const doId = env.REMOTE_CHECKER_DO.idFromName(monitor.id)
-        const doStub = env.REMOTE_CHECKER_DO.get(doId, {
-          locationHint: doLoc as DurableObjectLocationHint,
-        })
-        resp = await doStub.getLocationAndStatus(monitor)
-        try {
-          // Kill the DO instance after use, to avoid extra resource usage
-          await doStub.kill()
-        } catch (err) {
-          // An error here is expected, ignore it
-        }
-      } else if (monitor.checkProxy.startsWith('globalping://')) {
-        resp = await getStatusWithGlobalPing(monitor)
-      } else {
-        resp = await (
-          await fetch(monitor.checkProxy, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(monitor),
+  // Instant retry: if a check fails, re-check before reporting the monitor as down,
+  // to filter out transient blips (false positives). Controlled per-monitor via
+  // `retries` / `retryDelayMs` (default 0 retries = previous behavior, no retry).
+  const maxAttempts = 1 + (monitor.retries ?? 0)
+  const retryDelayMs = monitor.retryDelayMs ?? 5000
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    checkLocation = defaultLocation
+
+    if (monitor.checkProxy) {
+      // Initiate a check using proxy (Geo-specific monitoring)
+      try {
+        console.log(`[${monitor.id}] Calling check proxy: ${monitor.checkProxy}`)
+        let resp
+        if (monitor.checkProxy.startsWith('worker://')) {
+          const doLoc = monitor.checkProxy.replace('worker://', '')
+          const doId = env.REMOTE_CHECKER_DO.idFromName(monitor.id)
+          const doStub = env.REMOTE_CHECKER_DO.get(doId, {
+            locationHint: doLoc as DurableObjectLocationHint,
           })
-        ).json<{ location: string; status: { ping: number; up: boolean; err: string } }>()
+          resp = await doStub.getLocationAndStatus(monitor)
+          try {
+            // Kill the DO instance after use, to avoid extra resource usage
+            await doStub.kill()
+          } catch (err) {
+            // An error here is expected, ignore it
+          }
+        } else if (monitor.checkProxy.startsWith('globalping://')) {
+          resp = await getStatusWithGlobalPing(monitor)
+        } else {
+          resp = await (
+            await fetch(monitor.checkProxy, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(monitor),
+            })
+          ).json<{ location: string; status: { ping: number; up: boolean; err: string } }>()
+        }
+        checkLocation = resp.location
+        status = resp.status
+      } catch (err) {
+        console.log(`[${monitor.id}] Error calling proxy: ${err}`)
+        if (monitor.checkProxyFallback) {
+          console.log('Falling back to local check...')
+          status = await getStatus(monitor)
+        } else {
+          // TODO: more consistent error handling (throw or return?)
+          status = { ping: 0, up: false, err: 'Unknown check proxy error' }
+        }
       }
-      checkLocation = resp.location
-      status = resp.status
-    } catch (err) {
-      console.log(`[${monitor.id}] Error calling proxy: ${err}`)
-      if (monitor.checkProxyFallback) {
-        console.log('Falling back to local check...')
-        status = await getStatus(monitor)
-      } else {
-        // TODO: more consistent error handling (throw or return?)
-        status = { ping: 0, up: false, err: 'Unknown check proxy error' }
-      }
+    } else {
+      // Initiate a check from the current location
+      status = await getStatus(monitor)
     }
-  } else {
-    // Initiate a check from the current location
-    status = await getStatus(monitor)
+
+    if (status.up || attempt === maxAttempts) break
+    console.log(
+      `[${monitor.id}] Attempt ${attempt}/${maxAttempts} failed (${status.err}); retrying in ${retryDelayMs}ms...`
+    )
+    await new Promise((resolve) => setTimeout(resolve, retryDelayMs))
   }
 
   console.log(`[${monitor.id}] Check result from ${checkLocation}: up=${status.up}, ping=${status.ping}, err=${status.err}`)
