@@ -45,6 +45,11 @@ export type MonitorTarget = {
   responseForbiddenKeyword?: string
   checkProxy?: string
   checkProxyFallback?: boolean
+  // [OPTIONAL] Instant retry on failure: number of extra attempts before reporting
+  // the monitor as down (default 0 = no retry). Filters out transient blips.
+  retries?: number
+  // [OPTIONAL] Delay in ms between a failed attempt and the retry (default 5000).
+  retryDelayMs?: number
 }
 
 export type WorkerConfig<TEnv = Env> = {

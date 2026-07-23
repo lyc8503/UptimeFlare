@@ -74,6 +74,11 @@ const workerConfig: WorkerConfig = {
       checkProxy: 'https://xxx.example.com OR worker://weur',
       // [OPTIONAL] if true, the check will fallback to local if the specified proxy is down
       checkProxyFallback: true,
+      // [OPTIONAL] instant retry on failure: number of extra attempts before reporting
+      // the monitor as down, to filter out transient blips (default 0 = no retry)
+      retries: 1,
+      // [OPTIONAL] delay in ms between a failed attempt and the retry (default 5000)
+      retryDelayMs: 5000,
     },
     // Example TCP Monitor
     {
