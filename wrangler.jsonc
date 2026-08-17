@@ -1,0 +1,54 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".open-next/assets"
+  },
+  "compatibility_date": "2025-04-02",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "d1_databases": [
+    {
+      "binding": "UPTIMEFLARE_D1",
+      "database_name": "uptimeflare_d1",
+      "database_id": "00000000-0000-0000-0000-000000000000"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "REMOTE_CHECKER_DO",
+        "class_name": "RemoteChecker"
+      }
+    ]
+  },
+  "images": {
+    "binding": "IMAGES"
+  },
+  "main": "src/server/worker.ts",
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["RemoteChecker"]
+    }
+  ],
+  "name": "uptimeflare",
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
+  "observability": {
+    "enabled": false,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": false,
+      "persist": true,
+      "head_sampling_rate": 1
+    }
+  }
+}
+

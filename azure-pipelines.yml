@@ -1,0 +1,40 @@
+# Azure DevOps Pipeline — Deploy UptimeFlare (single Worker) to Cloudflare
+#
+# Required secret (Pipeline variables / Library variable group):
+#   CLOUDFLARE_API_TOKEN : Cloudflare API token with "Workers Scripts: Edit",
+#                          "D1: Edit" and "Durable Objects: Edit" permissions.
+#
+# The account id is also exposed as a variable below (non-secret); it must
+# match the `account_id` in wrangler.jsonc.
+
+trigger:
+  branches:
+    include:
+      - main
+
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  # TODO: replace with your Cloudflare account ID
+  CLOUDFLARE_ACCOUNT_ID: 'YOUR_CLOUDFLARE_ACCOUNT_ID'
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '22.x'
+    displayName: 'Use Node.js 22.x'
+
+  - script: npm ci
+    displayName: 'Install dependencies'
+
+  # `npm run deploy` = opennextjs-cloudflare build && npm run db:init && opennextjs-cloudflare deploy
+  # (db:init is idempotent: init.sql uses CREATE TABLE IF NOT EXISTS)
+  - script: npm run deploy
+    displayName: 'Build and deploy Worker to Cloudflare'
+    env:
+      CLOUDFLARE_API_TOKEN: $(CLOUDFLARE_API_TOKEN)
+      CLOUDFLARE_ACCOUNT_ID: $(CLOUDFLARE_ACCOUNT_ID)
+

@@ -1,9 +1,9 @@
 declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      UPTIMEFLARE_STATE: KVNamespace
-    }
+  interface CloudflareEnv {
+    UPTIMEFLARE_D1: D1Database
+    REMOTE_CHECKER_DO: DurableObjectNamespace
   }
 }
 
 export {}
+

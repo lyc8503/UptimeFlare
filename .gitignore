@@ -38,3 +38,7 @@ next-env.d.ts
 terraform.tfstate*
 
 /.wrangler
+
+# opennext build output
+/.open-next
+.open-next/

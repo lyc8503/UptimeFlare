@@ -43,9 +43,42 @@ Some screenshots:
 
 ![Desktop, Light theme](docs/desktop.png)
 
-## ⚡Quickstart / 📄Documentation
+## ⚡Quickstart / 📄Deployment
 
-Please refer to [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
+UptimeFlare is now deployed as a **single Cloudflare Worker** using [OpenNext](https://opennext.js.org/cloudflare) + Next.js, serving both the status page and the monitoring engine (D1 + Durable Object + Cron).
+
+### Prerequisites
+- Node.js **22+**
+- A Cloudflare account with Workers, D1 and Durable Objects enabled
+- A Cloudflare API token with `Workers Scripts: Edit`, `D1: Edit` and `Durable Objects: Edit`
+
+### 1. Configure your monitors
+Edit `src/uptime.config.ts` with your monitors, notifications, etc.
+
+### 2. Authenticate
+```bash
+wrangler login
+# or set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID
+```
+
+### 3. Create the D1 database (once)
+```bash
+npx wrangler d1 create uptimeflare_d1
+```
+Copy the returned `database_id` into `wrangler.jsonc` (replacing the `00000000-0000-0000-0000-000000000000` placeholder).
+
+### 4. Deploy
+```bash
+npm install
+npm run deploy
+```
+`npm run deploy` builds the app, initializes the D1 schema and deploys the Worker (idempotent).
+
+### CI/CD
+- **GitHub Actions** — set the `CLOUDFLARE_API_TOKEN` (and optionally `CLOUDFLARE_ACCOUNT_ID`) secrets; workflow: `.github/workflows/deploy.yml`.
+- **Azure DevOps** — set the `CLOUDFLARE_API_TOKEN` secret variable; pipeline: `azure-pipelines.yml`.
+
+For more details, see the [Wiki](https://github.com/lyc8503/UptimeFlare/wiki).
 
 ## 🚀Upgrade existing deployments
 
