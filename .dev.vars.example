@@ -1,0 +1,4 @@
+# Access identifiers are public configuration, not passwords.
+# Local admin requests still require a valid Access JWT. There is no auth bypass.
+CF_ACCESS_TEAM_DOMAIN=
+CF_ACCESS_AUD=
