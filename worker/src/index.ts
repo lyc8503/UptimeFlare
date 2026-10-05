@@ -3,12 +3,53 @@ import { MonitorTarget } from '../../types/config'
 import { workerConfig } from '../../uptime.config'
 import { doMonitor, getStatus } from './monitor'
 import { formatAndNotify, getWorkerLocation } from './util'
-import { CompactedMonitorStateWrapper, getFromStore, setToStore } from './store'
+import { CompactedMonitorStateWrapper, getFromStore, setToStoreIfUnchanged } from './store'
+import { selectMonitorBatch } from './batch'
+import { shouldSendDownNotification } from './notification'
+import { shouldPersistState } from './persistence'
 import pLimit from 'p-limit'
 
 export interface Env {
   REMOTE_CHECKER_DO: DurableObjectNamespace<RemoteChecker>
   UPTIMEFLARE_D1: D1Database
+}
+
+async function persistStateWithRetry(
+  env: Env,
+  initialStoredValue: string | null,
+  processedState: CompactedMonitorStateWrapper,
+  processedMonitorIds: string[],
+  currentTimeSecond: number
+) {
+  let expectedValue = initialStoredValue
+  let candidate = processedState
+
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    candidate.recalculateOverallStatus(workerConfig.monitors.map((monitor) => monitor.id))
+    candidate.data.lastUpdate = Math.max(candidate.data.lastUpdate, currentTimeSecond)
+
+    if (
+      await setToStoreIfUnchanged(
+        env,
+        'state',
+        candidate.getCompactedStateStr(),
+        expectedValue
+      )
+    ) {
+      return
+    }
+
+    console.log(`State changed concurrently; rebasing selected batch (attempt ${attempt}/5)...`)
+    const latestValue = await getFromStore(env, 'state')
+    const latestState = new CompactedMonitorStateWrapper(latestValue)
+    for (const monitorId of processedMonitorIds) {
+      latestState.copyMonitorStateFrom(processedState, monitorId)
+    }
+    expectedValue = latestValue
+    candidate = latestState
+  }
+
+  throw new Error('Unable to persist monitor state after 5 concurrent update attempts')
 }
 
 const Worker = {
@@ -17,11 +58,22 @@ const Worker = {
     console.log(`Running scheduled event on ${workerLocation}...`)
 
     // Create a wrapped MonitorState from stored compacted state
-    const state = new CompactedMonitorStateWrapper(await getFromStore(env, 'state'))
-    state.data.overallDown = 0
-    state.data.overallUp = 0
+    const initialStoredState = await getFromStore(env, 'state')
+    const state = new CompactedMonitorStateWrapper(initialStoredState)
+
+    const monitorBatch = selectMonitorBatch(
+      workerConfig.monitors,
+      workerConfig.monitorBatchSize,
+      event.scheduledTime
+    )
+    console.log(
+      `Checking monitor batch ${monitorBatch.batchIndex + 1}/${monitorBatch.batchCount}: ${monitorBatch.monitors
+        .map((monitor) => monitor.id)
+        .join(', ')}`
+    )
 
     let statusChanged = false
+    let notificationStateChanged = false
     const currentTimeSecond = Math.round(Date.now() / 1000)
 
     // Parallel check multiple monitors
@@ -30,7 +82,7 @@ const Worker = {
     let checkQueue: Promise<CheckResult>[] = []
     let checkResult: Record<string, CheckResult> = {};
     const limit = pLimit(5);
-    for (const monitor of workerConfig.monitors) {
+    for (const monitor of monitorBatch.monitors) {
       checkQueue.push(limit(() => doMonitor(monitor, workerLocation, env)))
     }
     for (const result of await Promise.all(checkQueue)) {
@@ -38,14 +90,55 @@ const Worker = {
     }
 
     // Update each monitor's state based on check results
-    for (const monitor of workerConfig.monitors) {
+    for (const monitor of monitorBatch.monitors) {
       console.log(`Processing monitor result: ${monitor.name} (${monitor.id})`)
 
       let monitorStatusChanged = false
       const { location: checkLocation, status } = checkResult[monitor.id]
 
-      // Update counters
-      status.up ? state.data.overallUp++ : state.data.overallDown++
+      // Retry recovery delivery independently from the current status. A
+      // failed webhook remains pending until every configured destination
+      // accepts it.
+      const pendingRecovery = state.getPendingRecovery(monitor.id)
+      if (pendingRecovery) {
+        try {
+          const recoverySent = await formatAndNotify(
+            monitor,
+            true,
+            pendingRecovery.incidentStart,
+            pendingRecovery.recoveredAt,
+            'OK'
+          )
+          if (recoverySent) {
+            state.clearPendingRecovery(monitor.id)
+            state.clearDownNotificationSent(monitor.id, pendingRecovery.incidentStart)
+            notificationStateChanged = true
+          }
+        } catch (e) {
+          console.log(`Error retrying recovery notification for ${monitor.id}:`)
+          console.log(e)
+        }
+      }
+
+      const pendingErrorChange = state.getPendingErrorChange(monitor.id)
+      if (pendingErrorChange) {
+        try {
+          const errorChangeSent = await formatAndNotify(
+            monitor,
+            false,
+            pendingErrorChange.incidentStart,
+            currentTimeSecond,
+            pendingErrorChange.reason
+          )
+          if (errorChangeSent) {
+            state.clearPendingErrorChange(monitor.id)
+            notificationStateChanged = true
+          }
+        } catch (e) {
+          console.log(`Error retrying error-change notification for ${monitor.id}:`)
+          console.log(e)
+        }
+      }
 
       // Update incidents
       // Create a dummy incident to store the start time of the monitoring and simplify logic
@@ -70,17 +163,23 @@ const Worker = {
 
           monitorStatusChanged = true
           try {
-            if (
-              // grace period not set OR ...
-              workerConfig.notification?.gracePeriod === undefined ||
-              // only when we have sent a notification for DOWN status, we will send a notification for UP status (within 30 seconds of possible drift)
-              currentTimeSecond - lastIncident.start[0] >=
-                (workerConfig.notification.gracePeriod + 1) * 60 - 30
-            ) {
-              await formatAndNotify(monitor, true, lastIncident.start[0], currentTimeSecond, 'OK')
+            if (state.wasDownNotificationSent(monitor.id, lastIncident.start[0])) {
+              state.setPendingRecovery(monitor.id, lastIncident.start[0], currentTimeSecond)
+              notificationStateChanged = true
+              const recoverySent = await formatAndNotify(
+                monitor,
+                true,
+                lastIncident.start[0],
+                currentTimeSecond,
+                'OK'
+              )
+              if (recoverySent) {
+                state.clearPendingRecovery(monitor.id)
+                state.clearDownNotificationSent(monitor.id, lastIncident.start[0])
+              }
             } else {
               console.log(
-                `grace period (${workerConfig.notification?.gracePeriod}m) not met, skipping webhook UP notification for ${monitor.name}`
+                `Skipping webhook UP notification for ${monitor.name}: no DOWN notification was sent`
               )
             }
 
@@ -121,45 +220,54 @@ const Worker = {
         const currentIncident = state.getIncident(monitor.id, state.incidentLen(monitor.id) - 1)
         try {
           if (
-            // monitor status changed AND...
-            (monitorStatusChanged &&
-              // grace period not set OR ...
-              (workerConfig.notification?.gracePeriod === undefined ||
-                // have sent a notification for DOWN status
-                currentTimeSecond - currentIncident.start[0] >=
-                  (workerConfig.notification.gracePeriod + 1) * 60 - 30)) ||
-            // grace period is set AND...
-            (workerConfig.notification?.gracePeriod !== undefined &&
-              // grace period is met
-              currentTimeSecond - currentIncident.start[0] >=
-                workerConfig.notification.gracePeriod * 60 - 30 &&
-              currentTimeSecond - currentIncident.start[0] <
-                workerConfig.notification.gracePeriod * 60 + 30)
+            shouldSendDownNotification({
+              currentTime: currentTimeSecond,
+              incidentStart: currentIncident.start[0],
+              notifiedIncidentStart: state.data.notifiedIncidentStart?.[monitor.id],
+              gracePeriodMinutes: workerConfig.notification?.gracePeriod,
+              monitorStatusChanged,
+              skipErrorChangeNotification:
+                workerConfig.notification?.skipErrorChangeNotification ?? false,
+            })
           ) {
-            if (
-              currentIncident.start[0] !== currentTimeSecond &&
-              workerConfig.notification?.skipErrorChangeNotification
-            ) {
-              console.log(
-                'Skipping notification for following error reason change due to user config'
-              )
-            } else {
-              await formatAndNotify(
-                monitor,
-                false,
+            const isFollowupErrorChange =
+              state.wasDownNotificationSent(monitor.id, currentIncident.start[0]) &&
+              monitorStatusChanged &&
+              currentIncident.start[0] !== currentTimeSecond
+            if (isFollowupErrorChange) {
+              state.setPendingErrorChange(
+                monitor.id,
                 currentIncident.start[0],
                 currentTimeSecond,
                 status.err
               )
+              notificationStateChanged = true
+            }
+
+            const notificationSent = await formatAndNotify(
+              monitor,
+              false,
+              currentIncident.start[0],
+              currentTimeSecond,
+              status.err
+            )
+            if (notificationSent) {
+              if (!state.wasDownNotificationSent(monitor.id, currentIncident.start[0])) {
+                notificationStateChanged = true
+              }
+              state.markDownNotificationSent(monitor.id, currentIncident.start[0])
+              if (isFollowupErrorChange) {
+                state.clearPendingErrorChange(monitor.id)
+              }
             }
           } else {
             console.log(
-              `Grace period (${workerConfig.notification
-                ?.gracePeriod}m) not met or no change (currently down for ${
+              `DOWN notification not due for ${monitor.name} (down for ${
                 currentTimeSecond - currentIncident.start[0]
-              }s, changed ${monitorStatusChanged}), skipping webhook DOWN notification for ${
-                monitor.name
-              }`
+              }s, changed ${monitorStatusChanged}, already sent ${state.wasDownNotificationSent(
+                monitor.id,
+                currentIncident.start[0]
+              )})`
             )
           }
 
@@ -228,22 +336,40 @@ const Worker = {
         })
       }
 
+      state.setMonitorLastUpdate(monitor.id, Date.now())
       statusChanged ||= monitorStatusChanged
     }
+
+    // Monitors outside this invocation's batch retain their incident and
+    // latency history. Recalculate global counters from every monitor with
+    // persisted state. Monitors that have not been checked yet count as
+    // unavailable so the status page never presents unknown state as healthy.
+    state.recalculateOverallStatus(workerConfig.monitors.map((monitor) => monitor.id))
 
     console.log(
       `statusChanged: ${statusChanged}, lastUpdate: ${state.data.lastUpdate}, currentTime: ${currentTimeSecond}`
     )
     // Update state
-    // Allow for a cooldown period before writing to storage
+    // Batched checks must persist every selected batch so its results are not
+    // lost. Non-batched checks retain the configured cooldown.
     if (
-      statusChanged ||
-      currentTimeSecond - state.data.lastUpdate >=
-        (workerConfig.kvWriteCooldownMinutes ?? 3) * 60 - 10 // Allow for 10 seconds of clock drift
+      shouldPersistState({
+        batched: monitorBatch.batched,
+        statusChanged,
+        notificationStateChanged,
+        currentTime: currentTimeSecond,
+        lastUpdate: state.data.lastUpdate,
+        cooldownMinutes: workerConfig.kvWriteCooldownMinutes,
+      })
     ) {
       console.log('Updating state...')
-      state.data.lastUpdate = currentTimeSecond
-      await setToStore(env, 'state', state.getCompactedStateStr())
+      await persistStateWithRetry(
+        env,
+        initialStoredState,
+        state,
+        monitorBatch.monitors.map((monitor) => monitor.id),
+        currentTimeSecond
+      )
     } else {
       console.log('Skipping state update due to cooldown period.')
     }

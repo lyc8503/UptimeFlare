@@ -33,6 +33,11 @@ const pageConfig: PageConfig = {
 const workerConfig: WorkerConfig = {
   // [Optional] Write KV at most every N minutes unless the status changed, default to 3
   kvWriteCooldownMinutes: 3,
+  // [Optional] Check this many monitors per scheduled invocation in deterministic round-robin batches.
+  // Omit to check every monitor on every invocation. Must be a positive integer smaller than the monitor count.
+  // With the default every-minute Cron Trigger, 20 monitors and a batch size of 5 checks each monitor every 4 minutes.
+  // Batched checks persist every invocation (ignoring kvWriteCooldownMinutes), and lastUpdate means the latest batch update.
+  // monitorBatchSize: 5,
   // Enable HTTP Basic auth for status page & API by uncommenting the line below, format `<USERNAME>:<PASSWORD>`
   // passwordProtection: 'username:password',
   // Define all your monitors here

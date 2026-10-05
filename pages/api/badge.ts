@@ -49,6 +49,18 @@ export default async function handler(req: NextRequest): Promise<Response> {
       await getFromStore(process.env as any, 'state')
     )
 
+    if (!compactedState.hasMonitorData(monitorId)) {
+      return new Response(
+        JSON.stringify({
+          schemaVersion: 1,
+          label,
+          message: downMsg,
+          color: colorDown,
+        } satisfies BadgePayload),
+        { headers: jsonHeaders }
+      )
+    }
+
     const lastIncident = compactedState.getIncident(
       monitorId,
       compactedState.incidentLen(monitorId) - 1
