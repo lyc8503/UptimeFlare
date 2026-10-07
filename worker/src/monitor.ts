@@ -365,7 +365,7 @@ export async function doMonitor(monitor: MonitorTarget, defaultLocation: string,
       let resp
       if (monitor.checkProxy.startsWith('worker://')) {
         const doLoc = monitor.checkProxy.replace('worker://', '')
-        const doId = env.REMOTE_CHECKER_DO.idFromName(monitor.id)
+        const doId = env.REMOTE_CHECKER_DO.idFromName(`${doLoc}:${monitor.id}`)
         const doStub = env.REMOTE_CHECKER_DO.get(doId, {
           locationHint: doLoc as DurableObjectLocationHint,
         })
