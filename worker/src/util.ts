@@ -1,5 +1,6 @@
 import { MonitorTarget, WebhookConfig } from '../../types/config'
 import { maintenances, workerConfig } from '../../uptime.config'
+import { allWebhookDeliveriesSucceeded } from './notification'
 
 async function getWorkerLocation() {
   const res = await fetch('https://cloudflare.com/cdn-cgi/trace')
@@ -79,12 +80,13 @@ function templateWebhookPlayload(payload: any, message: string) {
   }
 }
 
-async function webhookNotify(webhook: WebhookConfig, message: string) {
+async function webhookNotify(webhook: WebhookConfig, message: string): Promise<boolean> {
   if (Array.isArray(webhook)) {
+    const results: boolean[] = []
     for (const w of webhook) {
-      await webhookNotify(w, message)
+      results.push(await webhookNotify(w, message))
     }
-    return
+    return allWebhookDeliveriesSucceeded(results)
   }
 
   console.log(
@@ -138,11 +140,14 @@ async function webhookNotify(webhook: WebhookConfig, message: string) {
       console.log(
         'Error calling webhook server, code: ' + resp.status + ', response: ' + (await resp.text())
       )
-    } else {
-      console.log('Webhook notification sent successfully, code: ' + resp.status)
+      return false
     }
+
+    console.log('Webhook notification sent successfully, code: ' + resp.status)
+    return true
   } catch (e) {
     console.log('Error calling webhook server: ' + e)
+    return false
   }
 }
 
@@ -153,27 +158,30 @@ const formatAndNotify = async (
   timeIncidentStart: number,
   timeNow: number,
   reason: string
-) => {
+): Promise<boolean> => {
   // Skip notification if monitor is in the skip list
   const skipList = workerConfig.notification?.skipNotificationIds
   if (skipList && skipList.includes(monitor.id)) {
     console.log(`Skipping notification for ${monitor.name} (${monitor.id} in skipNotificationIds)`)
-    return
+    return false
   }
 
-  // Skip notification if monitor is in maintenance
+  // Skip notification if monitor is currently in maintenance. Keep timeNow for
+  // the notification's event timestamp, but do not let a historical recovery
+  // timestamp make retries remain in an already-finished maintenance window.
+  const maintenanceNow = new Date()
   const maintenanceList = maintenances
     .filter(
       (m) =>
-        new Date(timeNow * 1000) >= new Date(m.start) &&
-        (!m.end || new Date(timeNow * 1000) <= new Date(m.end))
+        maintenanceNow >= new Date(m.start) &&
+        (!m.end || maintenanceNow <= new Date(m.end))
     )
     .map((e) => e.monitors || [])
     .flat()
 
   if (maintenanceList.includes(monitor.id)) {
     console.log(`Skipping notification for ${monitor.name} (in maintenance)`)
-    return
+    return false
   }
 
   if (workerConfig.notification?.webhook) {
@@ -185,9 +193,10 @@ const formatAndNotify = async (
       reason,
       workerConfig.notification?.timeZone ?? 'Etc/GMT'
     )
-    await webhookNotify(workerConfig.notification.webhook, notification)
+    return webhookNotify(workerConfig.notification.webhook, notification)
   } else {
     console.log(`Webhook not set, skipping notification for ${monitor.name}`)
+    return false
   }
 }
 

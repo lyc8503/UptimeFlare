@@ -49,6 +49,7 @@ export type MonitorTarget = {
 
 export type WorkerConfig<TEnv = Env> = {
   kvWriteCooldownMinutes?: number
+  monitorBatchSize?: number
   passwordProtection?: string
   monitors: MonitorTarget[]
   notification?: Notification
@@ -125,6 +126,24 @@ export type MonitorStateCompacted = {
   lastUpdate: number
   overallUp: number
   overallDown: number
+  notifiedIncidentStart?: Record<string, number>
+  pendingRecovery?: Record<
+    string,
+    {
+      incidentStart: number
+      recoveredAt: number
+    }
+  >
+  pendingErrorChange?: Record<
+    string,
+    {
+      incidentStart: number
+      changedAt: number
+      reason: string
+    }
+  >
+  notificationLastUpdate?: Record<string, number>
+  monitorLastUpdate?: Record<string, number>
 
   // incident in stored in columnar format
   incident: Record<
