@@ -28,6 +28,25 @@ const pageConfig: PageConfig = {
   },
   // [OPTIONAL] Custom footer html
   // customFooter: '',
+  // [OPTIONAL] Settings for installing the status page as an app (PWA), from the browser's menu
+  // or "Add to Home Screen" on iOS. Everything is optional, it's installable without this too
+  // pwa: {
+  //   // App name, default to `title`
+  //   name: 'My Status Page',
+  //   // Name under the app icon, default to `name`
+  //   shortName: 'Status',
+  //   // Color of the title bar (and of the browser's toolbar on mobile), or one for each theme:
+  //   // themeColor: { light: '#FFFFFF', dark: '#242424' },
+  //   themeColor: '#1C7ED6',
+  //   // Color of the splash screen while the app opens
+  //   backgroundColor: '#FFFFFF',
+  //   // App icons, default to `favicon`. PNGs of 192x192 and 512x512 are best,
+  //   // and the first one is the iOS home screen icon (a PNG, not transparent)
+  //   icons: [
+  //     { src: 'https://example.com/icon-192.png', sizes: '192x192', type: 'image/png' },
+  //     { src: 'https://example.com/icon-512.png', sizes: '512x512', type: 'image/png' },
+  //   ],
+  // },
 }
 
 const workerConfig: WorkerConfig = {
