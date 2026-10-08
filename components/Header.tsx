@@ -1,11 +1,13 @@
-import { Container, Group, Image } from '@mantine/core'
+import { Container, Group, Image, useComputedColorScheme } from '@mantine/core'
 import classes from '@/styles/Header.module.css'
 import { pageConfig } from '@/uptime.config'
 import { PageConfigLink } from '@/types/config'
 import { useTranslation } from 'react-i18next'
+import { getLogo } from '@/util/colorScheme'
 
 export default function Header({ style }: { style?: React.CSSProperties }) {
   const { t } = useTranslation('common')
+  const colorScheme = useComputedColorScheme('light', { getInitialValueInEffect: false })
   const linkToElement = (link: PageConfigLink, i: number) => {
     return (
       <a
@@ -31,7 +33,7 @@ export default function Header({ style }: { style?: React.CSSProperties }) {
             target={location.pathname == '/' ? '_blank' : undefined}
           >
             <Image
-              src={pageConfig.logo ?? '/logo.svg'}
+              src={getLogo(pageConfig, colorScheme)}
               h={56}
               w={{ base: 140, sm: 190 }}
               fit="contain"
