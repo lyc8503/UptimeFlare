@@ -1,6 +1,8 @@
 import { maintenances, workerConfig } from '@/uptime.config'
 import { NextRequest } from 'next/server'
 import { CompactedMonitorStateWrapper, getFromStore } from '@/worker/src/store'
+import { getRequestContext } from '@cloudflare/next-on-pages'
+import { allMaintenances } from '@/server/maintenance'
 
 export const runtime = 'edge'
 
@@ -9,11 +11,12 @@ const headers = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
+  'Cache-Control': 'no-store',
 }
 
 export default async function handler(req: NextRequest): Promise<Response> {
   const compactedState = new CompactedMonitorStateWrapper(
-    await getFromStore(process.env as any, 'state')
+    await getFromStore(getRequestContext().env, 'state')
   )
 
   if (compactedState.data.lastUpdate === 0) {
@@ -46,7 +49,7 @@ export default async function handler(req: NextRequest): Promise<Response> {
     down: compactedState.data.overallDown,
     updatedAt: compactedState.data.lastUpdate,
     monitors,
-    maintenances,
+    maintenances: await allMaintenances(getRequestContext().env.UPTIMEFLARE_D1, maintenances),
   }
 
   return new Response(JSON.stringify(ret), {
