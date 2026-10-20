@@ -1,4 +1,5 @@
 import type { Env } from '../worker/src'
+import type { DateTimeConfig } from '../util/datetime'
 
 export type PageConfig = {
   title?: string
@@ -10,6 +11,7 @@ export type PageConfig = {
     upcomingColor?: string
   }
   customFooter?: string
+  dateTime?: DateTimeConfig
 }
 
 export type MaintenanceConfig = {

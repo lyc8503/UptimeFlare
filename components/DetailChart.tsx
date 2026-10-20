@@ -14,6 +14,8 @@ import 'chartjs-adapter-moment'
 import { MonitorState, MonitorTarget } from '@/types/config'
 import { codeToCountry } from '@/util/iata'
 import { useTranslation } from 'react-i18next'
+import { pageConfig } from '@/uptime.config'
+import { useDateTime } from '@/util/useDateTime'
 
 ChartJS.register(
   CategoryScale,
@@ -34,6 +36,9 @@ export default function DetailChart({
   state: MonitorState
 }) {
   const { t } = useTranslation('common')
+  const dateTime = useDateTime()
+  // Only override chart.js's own time labels when date/time display is configured
+  const customTimes = pageConfig.dateTime !== undefined
   const latencyData = state.latency[monitor.id].map((point) => ({
     x: point.time * 1000,
     y: point.ping,
@@ -66,6 +71,10 @@ export default function DetailChart({
     plugins: {
       tooltip: {
         callbacks: {
+          ...(customTimes && {
+            title: (items: any[]) =>
+              items.length ? dateTime.format('dateTime', items[0].parsed.x) : '',
+          }),
           label: (item: any) => {
             if (item.parsed.y) {
               return `${item.parsed.y}ms (${codeToCountry(item.raw.loc)})`
@@ -89,6 +98,9 @@ export default function DetailChart({
           source: 'auto' as const,
           maxRotation: 0,
           autoSkip: true,
+          ...(customTimes && {
+            callback: (value: string | number) => dateTime.format('time', value),
+          }),
         },
       },
     },

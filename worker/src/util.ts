@@ -1,5 +1,6 @@
 import { MonitorTarget, WebhookConfig } from '../../types/config'
-import { maintenances, workerConfig } from '../../uptime.config'
+import { maintenances, pageConfig, workerConfig } from '../../uptime.config'
+import { formatPattern } from '../../util/datetime'
 
 async function getWorkerLocation() {
   const res = await fetch('https://cloudflare.com/cdn-cgi/trace')
@@ -37,7 +38,10 @@ function formatStatusChangeNotification(
   reason: string,
   timeZone: string
 ) {
+  // Uses the status page's `dateTime` pattern if configured, in the notification time zone
+  const pattern = pageConfig.dateTime?.formats?.dateTime
   const dateFormatter = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
     month: 'numeric',
     day: '2-digit',
     hour: '2-digit',
@@ -45,10 +49,14 @@ function formatStatusChangeNotification(
     hour12: false,
     timeZone: timeZone,
   })
+  const formatTime = (timestamp: number) =>
+    pattern
+      ? formatPattern(new Date(timestamp * 1000), pattern, { timeZone })
+      : dateFormatter.format(new Date(timestamp * 1000))
 
   let downtimeDuration = Math.round((timeNow - timeIncidentStart) / 60)
-  const timeNowFormatted = dateFormatter.format(new Date(timeNow * 1000))
-  const timeIncidentStartFormatted = dateFormatter.format(new Date(timeIncidentStart * 1000))
+  const timeNowFormatted = formatTime(timeNow)
+  const timeIncidentStartFormatted = formatTime(timeIncidentStart)
 
   if (isUp) {
     return `✅ ${monitor.name} is up! \nThe service is up again after being down for ${downtimeDuration} minutes.`

@@ -13,9 +13,9 @@
   "No data available": "No data available, please make sure you have deployed your workers with latest config and check your worker status!",
   "Overall": "Overall: {{percent}}%",
   "No Data": "No Data",
-  "percent at date": "{{percent}}% at {{date}}",
+  "percent at date": "{{percent}}% on {{date}}",
   "Down for": "Down for {{duration}} (click for detail)",
-  "incidents at": "🚨 {{name}} incidents at {{date}}",
+  "incidents at": "🚨 {{name}} incidents on {{date}}",
   "Response times": "Response times(ms)",
   "Upcoming": "[Upcoming] ",
   "Scheduled Maintenance": "Scheduled Maintenance",
@@ -33,5 +33,6 @@
   "All": "All",
   "Select monitor": "Select monitor",
   "Backwards": "← Backwards",
-  "Forward": "Forward →"
+  "Forward": "Forward →",
+  "Times shown in time zone": "Times are shown in {{timeZone}} ({{offset}}), not your local time zone"
 }

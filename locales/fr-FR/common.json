@@ -33,5 +33,6 @@
   "All": "Tous",
   "Select monitor": "Sélectionner un moniteur",
   "Backwards": "← Précédent",
-  "Forward": "Suivant →"
+  "Forward": "Suivant →",
+  "Times shown in time zone": "Les heures sont affichées dans le fuseau {{timeZone}} ({{offset}}), et non dans votre fuseau horaire local"
 }

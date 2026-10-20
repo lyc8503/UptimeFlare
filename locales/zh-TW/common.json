@@ -33,5 +33,6 @@
   "All": "全部",
   "Select monitor": "選取站點",
   "Backwards": "← 上個月",
-  "Forward": "下個月 →"
+  "Forward": "下個月 →",
+  "Times shown in time zone": "時間以 {{timeZone}} ({{offset}}) 顯示，而非您的本地時區"
 }

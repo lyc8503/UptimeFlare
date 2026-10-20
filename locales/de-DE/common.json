@@ -33,5 +33,6 @@
   "All": "Alle",
   "Select monitor": "Auswählen",
   "Backwards": "← Zurück",
-  "Forward": "Vorwärts →"
+  "Forward": "Vorwärts →",
+  "Times shown in time zone": "Zeiten werden in {{timeZone}} ({{offset}}) angezeigt, nicht in Ihrer lokalen Zeitzone"
 }

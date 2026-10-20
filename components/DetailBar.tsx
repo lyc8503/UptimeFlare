@@ -4,6 +4,7 @@ import { Box, Tooltip, Modal } from '@mantine/core'
 import { useResizeObserver } from '@mantine/hooks'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useDateTime } from '@/util/useDateTime'
 const moment = require('moment')
 require('moment-precise-range-plugin')
 
@@ -15,6 +16,7 @@ export default function DetailBar({
   state: MonitorState
 }) {
   const { t } = useTranslation('common')
+  const dateTime = useDateTime()
   const [barRef, barRect] = useResizeObserver()
   const [modalOpened, setModalOpened] = useState(false)
   const [modalTitle, setModalTitle] = useState('')
@@ -29,11 +31,11 @@ export default function DetailBar({
   const currentTime = Math.round(Date.now() / 1000)
   const montiorStartTime = state.incident[monitor.id][0].start[0]
 
-  const todayStart = new Date()
-  todayStart.setHours(0, 0, 0, 0)
+  // Day boundaries follow the configured time zone (or the viewer's local one)
+  const todayStart = dateTime.startOfDay(currentTime)
 
   for (let i = 89; i >= 0; i--) {
-    const dayStart = Math.round(todayStart.getTime() / 1000) - i * 86400
+    const dayStart = todayStart - i * 86400
     const dayEnd = dayStart + 86400
 
     const dayMonitorTime = overlapLen(dayStart, dayEnd, montiorStartTime, currentTime)
@@ -58,14 +60,8 @@ export default function DetailBar({
           partEnd = Math.min(partEnd, dayEnd)
 
           if (overlapLen(dayStart, dayEnd, partStart, partEnd) > 0) {
-            const startStr = new Date(partStart * 1000).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            })
-            const endStr = new Date(partEnd * 1000).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            })
+            const startStr = dateTime.format('time', partStart * 1000)
+            const endStr = dateTime.format('time', partEnd * 1000)
             incidentReasons.push(`[${startStr}-${endStr}] ${incident.error[i]}`)
           }
         }
@@ -87,7 +83,7 @@ export default function DetailBar({
               <div>
                 {t('percent at date', {
                   percent: dayPercent,
-                  date: new Date(dayStart * 1000).toLocaleDateString(),
+                  date: dateTime.format('date', dayStart * 1000),
                 })}
               </div>
               {dayDownTime > 0 && (
@@ -115,7 +111,7 @@ export default function DetailBar({
               setModalTitle(
                 t('incidents at', {
                   name: monitor.name,
-                  date: new Date(dayStart * 1000).toLocaleDateString(),
+                  date: dateTime.format('date', dayStart * 1000),
                 })
               )
               setModelContent(

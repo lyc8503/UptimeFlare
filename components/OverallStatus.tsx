@@ -1,10 +1,17 @@
 import { MaintenanceConfig, MonitorTarget } from '@/types/config'
-import { Center, Container, Title, Collapse, Button, Box } from '@mantine/core'
-import { IconCircleCheck, IconAlertCircle, IconPlus, IconMinus } from '@tabler/icons-react'
+import { Center, Container, Title, Collapse, Button, Box, Tooltip } from '@mantine/core'
+import {
+  IconCircleCheck,
+  IconAlertCircle,
+  IconPlus,
+  IconMinus,
+  IconInfoCircle,
+} from '@tabler/icons-react'
 import { useEffect, useState } from 'react'
 import MaintenanceAlert from './MaintenanceAlert'
 import { pageConfig } from '@/uptime.config'
 import { useTranslation } from 'react-i18next'
+import { useDateTime, useTimeZoneNotice } from '@/util/useDateTime'
 
 function useWindowVisibility() {
   const [isVisible, setIsVisible] = useState(true)
@@ -26,6 +33,8 @@ export default function OverallStatus({
   monitors: MonitorTarget[]
 }) {
   const { t } = useTranslation('common')
+  const dateTime = useDateTime()
+  const timeZoneNotice = useTimeZoneNotice()
   let group = pageConfig.group
   let groupedMonitor = (group && Object.keys(group).length > 0) || false
 
@@ -93,9 +102,17 @@ export default function OverallStatus({
       </Title>
       <Title mt="sm" style={{ textAlign: 'center', color: '#70778c' }} order={5}>
         {t('Last updated on', {
-          date: new Date(state.lastUpdate * 1000).toLocaleString(),
+          date: dateTime.format('dateTime', state.lastUpdate * 1000),
           seconds: currentTime - state.lastUpdate,
         })}
+        {timeZoneNotice && (
+          <Tooltip label={t('Times shown in time zone', timeZoneNotice)} multiline maw={300}>
+            <IconInfoCircle
+              aria-label={t('Times shown in time zone', timeZoneNotice)}
+              style={{ width: 16, height: 16, marginLeft: 4, verticalAlign: 'text-bottom' }}
+            />
+          </Tooltip>
+        )}
       </Title>
 
       {/* Upcoming Maintenance */}

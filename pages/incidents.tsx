@@ -10,15 +10,18 @@ import { useEffect, useState } from 'react'
 import MaintenanceAlert from '@/components/MaintenanceAlert'
 import NoIncidentsAlert from '@/components/NoIncidents'
 import { useTranslation } from 'react-i18next'
+import { yearMonth } from '@/util/datetime'
 
 export const runtime = 'experimental-edge'
 const inter = Inter({ subsets: ['latin'] })
 
+// Months follow the configured time zone (or the viewer's local one)
+const timeZone = pageConfig.dateTime?.timeZone
+
 function getSelectedMonth() {
   const hash = window.location.hash.replace('#', '')
   if (!hash) {
-    const now = new Date()
-    return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0')
+    return yearMonth(new Date(), timeZone)
   }
   return hash.split('-').splice(0, 2).join('-')
 }
@@ -30,9 +33,7 @@ function filterIncidentsByMonth(
 ): (Omit<MaintenanceConfig, 'monitors'> & { monitors: MonitorTarget[] })[] {
   return incidents
     .filter((incident) => {
-      const d = new Date(incident.start)
-      const incidentMonth = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
-      return incidentMonth === monthStr
+      return yearMonth(new Date(incident.start), timeZone) === monthStr
     })
     .map((e) => ({
       ...e,

@@ -4,6 +4,7 @@ import { IconAlertTriangle } from '@tabler/icons-react'
 import { MaintenanceConfig, MonitorTarget } from '@/types/config'
 import { pageConfig } from '@/uptime.config'
 import { useTranslation } from 'react-i18next'
+import { useDateTime } from '@/util/useDateTime'
 
 export default function MaintenanceAlert({
   maintenance,
@@ -15,6 +16,7 @@ export default function MaintenanceAlert({
   upcoming?: boolean
 }) {
   const { t } = useTranslation('common')
+  const dateTime = useDateTime()
   const theme = useMantineTheme()
   const isDesktop = useMediaQuery(`(min-width: ${theme.breakpoints.sm})`)
 
@@ -65,13 +67,13 @@ export default function MaintenanceAlert({
           <div style={{ textAlign: 'right', fontWeight: 'bold' }}>
             {upcoming ? t('Scheduled for') : t('From')}
           </div>
-          <div>{new Date(maintenance.start).toLocaleString()}</div>
+          <div>{dateTime.format('dateTime', maintenance.start)}</div>
           <div style={{ textAlign: 'right', fontWeight: 'bold' }}>
             {upcoming ? t('Expected end') : t('To')}
           </div>
           <div>
             {maintenance.end
-              ? new Date(maintenance.end).toLocaleString()
+              ? dateTime.format('dateTime', maintenance.end)
               : t('Until further notice')}
           </div>
         </div>

@@ -28,6 +28,21 @@ const pageConfig: PageConfig = {
   },
   // [OPTIONAL] Custom footer html
   // customFooter: '',
+  // [OPTIONAL] Date/time display on the status page (also used by notification messages)
+  // dateTime: {
+  //   // [OPTIONAL] IANA time zone shown to every visitor, default to each visitor's local time zone
+  //   // Visitors in a different time zone get a notice next to "Last updated"
+  //   // (notifications keep using `notification.timeZone`)
+  //   timeZone: 'Asia/Shanghai',
+  //   // [OPTIONAL] moment-style patterns, each one defaults to the browser's locale format if not specified
+  //   // Tokens: YYYY YY MMMM MMM MM M DD D dddd ddd HH H hh h mm m ss s A a z, [literal text]
+  //   // Month/weekday names and AM/PM follow the page language (English in notifications)
+  //   formats: {
+  //     dateTime: 'MMM D, YYYY [at] h:mm:ss A', // e.g. "Jul 25, 2025 at 3:12:34 AM"
+  //     date: 'MMM D, YYYY', // daily bars, incidents
+  //     time: 'HH:mm', // incident time ranges
+  //   },
+  // },
 }
 
 const workerConfig: WorkerConfig = {
