@@ -34,5 +34,7 @@
   "Select monitor": "选择监控",
   "Backwards": "← 上一月",
   "Forward": "下一月 →",
-  "Times shown in time zone": "时间以 {{timeZone}} ({{offset}}) 显示，而非您的本地时区"
+  "Times shown in time zone": "时间以 {{timeZone}} ({{offset}}) 显示，而非您的本地时区",
+  "Times shown in local time zone": "时间以您的本地时区显示（{{timeZone}}，{{offset}}）",
+  "Times shown in matching time zone": "时间以 {{timeZone}} ({{offset}}) 显示，与您的本地时区相同"
 }

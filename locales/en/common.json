@@ -34,5 +34,7 @@
   "Select monitor": "Select monitor",
   "Backwards": "← Backwards",
   "Forward": "Forward →",
-  "Times shown in time zone": "Times are shown in {{timeZone}} ({{offset}}), not your local time zone"
+  "Times shown in time zone": "Times are shown in {{timeZone}} ({{offset}}), not your local time zone",
+  "Times shown in local time zone": "Times are shown in your local time zone ({{timeZone}}, {{offset}})",
+  "Times shown in matching time zone": "Times are shown in {{timeZone}} ({{offset}}), which is also your local time zone"
 }

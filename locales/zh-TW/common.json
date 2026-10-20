@@ -34,5 +34,7 @@
   "Select monitor": "選取站點",
   "Backwards": "← 上個月",
   "Forward": "下個月 →",
-  "Times shown in time zone": "時間以 {{timeZone}} ({{offset}}) 顯示，而非您的本地時區"
+  "Times shown in time zone": "時間以 {{timeZone}} ({{offset}}) 顯示，而非您的本地時區",
+  "Times shown in local time zone": "時間以您的本地時區顯示（{{timeZone}}，{{offset}}）",
+  "Times shown in matching time zone": "時間以 {{timeZone}} ({{offset}}) 顯示，與您的本地時區相同"
 }

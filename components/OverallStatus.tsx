@@ -35,6 +35,16 @@ export default function OverallStatus({
   const { t } = useTranslation('common')
   const dateTime = useDateTime()
   const timeZoneNotice = useTimeZoneNotice()
+  const timeZoneNoticeText =
+    timeZoneNotice &&
+    t(
+      {
+        local: 'Times shown in local time zone',
+        'fixed-same': 'Times shown in matching time zone',
+        'fixed-other': 'Times shown in time zone',
+      }[timeZoneNotice.kind],
+      timeZoneNotice
+    )
   let group = pageConfig.group
   let groupedMonitor = (group && Object.keys(group).length > 0) || false
 
@@ -105,10 +115,10 @@ export default function OverallStatus({
           date: dateTime.format('dateTime', state.lastUpdate * 1000),
           seconds: currentTime - state.lastUpdate,
         })}
-        {timeZoneNotice && (
-          <Tooltip label={t('Times shown in time zone', timeZoneNotice)} multiline maw={300}>
+        {timeZoneNoticeText && (
+          <Tooltip label={timeZoneNoticeText} multiline maw={300}>
             <IconInfoCircle
-              aria-label={t('Times shown in time zone', timeZoneNotice)}
+              aria-label={timeZoneNoticeText}
               style={{ width: 16, height: 16, marginLeft: 4, verticalAlign: 'text-bottom' }}
             />
           </Tooltip>
