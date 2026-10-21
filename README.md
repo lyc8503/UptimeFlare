@@ -53,6 +53,10 @@ Get the latest features right away with [simple upgrade process](https://github.
 
 ## ⚙️Docs for developer
 
+### Maintenance admin
+
+Optionally enable `/admin` through Cloudflare Access to start maintenance for any service, schedule events, and extend or end active windows without redeploying. See [admin setup and usage](docs/admin.md) for Access configuration and local development instructions.
+
 To contribute new features or customize your deployment furthermore, see [here](https://github.com/lyc8503/UptimeFlare/wiki/How-to-develop).
 
 ## New features (TODOs)

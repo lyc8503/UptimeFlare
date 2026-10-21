@@ -6,7 +6,7 @@ import {
   MonitorStateCompacted,
 } from '../../types/config'
 
-export async function getFromStore(env: Env, key: string): Promise<string | null> {
+export async function getFromStore(env: Pick<Env, 'UPTIMEFLARE_D1'>, key: string): Promise<string | null> {
   const stmt = env.UPTIMEFLARE_D1.prepare('SELECT value FROM uptimeflare WHERE key = ?')
   const result = await stmt.bind(key).first<{ value: string }>()
   return result?.value || null

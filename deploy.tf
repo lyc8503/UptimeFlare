@@ -21,6 +21,10 @@ variable "enable_do_migration" {
   default = false
 }
 
+locals {
+  admin_access = jsondecode(file("${path.module}/deploy/admin.json"))
+}
+
 resource "cloudflare_d1_database" "uptimeflare_d1" {
   account_id            = var.CLOUDFLARE_ACCOUNT_ID
   name                  = "uptimeflare_d1"
@@ -81,6 +85,16 @@ resource "cloudflare_pages_project" "uptimeflare" {
       fail_open = false
     }
     production = {
+      env_vars = local.admin_access.enabled ? {
+        CF_ACCESS_TEAM_DOMAIN = {
+          type  = "plain_text"
+          value = local.admin_access.teamDomain
+        }
+        CF_ACCESS_AUD = {
+          type  = "plain_text"
+          value = local.admin_access.audience
+        }
+      } : {}
       d1_databases = {
         UPTIMEFLARE_D1 = {
           id = cloudflare_d1_database.uptimeflare_d1.id

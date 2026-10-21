@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import MaintenanceAlert from './MaintenanceAlert'
 import { pageConfig } from '@/uptime.config'
 import { useTranslation } from 'react-i18next'
+import { maintenanceStatus } from '@/util/maintenance'
 
 function useWindowVisibility() {
   const [isVisible, setIsVisible] = useState(true)
@@ -66,7 +67,7 @@ export default function OverallStatus({
   const activeMaintenances: (Omit<MaintenanceConfig, 'monitors'> & {
     monitors?: MonitorTarget[]
   })[] = maintenances
-    .filter((m) => now >= new Date(m.start) && (!m.end || now <= new Date(m.end)))
+    .filter((m) => maintenanceStatus(m, now.getTime()) === 'Active')
     .map((maintenance) => ({
       ...maintenance,
       monitors: maintenance.monitors?.map(
@@ -77,7 +78,7 @@ export default function OverallStatus({
   const upcomingMaintenances: (Omit<MaintenanceConfig, 'monitors'> & {
     monitors?: (MonitorTarget | undefined)[]
   })[] = maintenances
-    .filter((m) => now < new Date(m.start))
+    .filter((m) => maintenanceStatus(m, now.getTime()) === 'Upcoming')
     .map((maintenance) => ({
       ...maintenance,
       monitors: maintenance.monitors?.map(

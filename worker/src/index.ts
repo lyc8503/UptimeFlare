@@ -1,6 +1,7 @@
 import { DurableObject } from 'cloudflare:workers'
 import { MonitorTarget } from '../../types/config'
-import { workerConfig } from '../../uptime.config'
+import { maintenances, workerConfig } from '../../uptime.config'
+import { allMaintenances } from '../../server/maintenance'
 import { doMonitor, getStatus } from './monitor'
 import { formatAndNotify, getWorkerLocation } from './util'
 import { CompactedMonitorStateWrapper, getFromStore, setToStore } from './store'
@@ -22,7 +23,6 @@ const Worker = {
     state.data.overallUp = 0
 
     let statusChanged = false
-    const currentTimeSecond = Math.round(Date.now() / 1000)
 
     // Parallel check multiple monitors
     // Max concurrent connection is 6 limited by Cloudflare Workers, we use 5 here to be safe
@@ -36,6 +36,10 @@ const Worker = {
     for (const result of await Promise.all(checkQueue)) {
       checkResult[result.id] = result
     }
+
+    // Load after checks so newly started maintenance suppresses this run's notifications.
+    const maintenanceEvents = await allMaintenances(env.UPTIMEFLARE_D1, maintenances)
+    const currentTimeSecond = Math.round(Date.now() / 1000)
 
     // Update each monitor's state based on check results
     for (const monitor of workerConfig.monitors) {
@@ -77,7 +81,7 @@ const Worker = {
               currentTimeSecond - lastIncident.start[0] >=
                 (workerConfig.notification.gracePeriod + 1) * 60 - 30
             ) {
-              await formatAndNotify(monitor, true, lastIncident.start[0], currentTimeSecond, 'OK')
+              await formatAndNotify(monitor, true, lastIncident.start[0], currentTimeSecond, 'OK', maintenanceEvents)
             } else {
               console.log(
                 `grace period (${workerConfig.notification?.gracePeriod}m) not met, skipping webhook UP notification for ${monitor.name}`
@@ -149,7 +153,8 @@ const Worker = {
                 false,
                 currentIncident.start[0],
                 currentTimeSecond,
-                status.err
+                status.err,
+                maintenanceEvents
               )
             }
           } else {

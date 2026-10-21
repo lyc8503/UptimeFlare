@@ -53,6 +53,9 @@ jobs:
           cd worker
           npx wrangler deploy src/index.ts --outdir dist --dry-run
 
+      - name: Test admin maintenance flows
+        run: npm run test:admin
+
       - name: Build page
         run: |
           npx @cloudflare/next-on-pages

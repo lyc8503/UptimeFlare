@@ -1,0 +1,116 @@
+.page {
+  min-height: 100vh;
+  background: light-dark(#f6f8fb, var(--mantine-color-dark-8));
+  color: light-dark(#15243a, var(--mantine-color-gray-1));
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: light-dark(#50617a, var(--mantine-color-gray-4));
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.back:hover {
+  color: #1768c4;
+}
+.back:focus-visible {
+  outline: 2px solid #1768c4;
+  outline-offset: 6px;
+}
+
+.indicator {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #2a8c79;
+}
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 1.7px;
+  font-weight: 700;
+  color: light-dark(#687b93, var(--mantine-color-gray-5));
+}
+.title {
+  font-size: clamp(30px, 4vw, 42px);
+  letter-spacing: -1.5px;
+  margin-top: 8px;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.statNumber {
+  font-size: 36px;
+  line-height: 1.4;
+  letter-spacing: -1px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+.quick {
+  background: light-dark(#edf4fe, var(--mantine-color-dark-6));
+  border: 1px solid light-dark(#cfdef2, var(--mantine-color-dark-4));
+}
+.cloudIcon,
+.icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  color: light-dark(#216dcb, var(--mantine-color-blue-3));
+  background: light-dark(#dceaff, var(--mantine-color-dark-5));
+}
+.form {
+  background: var(--mantine-color-body);
+}
+.empty {
+  text-align: center;
+  color: var(--mantine-color-dimmed);
+  background: light-dark(#fafbfe, var(--mantine-color-dark-7));
+  border-style: dashed;
+}
+.event {
+  background: var(--mantine-color-body);
+}
+.event h3 {
+  overflow-wrap: anywhere;
+}
+.login {
+  max-width: 440px;
+  margin: 65px auto;
+  background: var(--mantine-color-body);
+  box-shadow: 0 10px 40px #17375a08;
+}
+
+@media (max-width: 760px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+  .stats {
+    gap: 8px;
+  }
+  .stats > div {
+    padding: 12px;
+  }
+  .statNumber {
+    font-size: 29px;
+  }
+  .title {
+    letter-spacing: -1px;
+  }
+  .login {
+    margin-top: 30px;
+  }
+}

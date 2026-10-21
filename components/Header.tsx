@@ -1,5 +1,6 @@
 import { Container, Group, Image } from '@mantine/core'
 import classes from '@/styles/Header.module.css'
+import adminConfig from '@/deploy/admin.json'
 import { pageConfig } from '@/uptime.config'
 import { PageConfigLink } from '@/types/config'
 import { useTranslation } from 'react-i18next'
@@ -20,7 +21,11 @@ export default function Header({ style }: { style?: React.CSSProperties }) {
     )
   }
 
-  const links = [{ label: t('Incidents'), link: '/incidents' }, ...(pageConfig.links || [])]
+  const links = [
+    { label: t('Incidents'), link: '/incidents' },
+    ...(adminConfig.enabled ? [{ label: 'Admin', link: '/admin' }] : []),
+    ...(pageConfig.links || []),
+  ]
 
   return (
     <header className={classes.header} style={style}>
