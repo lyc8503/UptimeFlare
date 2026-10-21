@@ -93,7 +93,7 @@ export default function MonitorList({
                 .sort((a, b) => group[groupName].indexOf(a.id) - group[groupName].indexOf(b.id))
                 .map((monitor) => (
                   <div key={monitor.id}>
-                    <Card.Section ml="xs" mr="xs">
+                    <Card.Section ml="xs" mr="xs" id={`link-${monitor.id}`}>
                       <MonitorDetail monitor={monitor} state={state} />
                     </Card.Section>
                   </div>
