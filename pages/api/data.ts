@@ -26,6 +26,16 @@ export default async function handler(req: NextRequest): Promise<Response> {
   let monitors: any = {}
 
   for (let monitor of workerConfig.monitors) {
+    if (!compactedState.hasMonitorData(monitor.id)) {
+      monitors[monitor.id] = {
+        up: false,
+        latency: null,
+        location: null,
+        message: 'No data available',
+      }
+      continue
+    }
+
     const lastIncident = compactedState.getIncident(
       monitor.id,
       compactedState.incidentLen(monitor.id) - 1

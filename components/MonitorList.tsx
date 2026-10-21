@@ -8,7 +8,13 @@ import { useTranslation } from 'react-i18next'
 function countDownCount(state: MonitorState, ids: string[]) {
   let downCount = 0
   for (let id of ids) {
-    if (state.incident[id] === undefined || state.incident[id].length === 0) {
+    if (
+      state.incident[id] === undefined ||
+      state.incident[id].length === 0 ||
+      state.latency[id] === undefined ||
+      state.latency[id].length === 0
+    ) {
+      downCount++
       continue
     }
 
