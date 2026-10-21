@@ -10,6 +10,22 @@ export type PageConfig = {
     upcomingColor?: string
   }
   customFooter?: string
+  pwa?: PageConfigPwa
+}
+
+export type PageConfigPwa = {
+  name?: string
+  shortName?: string
+  themeColor?: string | { light: string; dark: string }
+  backgroundColor?: string
+  icons?: PageConfigPwaIcon[]
+}
+
+export type PageConfigPwaIcon = {
+  src: string
+  sizes: string
+  type?: string
+  purpose?: string
 }
 
 export type MaintenanceConfig = {

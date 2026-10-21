@@ -34,6 +34,7 @@ New users can deploy directly, while existing users can have a simple auto migra
   - Use your own domain with CNAME
   - Optional password authentication (private status page)
   - JSON API for fetching realtime status data
+  - Installable as an app (PWA) on desktop and mobile
 
 ## 👀Demo
 
