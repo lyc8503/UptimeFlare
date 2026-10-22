@@ -6,11 +6,12 @@ import { maintenances, pageConfig } from '@/uptime.config'
 import OverallStatus from '@/components/OverallStatus'
 import Header from '@/components/Header'
 import MonitorList from '@/components/MonitorList'
-import { Center, Text } from '@mantine/core'
+import { Center, Text, useComputedColorScheme } from '@mantine/core'
 import MonitorDetail from '@/components/MonitorDetail'
 import Footer from '@/components/Footer'
 import { useTranslation } from 'react-i18next'
 import { CompactedMonitorStateWrapper, getFromStore } from '@/worker/src/store'
+import { getFavicon } from '@/util/colorScheme'
 
 export const runtime = 'experimental-edge'
 const inter = Inter({ subsets: ['latin'] })
@@ -25,6 +26,14 @@ export default function Home({
   statusPageLink?: string
 }) {
   const { t } = useTranslation('common')
+  const colorScheme = useComputedColorScheme('light', { getInitialValueInEffect: false })
+  const favicon = getFavicon(pageConfig, colorScheme)
+  const pageHead = (
+    <Head>
+      <title>{pageConfig.title}</title>
+      <link rel="icon" href={favicon} />
+    </Head>
+  )
   let state = new CompactedMonitorStateWrapper(compactedStateStr).uncompact()
 
   // Specify monitorId in URL hash to view a specific monitor (can be used in iframe)
@@ -32,21 +41,26 @@ export default function Home({
   if (monitorId) {
     const monitor = monitors.find((monitor) => monitor.id === monitorId)
     if (!monitor || !state) {
-      return <Text fw={700}>{t('Monitor not found', { id: monitorId })}</Text>
+      return (
+        <>
+          {pageHead}
+          <Text fw={700}>{t('Monitor not found', { id: monitorId })}</Text>
+        </>
+      )
     }
     return (
-      <div style={{ maxWidth: '810px' }}>
-        <MonitorDetail monitor={monitor} state={state} />
-      </div>
+      <>
+        {pageHead}
+        <div style={{ maxWidth: '810px' }}>
+          <MonitorDetail monitor={monitor} state={state} />
+        </div>
+      </>
     )
   }
 
   return (
     <>
-      <Head>
-        <title>{pageConfig.title}</title>
-        <link rel="icon" href={pageConfig.favicon ?? '/favicon.png'} />
-      </Head>
+      {pageHead}
 
       <main className={inter.className}>
         <Header />

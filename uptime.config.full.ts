@@ -16,10 +16,19 @@ const pageConfig: PageConfig = {
     '🌐 Public (example group name)': ['foo_monitor', 'bar_monitor', 'more monitor ids...'],
     '🔐 Private': ['test_tcp_monitor'],
   },
+  // [OPTIONAL] Set the color scheme to 'auto', 'light', or 'dark'
+  // Defaults to 'auto', which follows the system color scheme
+  // colorScheme: 'auto',
   // [OPTIONAL] Set the path to your favicon, default to '/favicon.png' if not specified
   // favicon: 'https://example.com/favicon.ico',
+  // [OPTIONAL] Set a separate favicon for dark mode
+  // Falls back to `favicon` when omitted
+  // darkFavicon: 'https://example.com/favicon-dark.ico',
   // [OPTIONAL] Set the path to your logo, default to '/logo.svg' if not specified
   // logo: 'https://example.com/logo.svg',
+  // [OPTIONAL] Set a separate logo for dark mode
+  // Falls back to `logo` when omitted
+  // darkLogo: 'https://example.com/logo-dark.svg',
   // [OPTIONAL] Maintenance related settings
   maintenances: {
     // [OPTIONAL] The color of upcoming maintenance alerts, default to 'gray'

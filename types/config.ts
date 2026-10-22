@@ -4,8 +4,11 @@ export type PageConfig = {
   title?: string
   links?: PageConfigLink[]
   group?: PageConfigGroup
+  colorScheme?: 'auto' | 'light' | 'dark'
   favicon?: string
+  darkFavicon?: string
   logo?: string
+  darkLogo?: string
   maintenances?: {
     upcomingColor?: string
   }

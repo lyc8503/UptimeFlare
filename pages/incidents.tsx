@@ -4,12 +4,21 @@ import { Inter } from 'next/font/google'
 import { MaintenanceConfig, MonitorTarget } from '@/types/config'
 import { maintenances, pageConfig } from '@/uptime.config'
 import Header from '@/components/Header'
-import { Box, Button, Center, Container, Group, Select } from '@mantine/core'
+import {
+  Box,
+  Button,
+  Center,
+  Container,
+  Group,
+  Select,
+  useComputedColorScheme,
+} from '@mantine/core'
 import Footer from '@/components/Footer'
 import { useEffect, useState } from 'react'
 import MaintenanceAlert from '@/components/MaintenanceAlert'
 import NoIncidentsAlert from '@/components/NoIncidents'
 import { useTranslation } from 'react-i18next'
+import { getFavicon } from '@/util/colorScheme'
 
 export const runtime = 'experimental-edge'
 const inter = Inter({ subsets: ['latin'] })
@@ -56,6 +65,8 @@ function getPrevNextMonth(monthStr: string) {
 
 export default function IncidentsPage({ monitors }: { monitors: MonitorTarget[] }) {
   const { t } = useTranslation('common')
+  const colorScheme = useComputedColorScheme('light', { getInitialValueInEffect: false })
+  const favicon = getFavicon(pageConfig, colorScheme)
   const [selectedMonitor, setSelectedMonitor] = useState<string | null>('')
   const [selectedMonth, setSelectedMonth] = useState(getSelectedMonth())
 
@@ -84,7 +95,7 @@ export default function IncidentsPage({ monitors }: { monitors: MonitorTarget[] 
     <>
       <Head>
         <title>{pageConfig.title}</title>
-        <link rel="icon" href={pageConfig.favicon ?? '/favicon.png'} />
+        <link rel="icon" href={favicon} />
       </Head>
 
       <main className={inter.className}>
