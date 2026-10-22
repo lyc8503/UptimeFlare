@@ -55,13 +55,13 @@ function formatStatusChangeNotification(
   } else if (timeNow == timeIncidentStart) {
     return `🔴 ${
       monitor.name
-    } is currently down. \nService is unavailable at ${timeNowFormatted}. \nIssue: ${
+    } is down. \nService became unavailable at ${timeNowFormatted}. \nIssue: ${
       reason || 'unspecified'
     }`
   } else {
     return `🔴 ${
       monitor.name
-    } is still down. \nService is unavailable since ${timeIncidentStartFormatted} (${downtimeDuration} minutes). \nIssue: ${
+    } is down. \nService unavailable since ${timeIncidentStartFormatted} (${downtimeDuration} minutes). \nIssue: ${
       reason || 'unspecified'
     }`
   }
