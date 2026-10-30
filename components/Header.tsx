@@ -25,8 +25,7 @@ export default function Header({ style }: { style?: React.CSSProperties }) {
     ...(pageConfig.links || []),
   ]
 
-  const logoHref =
-    location.pathname == '/' ? pageConfig.logoLink ?? 'https://github.com/lyc8503/UptimeFlare' : '/'
+  const logoHref = location.pathname == '/' ? pageConfig.logoLink ?? 'https://github.com/lyc8503/UptimeFlare' : '/'
 
   return (
     <header className={classes.header} style={style}>
