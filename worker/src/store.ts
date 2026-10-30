@@ -7,6 +7,8 @@ import {
 } from '../../types/config'
 
 export async function getFromStore(env: Env, key: string): Promise<string | null> {
+  // No D1 binding outside the Cloudflare runtime (e.g. plain `next dev`); return empty state instead of throwing
+  if (!env?.UPTIMEFLARE_D1) return null
   const stmt = env.UPTIMEFLARE_D1.prepare('SELECT value FROM uptimeflare WHERE key = ?')
   const result = await stmt.bind(key).first<{ value: string }>()
   return result?.value || null
