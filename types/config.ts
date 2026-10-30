@@ -6,6 +6,9 @@ export type PageConfig = {
   group?: PageConfigGroup
   favicon?: string
   logo?: string
+  logoLink?: string
+  showTitle?: boolean
+  incidents?: boolean
   maintenances?: {
     upcomingColor?: string
   }

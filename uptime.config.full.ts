@@ -20,6 +20,14 @@ const pageConfig: PageConfig = {
   // favicon: 'https://example.com/favicon.ico',
   // [OPTIONAL] Set the path to your logo, default to '/logo.svg' if not specified
   // logo: 'https://example.com/logo.svg',
+  // [OPTIONAL] Custom link opened when clicking the header logo (from the home page),
+  // default to 'https://github.com/lyc8503/UptimeFlare' if not specified
+  // logoLink: 'https://example.com',
+  // [OPTIONAL] Show the `title` text next to the logo in the header, default to false
+  // showTitle: true,
+  // [OPTIONAL] Set to false to disable the incidents feature entirely
+  // (hides the "Incidents" header tab and makes the /incidents page redirect home), default to true
+  // incidents: false,
   // [OPTIONAL] Maintenance related settings
   maintenances: {
     // [OPTIONAL] The color of upcoming maintenance alerts, default to 'gray'

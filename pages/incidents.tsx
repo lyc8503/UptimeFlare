@@ -134,7 +134,11 @@ export default function IncidentsPage({ monitors }: { monitors: MonitorTarget[] 
 }
 
 export async function getServerSideProps() {
-  const { workerConfig } = await import('@/uptime.config')
+  const { workerConfig, pageConfig } = await import('@/uptime.config')
+  // If the incidents feature is disabled, don't expose this page
+  if (pageConfig.incidents === false) {
+    return { redirect: { destination: '/', permanent: false } }
+  }
   // Only present these values to client
   const monitors: MonitorTarget[] = workerConfig.monitors.map((monitor) => ({
     id: monitor.id,
