@@ -37,9 +37,9 @@ async function getStatus(monitor) {
     // TCP port endpoint monitor
     let host, port
     try {
-      // This is not a real https connection, but we need to add a dummy `https://` to parse the hostname & port
+      // Use a scheme without a default port so URL preserves explicit ports such as 443.
       // TODO: ipv6 buggy
-      const parsed = new URL('https://' + monitor.target)
+      const parsed = new URL('tcp://' + monitor.target)
       host = parsed.hostname
       port = parsed.port
 
