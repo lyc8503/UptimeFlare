@@ -88,7 +88,7 @@ export async function getStatusWithGlobalPing(
     let globalPingRequest = {}
 
     if (monitor.method === 'TCP_PING') {
-      const targetUrl = new URL('https://' + monitor.target) // dummy https:// to parse hostname & port
+      const targetUrl = new URL('tcp://' + monitor.target)
       const ipVersionOption = getDomainOnlyIpVersionOption(targetUrl.hostname, gpUrl)
       globalPingRequest = {
         type: 'ping',
@@ -281,8 +281,8 @@ export async function getStatus(
       const connect = await import(/* webpackIgnore: true */ 'cloudflare:sockets').then(
         (sockets) => sockets.connect
       )
-      // This is not a real https connection, but we need to add a dummy `https://` to parse the hostname & port
-      const parsed = new URL('https://' + monitor.target)
+      // Use a scheme without a default port so URL preserves explicit ports such as 443.
+      const parsed = new URL('tcp://' + monitor.target)
       const socket = connect({ hostname: parsed.hostname, port: Number(parsed.port) })
 
       // Now we have an `opened` promise!
