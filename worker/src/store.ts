@@ -19,6 +19,16 @@ export async function setToStore(env: Env, key: string, value: string): Promise<
   await stmt.bind(key, value).run()
 }
 
+// Time (in seconds) of the last heartbeat received by a `PUSH` monitor, null if there is none yet
+export async function getLastPush(env: Env, monitorId: string): Promise<number | null> {
+  const value = Number(await getFromStore(env, 'push:' + monitorId))
+  return value > 0 ? value : null
+}
+
+export async function setLastPush(env: Env, monitorId: string, timeSecond: number): Promise<void> {
+  await setToStore(env, 'push:' + monitorId, String(timeSecond))
+}
+
 export class CompactedMonitorStateWrapper {
   data: MonitorStateCompacted
 

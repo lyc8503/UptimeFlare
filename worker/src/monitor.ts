@@ -1,6 +1,7 @@
 import { Env } from '.'
 import { MonitorTarget } from '../../types/config'
 import { withTimeout, fetchTimeout } from './util'
+import { getLastPush } from './store'
 
 function isIpAddress(hostname: string): boolean {
   // `URL.hostname` strips brackets for IPv6, so a `:` reliably indicates an IPv6 literal here.
@@ -354,11 +355,39 @@ export async function getStatus(
   return status
 }
 
+export async function getPushStatus(
+  monitor: MonitorTarget,
+  env: Env
+): Promise<{ ping: number; up: boolean; err: string }> {
+  const grace = monitor.pushGraceSeconds ?? 300
+  const lastPush = await getLastPush(env, monitor.id)
+
+  if (lastPush === null) {
+    return { ping: 0, up: false, err: 'No heartbeat received yet' }
+  }
+
+  if (Math.round(Date.now() / 1000) - lastPush > grace) {
+    // The message must stay the same during an incident, a changed message is treated as an error reason change
+    const lastSeen = new Date(lastPush * 1000).toISOString().slice(0, 16).replace('T', ' ')
+    return {
+      ping: 0,
+      up: false,
+      err: `No heartbeat received in ${grace} seconds (last one at ${lastSeen} UTC)`,
+    }
+  }
+
+  return { ping: 0, up: true, err: '' }
+}
+
 export async function doMonitor(monitor: MonitorTarget, defaultLocation: string, env: Env) {
   let checkLocation = defaultLocation
   let status
 
-  if (monitor.checkProxy) {
+  if (monitor.method === 'PUSH') {
+    // Nothing to check here, the monitored service sends heartbeats to /api/push
+    checkLocation = 'PUSH'
+    status = await getPushStatus(monitor, env)
+  } else if (monitor.checkProxy) {
     // Initiate a check using proxy (Geo-specific monitoring)
     try {
       console.log(`[${monitor.id}] Calling check proxy: ${monitor.checkProxy}`)

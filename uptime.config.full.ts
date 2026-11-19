@@ -87,6 +87,22 @@ const workerConfig: WorkerConfig = {
       statusPageLink: 'https://example.com',
       timeout: 5000,
     },
+    // Example PUSH (heartbeat) Monitor, for things that can't be reached from outside (cron jobs, backups, devices behind NAT...)
+    // The monitored service must request `https://<your status page>/api/push/<id>/<pushToken>` periodically (GET, POST or HEAD)
+    {
+      id: 'test_push_monitor',
+      name: 'Example PUSH Monitor',
+      // `method` should be `PUSH` for push monitors
+      method: 'PUSH',
+      // `target` is not used by push monitors
+      target: '',
+      // `pushToken` is the secret part of the heartbeat URL, use a long random string (letters, digits, `-` and `_`)
+      pushToken: 'REPLACE_WITH_A_RANDOM_STRING',
+      // [OPTIONAL] the monitor is down if no heartbeat is received for `pushGraceSeconds` seconds, default to 300
+      // heartbeats should be sent at least twice as often, the worker checks once per minute
+      pushGraceSeconds: 300,
+      tooltip: 'Nightly backup job',
+    },
   ],
   // [Optional] Notification settings
   notification: {

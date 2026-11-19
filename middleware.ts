@@ -4,7 +4,8 @@ import { workerConfig } from './uptime.config'
 
 export async function middleware(request: NextRequest) {
   const passwordProtection = workerConfig.passwordProtection
-  if (passwordProtection) {
+  // Heartbeats of PUSH monitors are authenticated by the token in the URL
+  if (passwordProtection && !request.nextUrl.pathname.startsWith('/api/push/')) {
     const authHeader = request.headers.get('Authorization')
     let authenticated = false
     const expected = 'Basic ' + btoa(passwordProtection)

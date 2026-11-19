@@ -34,6 +34,8 @@ export type MonitorTarget = {
   name: string
   method: string
   target: string
+  pushToken?: string
+  pushGraceSeconds?: number
   tooltip?: string
   statusPageLink?: string
   hideLatencyChart?: boolean

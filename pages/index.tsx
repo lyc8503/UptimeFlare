@@ -82,8 +82,9 @@ export async function getServerSideProps() {
       tooltip: monitor?.tooltip,
       // @ts-ignore
       statusPageLink: monitor?.statusPageLink,
+      // PUSH monitors have no response time to show
       // @ts-ignore
-      hideLatencyChart: monitor?.hideLatencyChart,
+      hideLatencyChart: monitor?.hideLatencyChart || monitor.method === 'PUSH',
     }
   })
 
