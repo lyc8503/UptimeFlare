@@ -169,6 +169,12 @@ export async function getStatusWithGlobalPing(
       }
     }
 
+    // Ping monitors can ask several probes (`probes=N`), the target is up if any of them gets a reply
+    const probes = Number(gpUrl.searchParams.get('probes') || 1)
+    if ((monitor.method === 'TCP_PING' || monitor.method === 'ICMP_PING') && probes > 1) {
+      globalPingRequest = { ...globalPingRequest, limit: probes }
+    }
+
     const startTime = Date.now()
     console.log(`Requesting the Global Ping API, payload: ${JSON.stringify(globalPingRequest)}`)
     const measurement = await fetchTimeout('https://api.globalping.io/v1/measurements', 5000, {
@@ -215,6 +221,12 @@ export async function getStatusWithGlobalPing(
         measurementResult
       )}, time elapsed: ${Date.now() - pollStart}ms`
     )
+
+    if (measurementResult.results?.length > 1) {
+      // Multiple probes, use the result of the one with the least packet loss
+      const loss = (r: any) => (r.result.status === 'finished' ? r.result.stats?.loss ?? 100 : 101)
+      measurementResult.results.sort((a: any, b: any) => loss(a) - loss(b))
+    }
 
     if (
       measurementResult.status !== 'finished' ||

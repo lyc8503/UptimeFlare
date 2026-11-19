@@ -97,7 +97,9 @@ const workerConfig: WorkerConfig = {
       // `target` should be a hostname or an IP address
       target: '1.2.3.4',
       // refer to docs https://github.com/lyc8503/UptimeFlare/wiki/Check-proxy-setup
-      checkProxy: 'globalping://<YOUR_GLOBALPING_TOKEN>?magic=US',
+      // [OPTIONAL] `probes=N` asks N probes instead of one (TCP_PING and ICMP_PING only), the monitor is up
+      // if any of them gets a reply. Every probe costs a Globalping credit.
+      checkProxy: 'globalping://<YOUR_GLOBALPING_TOKEN>?magic=US&probes=2',
     },
   ],
   // [Optional] Notification settings
