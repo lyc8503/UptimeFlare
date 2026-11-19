@@ -33,5 +33,12 @@
   "All": "全部",
   "Select monitor": "選取站點",
   "Backwards": "← 上個月",
-  "Forward": "下個月 →"
+  "Forward": "下個月 →",
+  "Outages": "事件紀錄",
+  "Monitor": "站點",
+  "Started": "開始時間",
+  "Duration": "持續時間",
+  "Reason": "原因",
+  "Ongoing": "進行中",
+  "No outages in this month": "本月無事件紀錄"
 }
