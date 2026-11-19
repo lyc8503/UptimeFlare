@@ -213,13 +213,19 @@ export async function getStatusWithGlobalPing(
     const city = measurementResult.results[0].probe.city
 
     if (monitor.method === 'TCP_PING') {
-      const time = Math.round(measurementResult.results[0].result.stats.avg)
+      // A ping measurement is reported as `finished` even when no packet gets a reply,
+      // in that case `loss` is 100 and `avg` is null
+      const stats = measurementResult.results[0].result.stats ?? {}
+      const lost = typeof stats.loss === 'number' ? stats.loss >= 100 : stats.avg == null
+      if (lost) {
+        console.log(`${monitor.name} got no reply (${stats.loss ?? 100}% packet loss)`)
+      }
       return {
         location: country + '/' + city,
         status: {
-          ping: time,
-          up: true,
-          err: '',
+          ping: Math.round(stats.avg ?? 0),
+          up: !lost,
+          err: lost ? `No reply from ${monitor.target} (${stats.loss ?? 100}% packet loss)` : '',
         },
       }
     } else {
