@@ -119,6 +119,13 @@ const Worker = {
         }
 
         const currentIncident = state.getIncident(monitor.id, state.incidentLen(monitor.id) - 1)
+        const downFor = currentTimeSecond - currentIncident.start[0]
+        const gracePeriod = workerConfig.notification?.gracePeriod
+        // The first DOWN notification of an incident is sent immediately, or when the grace period is met
+        const isFirstNotification =
+          gracePeriod === undefined
+            ? downFor === 0
+            : downFor >= gracePeriod * 60 - 30 && downFor < gracePeriod * 60 + 30
         try {
           if (
             // monitor status changed AND...
@@ -136,10 +143,7 @@ const Worker = {
               currentTimeSecond - currentIncident.start[0] <
                 workerConfig.notification.gracePeriod * 60 + 30)
           ) {
-            if (
-              currentIncident.start[0] !== currentTimeSecond &&
-              workerConfig.notification?.skipErrorChangeNotification
-            ) {
+            if (!isFirstNotification && workerConfig.notification?.skipErrorChangeNotification) {
               console.log(
                 'Skipping notification for following error reason change due to user config'
               )
