@@ -87,6 +87,20 @@ const workerConfig: WorkerConfig = {
       statusPageLink: 'https://example.com',
       timeout: 5000,
     },
+    // Example ICMP Ping Monitor
+    // Workers can't send ICMP packets, so this type ONLY works with a `globalping://` check proxy
+    {
+      id: 'test_icmp_monitor',
+      name: 'Example ICMP Ping Monitor',
+      // `method` should be `ICMP_PING` for ping monitors
+      method: 'ICMP_PING',
+      // `target` should be a hostname or an IP address
+      target: '1.2.3.4',
+      // refer to docs https://github.com/lyc8503/UptimeFlare/wiki/Check-proxy-setup
+      // [OPTIONAL] `probes=N` asks N probes instead of one (TCP_PING and ICMP_PING only), the monitor is up
+      // if any of them gets a reply. Every probe costs a Globalping credit.
+      checkProxy: 'globalping://<YOUR_GLOBALPING_TOKEN>?magic=US&probes=2',
+    },
   ],
   // [Optional] Notification settings
   notification: {

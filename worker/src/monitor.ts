@@ -87,7 +87,27 @@ export async function getStatusWithGlobalPing(
     const token = gpUrl.hostname
     let globalPingRequest = {}
 
-    if (monitor.method === 'TCP_PING') {
+    if (monitor.method === 'ICMP_PING') {
+      // `target` is a hostname or an IP address
+      const ipVersionOption = getDomainOnlyIpVersionOption(monitor.target, gpUrl)
+      globalPingRequest = {
+        type: 'ping',
+        target: monitor.target,
+        locations:
+          gpUrl.searchParams.get('magic') !== null
+            ? [
+                {
+                  magic: gpUrl.searchParams.get('magic'),
+                },
+              ]
+            : undefined,
+        measurementOptions: {
+          packets: 3,
+          protocol: 'icmp',
+          ...ipVersionOption,
+        },
+      }
+    } else if (monitor.method === 'TCP_PING') {
       const targetUrl = new URL('https://' + monitor.target) // dummy https:// to parse hostname & port
       const ipVersionOption = getDomainOnlyIpVersionOption(targetUrl.hostname, gpUrl)
       globalPingRequest = {
@@ -104,7 +124,7 @@ export async function getStatusWithGlobalPing(
         measurementOptions: {
           port: targetUrl.port,
           packets: 1,
-          protocol: 'tcp', // TODO: icmp?
+          protocol: 'tcp',
           ...ipVersionOption,
         },
       }
@@ -147,6 +167,12 @@ export async function getStatusWithGlobalPing(
           ...ipVersionOption,
         },
       }
+    }
+
+    // Ping monitors can ask several probes (`probes=N`), the target is up if any of them gets a reply
+    const probes = Number(gpUrl.searchParams.get('probes') || 1)
+    if ((monitor.method === 'TCP_PING' || monitor.method === 'ICMP_PING') && probes > 1) {
+      globalPingRequest = { ...globalPingRequest, limit: probes }
     }
 
     const startTime = Date.now()
@@ -196,6 +222,12 @@ export async function getStatusWithGlobalPing(
       )}, time elapsed: ${Date.now() - pollStart}ms`
     )
 
+    if (measurementResult.results?.length > 1) {
+      // Multiple probes, use the result of the one with the least packet loss
+      const loss = (r: any) => (r.result.status === 'finished' ? r.result.stats?.loss ?? 100 : 101)
+      measurementResult.results.sort((a: any, b: any) => loss(a) - loss(b))
+    }
+
     if (
       measurementResult.status !== 'finished' ||
       measurementResult.results[0].result.status !== 'finished'
@@ -212,14 +244,20 @@ export async function getStatusWithGlobalPing(
     const country = measurementResult.results[0].probe.country
     const city = measurementResult.results[0].probe.city
 
-    if (monitor.method === 'TCP_PING') {
-      const time = Math.round(measurementResult.results[0].result.stats.avg)
+    if (monitor.method === 'TCP_PING' || monitor.method === 'ICMP_PING') {
+      // A ping measurement is reported as `finished` even when no packet gets a reply,
+      // in that case `loss` is 100 and `avg` is null
+      const stats = measurementResult.results[0].result.stats ?? {}
+      const lost = typeof stats.loss === 'number' ? stats.loss >= 100 : stats.avg == null
+      if (lost) {
+        console.log(`${monitor.name} got no reply (${stats.loss ?? 100}% packet loss)`)
+      }
       return {
         location: country + '/' + city,
         status: {
-          ping: time,
-          up: true,
-          err: '',
+          ping: Math.round(stats.avg ?? 0),
+          up: !lost,
+          err: lost ? `No reply from ${monitor.target} (${stats.loss ?? 100}% packet loss)` : '',
         },
       }
     } else {
@@ -275,7 +313,10 @@ export async function getStatus(
 
   const startTime = Date.now()
 
-  if (monitor.method === 'TCP_PING') {
+  if (monitor.method === 'ICMP_PING') {
+    // Workers can't send ICMP packets, the check has to be done by a Globalping probe
+    status.err = 'ICMP_PING is only supported with a `globalping://` check proxy'
+  } else if (monitor.method === 'TCP_PING') {
     // TCP port endpoint monitor
     try {
       const connect = await import(/* webpackIgnore: true */ 'cloudflare:sockets').then(
