@@ -33,5 +33,12 @@
   "All": "All",
   "Select monitor": "Select monitor",
   "Backwards": "← Backwards",
-  "Forward": "Forward →"
+  "Forward": "Forward →",
+  "Outages": "Outages",
+  "Monitor": "Monitor",
+  "Started": "Started",
+  "Duration": "Duration",
+  "Reason": "Reason",
+  "Ongoing": "Ongoing",
+  "No outages in this month": "No outages recorded in this month."
 }

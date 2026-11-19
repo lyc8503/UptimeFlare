@@ -33,5 +33,12 @@
   "All": "Tous",
   "Select monitor": "Sélectionner un moniteur",
   "Backwards": "← Précédent",
-  "Forward": "Suivant →"
+  "Forward": "Suivant →",
+  "Outages": "Interruptions",
+  "Monitor": "Moniteur",
+  "Started": "Début",
+  "Duration": "Durée",
+  "Reason": "Cause",
+  "Ongoing": "En cours",
+  "No outages in this month": "Aucune interruption enregistrée ce mois-ci."
 }

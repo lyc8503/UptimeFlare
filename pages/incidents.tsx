@@ -9,6 +9,8 @@ import Footer from '@/components/Footer'
 import { useEffect, useState } from 'react'
 import MaintenanceAlert from '@/components/MaintenanceAlert'
 import NoIncidentsAlert from '@/components/NoIncidents'
+import OutageLog from '@/components/OutageLog'
+import { getFromStore } from '@/worker/src/store'
 import { useTranslation } from 'react-i18next'
 
 export const runtime = 'experimental-edge'
@@ -54,7 +56,13 @@ function getPrevNextMonth(monthStr: string) {
   }
 }
 
-export default function IncidentsPage({ monitors }: { monitors: MonitorTarget[] }) {
+export default function IncidentsPage({
+  compactedStateStr,
+  monitors,
+}: {
+  compactedStateStr: string
+  monitors: MonitorTarget[]
+}) {
   const { t } = useTranslation('common')
   const [selectedMonitor, setSelectedMonitor] = useState<string | null>('')
   const [selectedMonth, setSelectedMonth] = useState(getSelectedMonth())
@@ -114,6 +122,12 @@ export default function IncidentsPage({ monitors }: { monitors: MonitorTarget[] 
                 ))
               )}
             </Box>
+            <OutageLog
+              compactedStateStr={compactedStateStr}
+              monitors={monitors}
+              month={selectedMonth}
+              monitorId={selectedMonitor}
+            />
             <Group justify="space-between" mt="md">
               <Button variant="default" onClick={() => (window.location.hash = prev)}>
                 {t('Backwards')}
@@ -135,10 +149,13 @@ export default function IncidentsPage({ monitors }: { monitors: MonitorTarget[] 
 
 export async function getServerSideProps() {
   const { workerConfig } = await import('@/uptime.config')
+  // Read state as string from storage, to avoid hitting server-side cpu time limit
+  const compactedStateStr = await getFromStore(process.env as any, 'state')
+
   // Only present these values to client
   const monitors: MonitorTarget[] = workerConfig.monitors.map((monitor) => ({
     id: monitor.id,
     name: monitor.name,
   })) as MonitorTarget[]
-  return { props: { monitors } }
+  return { props: { compactedStateStr, monitors } }
 }
