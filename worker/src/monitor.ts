@@ -87,7 +87,27 @@ export async function getStatusWithGlobalPing(
     const token = gpUrl.hostname
     let globalPingRequest = {}
 
-    if (monitor.method === 'TCP_PING') {
+    if (monitor.method === 'ICMP_PING') {
+      // `target` is a hostname or an IP address
+      const ipVersionOption = getDomainOnlyIpVersionOption(monitor.target, gpUrl)
+      globalPingRequest = {
+        type: 'ping',
+        target: monitor.target,
+        locations:
+          gpUrl.searchParams.get('magic') !== null
+            ? [
+                {
+                  magic: gpUrl.searchParams.get('magic'),
+                },
+              ]
+            : undefined,
+        measurementOptions: {
+          packets: 3,
+          protocol: 'icmp',
+          ...ipVersionOption,
+        },
+      }
+    } else if (monitor.method === 'TCP_PING') {
       const targetUrl = new URL('https://' + monitor.target) // dummy https:// to parse hostname & port
       const ipVersionOption = getDomainOnlyIpVersionOption(targetUrl.hostname, gpUrl)
       globalPingRequest = {
@@ -104,7 +124,7 @@ export async function getStatusWithGlobalPing(
         measurementOptions: {
           port: targetUrl.port,
           packets: 1,
-          protocol: 'tcp', // TODO: icmp?
+          protocol: 'tcp',
           ...ipVersionOption,
         },
       }
@@ -212,7 +232,7 @@ export async function getStatusWithGlobalPing(
     const country = measurementResult.results[0].probe.country
     const city = measurementResult.results[0].probe.city
 
-    if (monitor.method === 'TCP_PING') {
+    if (monitor.method === 'TCP_PING' || monitor.method === 'ICMP_PING') {
       // A ping measurement is reported as `finished` even when no packet gets a reply,
       // in that case `loss` is 100 and `avg` is null
       const stats = measurementResult.results[0].result.stats ?? {}
@@ -281,7 +301,10 @@ export async function getStatus(
 
   const startTime = Date.now()
 
-  if (monitor.method === 'TCP_PING') {
+  if (monitor.method === 'ICMP_PING') {
+    // Workers can't send ICMP packets, the check has to be done by a Globalping probe
+    status.err = 'ICMP_PING is only supported with a `globalping://` check proxy'
+  } else if (monitor.method === 'TCP_PING') {
     // TCP port endpoint monitor
     try {
       const connect = await import(/* webpackIgnore: true */ 'cloudflare:sockets').then(
