@@ -1,0 +1,124 @@
+/* Cottage — generated from tokens.json */
+:root, [data-theme="light"] {
+  --paper: #FBF7EF;
+  --paper-raised: #FFFFFF;
+  --paper-sunken: #F3ECDF;
+  --ink: #23201B;
+  --ink-muted: #5F584D;
+  --ink-subtle: #6F675A;
+  --moss: #2F5D46;
+  --moss-hover: #264D3A;
+  --on-moss: #FFFFFF;
+  --moss-soft: #E3EDE5;
+  --hearth: #C2541C;
+  --on-hearth: #FFFFFF;
+  --hearth-ink: #A3441A;
+  --hearth-soft: #F8E6DA;
+  --honey: #E5B54A;
+  --honey-ink: #7A5A10;
+  --honey-soft: #FAF0D4;
+  --line: #E4DACA;
+  --line-strong: #958670;
+  --focus: var(--moss);
+  --success: #2A7349;
+  --success-soft: #E2F0E6;
+  --warning: #8C5900;
+  --warning-soft: #FBEFD6;
+  --danger: #B3261E;
+  --danger-soft: #FBE4E1;
+  --info: #2F5E8A;
+  --info-soft: #E3ECF5;
+  --scrim: rgba(35, 32, 27, 0.48);
+  --shadow-sm: 0 1px 2px rgba(35, 32, 27, 0.06);
+  --shadow-md: 0 6px 16px rgba(35, 32, 27, 0.08), 0 1px 3px rgba(35, 32, 27, 0.06);
+  --shadow-lg: 0 20px 48px rgba(35, 32, 27, 0.14), 0 2px 6px rgba(35, 32, 27, 0.06);
+}
+[data-theme="dark"] {
+  --paper: #191714;
+  --paper-raised: #221F1B;
+  --paper-sunken: #14120F;
+  --ink: #F2ECE0;
+  --ink-muted: #B8AE9D;
+  --ink-subtle: #8F8676;
+  --moss: #86BD9F;
+  --moss-hover: #9CCBB1;
+  --on-moss: #10201A;
+  --moss-soft: #1F2E26;
+  --hearth: #EE8A50;
+  --on-hearth: #2A1408;
+  --hearth-ink: #F29B66;
+  --hearth-soft: #3A2418;
+  --honey: #E9BF5C;
+  --honey-ink: #F0CB72;
+  --honey-soft: #352B14;
+  --line: #36322B;
+  --line-strong: #76705F;
+  --focus: var(--moss);
+  --success: #6FC08E;
+  --success-soft: #1B2C21;
+  --warning: #E2A93B;
+  --warning-soft: #33280F;
+  --danger: #F08A80;
+  --danger-soft: #3A1D1A;
+  --info: #8DB8E3;
+  --info-soft: #1A2633;
+  --scrim: rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.6);
+}
+:root {
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-32: 128px;
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+  --container-max: 1200px;
+  --prose-max: 720px;
+  --dashboard-max: 1120px;
+  --site-header-height: 72px;
+  --topbar-height: 56px;
+  --sidebar-width: 248px;
+  --control-sm: 32px;
+  --control-md: 40px;
+  --control-lg: 48px;
+  --table-row: 52px;
+  --app-icon-md: 40px;
+  --app-icon-lg: 64px;
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Hanken Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+.display-xl { font-family: var(--font-display); font-size: 64px; line-height: 68px; font-weight: 600; letter-spacing: -0.02em; font-variation-settings: 'opsz' 96; }
+.display-l { font-family: var(--font-display); font-size: 48px; line-height: 52px; font-weight: 600; letter-spacing: -0.015em; font-variation-settings: 'opsz' 72; }
+.h1 { font-family: var(--font-display); font-size: 40px; line-height: 46px; font-weight: 600; letter-spacing: -0.01em; font-variation-settings: 'opsz' 48; }
+.h2 { font-family: var(--font-display); font-size: 32px; line-height: 38px; font-weight: 600; letter-spacing: -0.01em; font-variation-settings: 'opsz' 36; }
+.h3 { font-family: var(--font-display); font-size: 24px; line-height: 30px; font-weight: 600; font-variation-settings: 'opsz' 24; }
+.h4 { font-family: var(--font-sans); font-size: 18px; line-height: 26px; font-weight: 600; }
+.body-l { font-family: var(--font-sans); font-size: 18px; line-height: 28px; font-weight: 400; }
+.body { font-family: var(--font-sans); font-size: 16px; line-height: 24px; font-weight: 400; }
+.body-s { font-family: var(--font-sans); font-size: 14px; line-height: 20px; font-weight: 400; }
+.label { font-family: var(--font-sans); font-size: 14px; line-height: 20px; font-weight: 600; }
+.eyebrow { font-family: var(--font-sans); font-size: 13px; line-height: 16px; font-weight: 600; letter-spacing: 0.08em; }
+.caption { font-family: var(--font-sans); font-size: 12px; line-height: 16px; font-weight: 500; }
+.mono { font-family: var(--font-mono); font-size: 14px; line-height: 20px; font-weight: 400; }
+.mono-s { font-family: var(--font-mono); font-size: 12px; line-height: 16px; font-weight: 500; }

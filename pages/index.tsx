@@ -1,43 +1,39 @@
 import Head from 'next/head'
-
-import { Inter } from 'next/font/google'
-import { MonitorTarget } from '@/types/config'
-import { maintenances, pageConfig } from '@/uptime.config'
+import Link from 'next/link'
+import { MaintenanceConfig, MonitorTarget } from '@/types/config'
+import { maintenances as configMaintenances, pageConfig } from '@/uptime.config'
 import OverallStatus from '@/components/OverallStatus'
 import Header from '@/components/Header'
 import MonitorList from '@/components/MonitorList'
-import { Center, Text } from '@mantine/core'
-import MonitorDetail from '@/components/MonitorDetail'
 import Footer from '@/components/Footer'
-import { useTranslation } from 'react-i18next'
+import UptimeBars from '@/components/UptimeBars'
 import { CompactedMonitorStateWrapper, getFromStore } from '@/worker/src/store'
 
 export const runtime = 'experimental-edge'
-const inter = Inter({ subsets: ['latin'] })
 
 export default function Home({
   compactedStateStr,
   monitors,
+  maintenances,
 }: {
-  compactedStateStr: string
+  compactedStateStr: string | null
   monitors: MonitorTarget[]
-  tooltip?: string
-  statusPageLink?: string
+  maintenances: MaintenanceConfig[]
 }) {
-  const { t } = useTranslation('common')
-  let state = new CompactedMonitorStateWrapper(compactedStateStr).uncompact()
+  const state = new CompactedMonitorStateWrapper(compactedStateStr).uncompact()
 
-  // Specify monitorId in URL hash to view a specific monitor (can be used in iframe)
+  // #monitor-id shows one service's bars on its own (for embedding in an iframe).
   const monitorId = window.location.hash.substring(1)
   if (monitorId) {
-    const monitor = monitors.find((monitor) => monitor.id === monitorId)
-    if (!monitor || !state) {
-      return <Text fw={700}>{t('Monitor not found', { id: monitorId })}</Text>
-    }
+    const monitor = monitors.find((m) => m.id === monitorId)
     return (
-      <div style={{ maxWidth: '810px' }}>
-        <MonitorDetail monitor={monitor} state={state} />
-      </div>
+      <main className="st-embed">
+        {monitor && state.incident[monitor.id] ? (
+          <UptimeBars monitor={monitor} state={state} />
+        ) : (
+          <p>No service called &ldquo;{monitorId}&rdquo;.</p>
+        )}
+      </main>
     )
   }
 
@@ -45,47 +41,41 @@ export default function Home({
     <>
       <Head>
         <title>{pageConfig.title}</title>
-        <link rel="icon" href={pageConfig.favicon ?? '/favicon.png'} />
+        <meta name="description" content="Live status of Cottage's website, dashboard and app hosting, checked every minute." />
       </Head>
-
-      <main className={inter.className}>
-        <Header />
-
-        {state.lastUpdate === 0 ? (
-          <Center>
-            <Text fw={700}>{t('Monitor State not defined')}</Text>
-          </Center>
-        ) : (
-          <div>
-            <OverallStatus state={state} monitors={monitors} maintenances={maintenances} />
-            <MonitorList monitors={monitors} state={state} />
-          </div>
-        )}
-
-        <Footer />
+      <Header current="status" />
+      <main className="st-main">
+        <div className="st-container st-container--narrow">
+          <OverallStatus state={state} monitors={monitors} maintenances={maintenances} />
+          <MonitorList monitors={monitors} state={state} maintenances={maintenances} />
+          <p className="st-note">
+            Uptime covers the last 90 days. Planned maintenance and incident updates are listed under{' '}
+            <Link href="/incidents">Incident history</Link>.
+          </p>
+        </div>
       </main>
+      <Footer />
     </>
   )
 }
 
-export async function getServerSideProps() {
+export async function getServerSideProps({ query }: { query: Record<string, string | string[] | undefined> }) {
   const { workerConfig } = await import('@/uptime.config')
-  // Read state as string from storage, to avoid hitting server-side cpu time limit
+  const monitors = workerConfig.monitors.map((m) => ({
+    id: m.id,
+    name: m.name,
+    tooltip: m.tooltip ?? null,
+    statusPageLink: m.statusPageLink ?? null,
+    hideLatencyChart: m.hideLatencyChart ?? null,
+  }))
+
+  // `npm run dev` has no D1 database: show sample data instead (dev/sample.ts).
+  if (process.env.NODE_ENV === 'development' && !(process.env as any).UPTIMEFLARE_D1) {
+    const { sampleState, sampleNotices } = await import('@/dev/sample')
+    return { props: { compactedStateStr: sampleState(workerConfig.monitors, String(query.sample ?? '')), monitors, maintenances: sampleNotices(String(query.sample ?? '')) } }
+  }
+
+  // Read the state as a string, so the server stays inside its CPU limit.
   const compactedStateStr = await getFromStore(process.env as any, 'state')
-
-  // Only present these values to client
-  const monitors = workerConfig.monitors.map((monitor) => {
-    return {
-      id: monitor.id,
-      name: monitor.name,
-      // @ts-ignore
-      tooltip: monitor?.tooltip,
-      // @ts-ignore
-      statusPageLink: monitor?.statusPageLink,
-      // @ts-ignore
-      hideLatencyChart: monitor?.hideLatencyChart,
-    }
-  })
-
-  return { props: { compactedStateStr, monitors } }
+  return { props: { compactedStateStr, monitors, maintenances: configMaintenances } }
 }

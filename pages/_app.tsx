@@ -1,15 +1,14 @@
-import '@mantine/core/styles.css'
 import type { AppProps } from 'next/app'
-import { MantineProvider } from '@mantine/core'
 import NoSsr from '@/components/NoSsr'
-import '@/util/i18n'
+import '@/styles/brand/fonts.css'
+import '@/styles/brand/tokens.css'
+import '@/styles/brand/bundle.css'
+import '@/styles/status.css'
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <NoSsr>
-      <MantineProvider defaultColorScheme="auto">
-        <Component {...pageProps} />
-      </MantineProvider>
+      <Component {...pageProps} />
     </NoSsr>
   )
 }

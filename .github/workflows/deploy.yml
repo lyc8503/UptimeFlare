@@ -5,8 +5,14 @@ on:
     branches: ['main']
   workflow_dispatch:
 
+# Cottage: deploys only once the repository variable CLOUDFLARE_DEPLOY is "true" (set at launch,
+# with the CLOUDFLARE_API_TOKEN secret). Until then a push to main does nothing.
+env:
+  WRANGLER_SEND_METRICS: 'false'
+
 jobs:
   build-and-deploy:
+    if: vars.CLOUDFLARE_DEPLOY == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

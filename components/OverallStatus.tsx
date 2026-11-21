@@ -1,137 +1,101 @@
-import { MaintenanceConfig, MonitorTarget } from '@/types/config'
-import { Center, Container, Title, Collapse, Button, Box } from '@mantine/core'
-import { IconCircleCheck, IconAlertCircle, IconPlus, IconMinus } from '@tabler/icons-react'
 import { useEffect, useState } from 'react'
-import MaintenanceAlert from './MaintenanceAlert'
-import { pageConfig } from '@/uptime.config'
-import { useTranslation } from 'react-i18next'
+import { MaintenanceConfig, MonitorState, MonitorTarget } from '@/types/config'
+import { activeNotices, overallSummary, upcomingNotices } from '@/util/status'
+import { PodRow, StatusIcon } from './brand'
+import Notice from './Notice'
 
-function useWindowVisibility() {
-  const [isVisible, setIsVisible] = useState(true)
+function useNow() {
+  const [now, setNow] = useState(() => Math.round(Date.now() / 1000))
   useEffect(() => {
-    const handleVisibilityChange = () => setIsVisible(document.visibilityState === 'visible')
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+    const t = setInterval(() => {
+      if (document.visibilityState === 'visible') setNow(Math.round(Date.now() / 1000))
+    }, 1000)
+    return () => clearInterval(t)
   }, [])
-  return isVisible
+  return now
+}
+
+function ago(seconds: number) {
+  if (seconds < 5) return 'just now'
+  if (seconds < 90) return `${seconds} seconds ago`
+  return `${Math.round(seconds / 60)} minutes ago`
 }
 
 export default function OverallStatus({
   state,
-  maintenances,
   monitors,
+  maintenances,
 }: {
-  state: { overallUp: number; overallDown: number; lastUpdate: number }
-  maintenances: MaintenanceConfig[]
+  state: MonitorState
   monitors: MonitorTarget[]
+  maintenances: MaintenanceConfig[]
 }) {
-  const { t } = useTranslation('common')
-  let group = pageConfig.group
-  let groupedMonitor = (group && Object.keys(group).length > 0) || false
+  const now = useNow()
+  const [openedAt] = useState(now)
+  const [showUpcoming, setShowUpcoming] = useState(false)
 
-  let statusString = ''
-  let icon = <IconAlertCircle style={{ width: 64, height: 64, color: '#b91c1c' }} />
-  if (state.overallUp === 0 && state.overallDown === 0) {
-    statusString = t('No data yet')
-  } else if (state.overallUp === 0) {
-    statusString = t('All systems not operational')
-  } else if (state.overallDown === 0) {
-    statusString = t('All systems operational')
-    icon = <IconCircleCheck style={{ width: 64, height: 64, color: '#059669' }} />
-  } else {
-    statusString = t('Some systems not operational', {
-      down: state.overallDown,
-      total: state.overallUp + state.overallDown,
-    })
-  }
-
-  const [openTime] = useState(Math.round(Date.now() / 1000))
-  const [currentTime, setCurrentTime] = useState(Math.round(Date.now() / 1000))
-  const isWindowVisible = useWindowVisibility()
-  const [expandUpcoming, setExpandUpcoming] = useState(false)
-
+  // Reload when the data is more than five minutes old (the worker writes every minute).
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (!isWindowVisible) return
-      if (currentTime - state.lastUpdate > 300 && currentTime - openTime > 30) {
-        window.location.reload()
-      }
-      setCurrentTime(Math.round(Date.now() / 1000))
-    }, 1000)
-    return () => clearInterval(interval)
-  })
+    if (state.lastUpdate > 0 && now - state.lastUpdate > 300 && now - openedAt > 30) {
+      window.location.reload()
+    }
+  }, [now, state.lastUpdate, openedAt])
 
-  const now = new Date()
-
-  const activeMaintenances: (Omit<MaintenanceConfig, 'monitors'> & {
-    monitors?: MonitorTarget[]
-  })[] = maintenances
-    .filter((m) => now >= new Date(m.start) && (!m.end || now <= new Date(m.end)))
-    .map((maintenance) => ({
-      ...maintenance,
-      monitors: maintenance.monitors?.map(
-        (monitorId) => monitors.find((mon) => monitorId === mon.id)!
-      ),
-    }))
-
-  const upcomingMaintenances: (Omit<MaintenanceConfig, 'monitors'> & {
-    monitors?: (MonitorTarget | undefined)[]
-  })[] = maintenances
-    .filter((m) => now < new Date(m.start))
-    .map((maintenance) => ({
-      ...maintenance,
-      monitors: maintenance.monitors?.map(
-        (monitorId) => monitors.find((mon) => monitorId === mon.id)!
-      ),
-    }))
+  const summary = overallSummary(state, monitors, maintenances)
+  const active = activeNotices(maintenances)
+  const upcoming = upcomingNotices(maintenances)
+  const shape = summary.tone === 'success' ? 'dot' : summary.tone === 'neutral' ? 'ring' : summary.title.startsWith('Maintenance') ? 'spin' : 'tri'
 
   return (
-    <Container size="md" mt="xl">
-      <Center>{icon}</Center>
-      <Title mt="sm" style={{ textAlign: 'center' }} order={1}>
-        {statusString}
-      </Title>
-      <Title mt="sm" style={{ textAlign: 'center', color: '#70778c' }} order={5}>
-        {t('Last updated on', {
-          date: new Date(state.lastUpdate * 1000).toLocaleString(),
-          seconds: currentTime - state.lastUpdate,
-        })}
-      </Title>
-
-      {/* Upcoming Maintenance */}
-      {upcomingMaintenances.length > 0 && (
-        <>
-          <Title mt="4px" style={{ textAlign: 'center', color: '#70778c' }} order={5}>
-            {t('upcoming maintenance', { count: upcomingMaintenances.length })}{' '}
-            <span
-              style={{ textDecoration: 'underline', cursor: 'pointer' }}
-              onClick={() => setExpandUpcoming(!expandUpcoming)}
-            >
-              {expandUpcoming ? t('Hide') : t('Show')}
+    <section className="st-hero" aria-labelledby="st-summary">
+      <PodRow count={5} size={28} />
+      <h1 id="st-summary" className="ct-h1 st-hero__title">
+        <span className={`st-hero__icon st-tone--${summary.tone}`}>
+          <StatusIcon shape={shape} />
+        </span>
+        {summary.title}
+      </h1>
+      <p className="st-hero__lede">
+        {state.lastUpdate > 0 ? (
+          <>
+            Last checked {ago(now - state.lastUpdate)}
+            <span className="st-hero__sep" aria-hidden>
+              ·
             </span>
-          </Title>
+            checks run every minute
+          </>
+        ) : (
+          'The first checks run within a minute of deploying.'
+        )}
+      </p>
 
-          <Collapse in={expandUpcoming}>
-            {upcomingMaintenances.map((maintenance, idx) => (
-              <MaintenanceAlert
-                key={`upcoming-${idx}`}
-                maintenance={maintenance}
-                style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
-                upcoming
-              />
-            ))}
-          </Collapse>
-        </>
+      {active.length > 0 && (
+        <div className="st-notices">
+          {active.map((n, i) => (
+            <Notice key={`a${i}`} notice={n} monitors={monitors} />
+          ))}
+        </div>
       )}
 
-      {/* Active Maintenance */}
-      {activeMaintenances.map((maintenance, idx) => (
-        <MaintenanceAlert
-          key={`active-${idx}`}
-          maintenance={maintenance}
-          style={{ maxWidth: groupedMonitor ? '897px' : '865px' }}
-        />
-      ))}
-    </Container>
+      {upcoming.length > 0 && (
+        <div className="st-upcoming">
+          <button
+            type="button"
+            className="ct-btn ct-btn--quiet ct-btn--sm"
+            aria-expanded={showUpcoming}
+            onClick={() => setShowUpcoming(!showUpcoming)}
+          >
+            {showUpcoming ? 'Hide' : 'Show'} planned maintenance ({upcoming.length})
+          </button>
+          {showUpcoming && (
+            <div className="st-notices">
+              {upcoming.map((n, i) => (
+                <Notice key={`u${i}`} notice={n} monitors={monitors} upcoming />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </section>
   )
 }

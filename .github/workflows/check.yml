@@ -1,0 +1,32 @@
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches: ['main']
+
+permissions:
+  contents: read
+
+env:
+  WRANGLER_SEND_METRICS: 'false'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+      - run: npm ci
+      - run: cd worker && npm ci
+      - name: Lint and types
+        run: |
+          npx next lint
+          npx tsc --noEmit -p .
+      - name: Build the worker
+        run: cd worker && npx wrangler deploy src/index.ts --outdir dist --dry-run
+      - name: Build the page for Cloudflare Pages
+        run: npx @cloudflare/next-on-pages
