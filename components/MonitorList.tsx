@@ -1,133 +1,114 @@
-import { MonitorState, MonitorTarget } from '@/types/config'
-import { Accordion, Card, Center, Text } from '@mantine/core'
-import MonitorDetail from './MonitorDetail'
+import { useState } from 'react'
+import { MaintenanceConfig, MonitorState, MonitorTarget } from '@/types/config'
 import { pageConfig } from '@/uptime.config'
-import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { formatPercent, monitorStatus, uptimePercent } from '@/util/status'
+import { StatusPill } from './brand'
+import UptimeBars from './UptimeBars'
+import LatencyChart from './LatencyChart'
 
-function countDownCount(state: MonitorState, ids: string[]) {
-  let downCount = 0
-  for (let id of ids) {
-    if (state.incident[id] === undefined || state.incident[id].length === 0) {
-      continue
-    }
+function MonitorRow({
+  monitor,
+  state,
+  maintenances,
+}: {
+  monitor: MonitorTarget
+  state: MonitorState
+  maintenances: MaintenanceConfig[]
+}) {
+  const [open, setOpen] = useState(false)
+  const status = monitorStatus(state, maintenances, monitor.id)
+  const uptime = uptimePercent(state, monitor.id)
+  const hasLatency = !monitor.hideLatencyChart && (state.latency[monitor.id]?.length ?? 0) > 0
+  const chartId = `chart-${monitor.id}`
 
-    if (state.incident[id].slice(-1)[0].end === null) {
-      downCount++
-    }
-  }
-  return downCount
-}
-
-function getStatusTextColor(state: MonitorState, ids: string[]) {
-  let downCount = countDownCount(state, ids)
-  if (downCount === 0) {
-    return '#059669'
-  } else if (downCount === ids.length) {
-    return '#df484a'
-  } else {
-    return '#f29030'
-  }
+  return (
+    <li className="st-monitor">
+      <div className="st-monitor__head">
+        <div className="st-monitor__titles">
+          <h3 className="st-monitor__name">
+            {monitor.statusPageLink ? <a href={monitor.statusPageLink}>{monitor.name}</a> : monitor.name}
+          </h3>
+          {monitor.tooltip && <p className="st-monitor__desc">{monitor.tooltip}</p>}
+        </div>
+        <div className="st-monitor__meta">
+          {uptime !== null && (
+            <span className="st-monitor__uptime">
+              <strong>{formatPercent(uptime)}</strong> uptime
+            </span>
+          )}
+          <StatusPill status={status} />
+        </div>
+      </div>
+      {state.incident[monitor.id] ? (
+        <UptimeBars monitor={monitor} state={state} />
+      ) : (
+        <p className="st-monitor__nodata">No checks have run for this service yet.</p>
+      )}
+      {hasLatency && (
+        <>
+          <button
+            type="button"
+            className="st-disclosure"
+            aria-expanded={open}
+            aria-controls={chartId}
+            onClick={() => setOpen(!open)}
+          >
+            <svg viewBox="0 0 16 16" width={16} height={16} aria-hidden className={open ? 'is-open' : ''}>
+              <path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Response times, last 12 hours
+          </button>
+          {open && (
+            <div id={chartId}>
+              <LatencyChart monitor={monitor} state={state} />
+            </div>
+          )}
+        </>
+      )}
+    </li>
+  )
 }
 
 export default function MonitorList({
   monitors,
   state,
+  maintenances,
 }: {
   monitors: MonitorTarget[]
   state: MonitorState
+  maintenances: MaintenanceConfig[]
 }) {
-  const { t } = useTranslation('common')
   const group = pageConfig.group
-  const groupedMonitor = group && Object.keys(group).length > 0
-  let content
-
-  // Load expanded groups from localStorage
-  const savedExpandedGroups = localStorage.getItem('expandedGroups')
-  const expandedInitial = savedExpandedGroups
-    ? JSON.parse(savedExpandedGroups)
-    : Object.keys(group || {})
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(expandedInitial)
-  useEffect(() => {
-    localStorage.setItem('expandedGroups', JSON.stringify(expandedGroups))
-  }, [expandedGroups])
-
-  if (groupedMonitor) {
-    // Grouped monitors
-    content = (
-      <Accordion
-        multiple
-        defaultValue={Object.keys(group)}
-        variant="contained"
-        value={expandedGroups}
-        onChange={(values) => setExpandedGroups(values)}
-      >
-        {Object.keys(group).map((groupName) => (
-          <Accordion.Item key={groupName} value={groupName}>
-            <Accordion.Control>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  width: '100%',
-                  alignItems: 'center',
-                }}
-              >
-                <div>{groupName}</div>
-                <Text
-                  fw={500}
-                  style={{
-                    display: 'inline',
-                    paddingRight: '5px',
-                    color: getStatusTextColor(state, group[groupName]),
-                  }}
-                >
-                  {group[groupName].length - countDownCount(state, group[groupName])}/
-                  {group[groupName].length} {t('Operational')}
-                </Text>
-              </div>
-            </Accordion.Control>
-            <Accordion.Panel>
-              {monitors
-                .filter((monitor) => group[groupName].includes(monitor.id))
-                .sort((a, b) => group[groupName].indexOf(a.id) - group[groupName].indexOf(b.id))
-                .map((monitor) => (
-                  <div key={monitor.id}>
-                    <Card.Section ml="xs" mr="xs">
-                      <MonitorDetail monitor={monitor} state={state} />
-                    </Card.Section>
-                  </div>
-                ))}
-            </Accordion.Panel>
-          </Accordion.Item>
-        ))}
-      </Accordion>
-    )
-  } else {
-    // Ungrouped monitors
-    content = monitors.map((monitor) => (
-      <div key={monitor.id}>
-        <Card.Section ml="xs" mr="xs">
-          <MonitorDetail monitor={monitor} state={state} />
-        </Card.Section>
-      </div>
-    ))
-  }
+  const groups: [string, MonitorTarget[]][] =
+    group && Object.keys(group).length > 0
+      ? Object.entries(group).map(([name, ids]) => [
+          name,
+          ids.map((id) => monitors.find((m) => m.id === id)).filter(Boolean) as MonitorTarget[],
+        ])
+      : [['Services', monitors]]
 
   return (
-    <Center>
-      <Card
-        shadow="sm"
-        padding="lg"
-        radius="md"
-        ml="md"
-        mr="md"
-        mt="xl"
-        withBorder={!groupedMonitor}
-        style={{ width: groupedMonitor ? '897px' : '865px' }}
-      >
-        {content}
-      </Card>
-    </Center>
+    <div className="st-groups">
+      {groups.map(([name, list]) => {
+        const ok = list.filter((m) => monitorStatus(state, maintenances, m.id) === 'operational').length
+        return (
+          <section key={name} className="st-group" aria-labelledby={`g-${name}`}>
+            <div className="st-group__head">
+              <h2 id={`g-${name}`} className="st-group__name">
+                {name}
+              </h2>
+              <span className="st-group__count">
+                {ok} of {list.length} operational
+              </span>
+            </div>
+            <ul className="st-group__list">
+              {list.map((m) => (
+                <MonitorRow key={m.id} monitor={m} state={state} maintenances={maintenances} />
+              ))}
+            </ul>
+          </section>
+        )
+      })}
+    </div>
   )
 }
