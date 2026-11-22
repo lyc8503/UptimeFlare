@@ -9,7 +9,7 @@ const pageConfig: PageConfig = {
   // Buttons on the right of the header.
   links: [
     { link: 'https://cottage.host', label: 'cottage.host' },
-    { link: 'https://app.cottage.host', label: 'Your dashboard', highlight: true },
+    { link: 'https://cottage.host/apps', label: 'Your dashboard', highlight: true },
   ],
   // Sections, in order. Every monitor below should appear in exactly one.
   group: {
@@ -37,8 +37,8 @@ const workerConfig: WorkerConfig = {
       name: 'Dashboard and billing',
       tooltip: 'Signing in, deploying and managing apps, and top-ups',
       method: 'GET',
-      target: 'https://app.cottage.host/healthz',
-      statusPageLink: 'https://app.cottage.host',
+      target: 'https://cottage.host/healthz',
+      statusPageLink: 'https://cottage.host',
       expectedCodes: [200],
       timeout: 10000,
       headers: { 'User-Agent': 'cottage-status (+https://status.cottage.host)' },

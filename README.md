@@ -30,7 +30,7 @@ Without a D1 database, `npm run dev` shows sample data (`dev/sample.ts`). Add `?
 
 ## Deploying (at launch)
 
-Not deployed yet: the checks need cottage.host, app.cottage.host and a canary app to exist. At launch:
+Not deployed yet: the checks need a canary app to exist (cottage.host now serves both the site and the dashboard). At launch:
 
 1. Put the canary app's address in the `apps-us-east` monitor.
 2. Create a Cloudflare API token for the account: Workers Scripts, D1 and Cloudflare Pages edit, plus Zone DNS edit on cottage.host. Save it as the Actions secret `CLOUDFLARE_API_TOKEN` (and `CLOUDFLARE_ACCOUNT_ID`).
