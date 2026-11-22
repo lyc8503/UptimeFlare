@@ -406,6 +406,9 @@ export async function doMonitor(monitor: MonitorTarget, defaultLocation: string,
 
   console.log(`[${monitor.id}] Check result from ${checkLocation}: up=${status.up}, ping=${status.ping}, err=${status.err}`)
 
+  // Incident errors are public. Keep raw diagnostics in logs, not in stored state.
+  status.err = status.up ? '' : 'Monitor check failed'
+
   return {
     location: checkLocation,
     status,
