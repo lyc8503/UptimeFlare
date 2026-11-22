@@ -48,4 +48,4 @@ The worker, `types/`, `deploy/` and `deploy.tf` are upstream's, so merges there 
 
 ## Licence
 
-Apache-2.0, as upstream ([LICENSE](LICENSE)). The Cottage name, logo and brand assets are Cottage Host's and aren't covered by that licence. The fonts (Fraunces, Hanken Grotesk, JetBrains Mono) are under the SIL Open Font License; see `public/fonts/OFL-*.txt`.
+Apache-2.0, as upstream ([LICENSE](LICENSE)). The Cottage name, logo and brand assets belong to Cottage Services LLC and aren't covered by that licence. The fonts (Fraunces, Hanken Grotesk, JetBrains Mono) are under the SIL Open Font License; see `public/fonts/OFL-*.txt`.

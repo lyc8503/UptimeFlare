@@ -15,7 +15,7 @@ export default function Footer() {
           </p>
         </div>
         <div className="st-footer__bottom">
-          <span>&copy; {new Date().getFullYear()} Cottage Host</span>
+          <span>&copy; {new Date().getFullYear()} Cottage Services LLC</span>
           <a href="https://cottage.host">cottage.host</a>
           {/* an API route, not a page */}
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
