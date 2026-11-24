@@ -370,12 +370,10 @@ export async function doMonitor(monitor: MonitorTarget, defaultLocation: string,
           locationHint: doLoc as DurableObjectLocationHint,
         })
         resp = await doStub.getLocationAndStatus(monitor)
-        try {
-          // Kill the DO instance after use, to avoid extra resource usage
-          await doStub.kill()
-        } catch (err) {
-          // An error here is expected, ignore it
-        }
+        // NOTE: don't kill the DO here. kill() throws 'killed' inside
+        // blockConcurrencyWhile, which surfaced as "Error: killed" on
+        // otherwise successful proxied checks (#164). The billing concern
+        // that motivated the kill (#109) no longer applies (see #164).
       } else if (monitor.checkProxy.startsWith('globalping://')) {
         resp = await getStatusWithGlobalPing(monitor)
       } else {
